@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+
+# 敏感配置文件
+config.json
+.env
+
+# 日志文件
+logs/
+*.log
+
+# 调试文件
+debug/
+*.png
+*_debug.html
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Chrome Driver
+chromedriver-win32/
+*.zip
+
+# 操作系统
+.DS_Store
+Thumbs.db
+
+# Docker
+.dockerignore
+
+# 临时文件
+*.tmp
+*.temp

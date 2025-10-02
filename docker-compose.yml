@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  AW98tang:
+    build: .
+    container_name: AW98tang
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./config.json:/app/config.json
+      - ./logs:/app/logs
+      - ./debug:/app/debug
+    environment:
+      - PYTHONUNBUFFERED=1
+      - TZ=Asia/Shanghai
+      # Web控制面板登录配置
+      - WEB_USERNAME=${WEB_USERNAME:-admin}
+      - WEB_PASSWORD=${WEB_PASSWORD:-admin123}
+      - SECRET_KEY=${SECRET_KEY:-sehuatang-secret-key-2024}
+    networks:
+      - sehuatang-net
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+
+networks:
+  sehuatang-net:
+    driver: bridge
