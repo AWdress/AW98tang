@@ -2,31 +2,51 @@ version: '3.8'
 
 services:
   AW98tang:
-    build: .
+    # 使用 Docker Hub 镜像（如需本地构建，将 image 改为 build: .）
+    image: awdress/aw98tang:latest
+    
+    # 容器名称
     container_name: AW98tang
+    
+    # 自动重启策略：除非手动停止，否则总是重启
     restart: unless-stopped
+    
+    # 端口映射：主机端口:容器端口
     ports:
-      - "5000:5000"
+      - "5000:5000"  # Web 控制面板端口
+    
+    # 数据卷挂载：将主机目录映射到容器内
     volumes:
-      - ./config.json:/app/config.json
-      - ./logs:/app/logs
-      - ./debug:/app/debug
+      - ./config.json:/app/config.json  # 配置文件（必须）
+      - ./logs:/app/logs                # 日志目录
+      - ./debug:/app/debug              # 调试文件目录
+    
+    # 环境变量配置
     environment:
+      # Python 输出不缓冲，实时显示日志
       - PYTHONUNBUFFERED=1
+      
+      # 时区设置
       - TZ=Asia/Shanghai
-      # Web控制面板登录配置
-      - WEB_USERNAME=${WEB_USERNAME:-admin}
-      - WEB_PASSWORD=${WEB_PASSWORD:-admin123}
-      - SECRET_KEY=${SECRET_KEY:-sehuatang-secret-key-2024}
+      
+      # Web 控制面板登录配置（可通过 .env 文件自定义）
+      - WEB_USERNAME=${WEB_USERNAME:-admin}      # 默认用户名: admin
+      - WEB_PASSWORD=${WEB_PASSWORD:-admin123}   # 默认密码: admin123
+      - SECRET_KEY=${SECRET_KEY:-sehuatang-secret-key-2024}  # Session 密钥
+    
+    # 网络配置
     networks:
       - sehuatang-net
+    
+    # 资源限制
     deploy:
       resources:
         limits:
-          memory: 1G
+          memory: 1G      # 最大内存使用 1GB
         reservations:
-          memory: 512M
+          memory: 512M    # 预留内存 512MB
 
+# 网络定义
 networks:
   sehuatang-net:
-    driver: bridge
+    driver: bridge  # 使用桥接网络
