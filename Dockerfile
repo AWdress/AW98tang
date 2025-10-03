@@ -21,7 +21,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # 复制项目文件
 COPY *.py ./
-COPY config.json ./
+COPY config.json.example ./config.json
 COPY templates/ ./templates/
 
 # 创建必要的目录

@@ -4,10 +4,8 @@ on:
   push:
     paths:
       - 'Dockerfile'  # 只有Dockerfile变化时触发
-      - 'docker-entrypoint.sh'  # 只有docker-entrypoint.sh变化时触发的
     tags:
       - 'v*'  # 正式版本标签 (v1.0.0, v1.1.0等)
-      - 'dev'  # dev标签
   workflow_dispatch:  # 允许手动触发
 
 env:
@@ -79,8 +77,8 @@ jobs:
           type=raw,value=${{ steps.version.outputs.version }}
           type=raw,value=${{ steps.version.outputs.is_release == 'true' && 'latest' || '' }}
         labels: |
-          org.opencontainers.image.title=AWLottery
-          org.opencontainers.image.description=AWLottery Bot
+          org.opencontainers.image.title=AW98tang
+          org.opencontainers.image.description=色花堂智能助手 Pro - 智能自动化系统
           org.opencontainers.image.version=${{ steps.version.outputs.version }}
           org.opencontainers.image.source=https://github.com/${{ github.repository }}
           org.opencontainers.image.url=https://github.com/${{ github.repository }}
@@ -139,7 +137,7 @@ jobs:
         echo "docker pull ${{ env.DOCKER_HUB_IMAGE }}:${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "# Run the container" >> $GITHUB_STEP_SUMMARY
-        echo "docker run -d --name awlottery ${{ env.DOCKER_HUB_IMAGE }}:${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+        echo "docker run -d --name aw98tang ${{ env.DOCKER_HUB_IMAGE }}:${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
         echo '```' >> $GITHUB_STEP_SUMMARY
 
   security-scan:
