@@ -16,21 +16,43 @@ if [ "${AUTO_UPDATE}" = "true" ]; then
         # 配置 Git 使用 GitHub Token（用于私有仓库）
         if [ -n "${GITHUB_TOKEN}" ]; then
             echo "🔑 配置 GitHub Token 认证..."
-            git config --global credential.helper store
+            
+            # 配置 Git 安全目录（避免 dubious ownership 错误）
+            git config --global --add safe.directory /app
             
             # 获取远程仓库 URL
-            REPO_URL=$(git config --get remote.origin.url)
+            REPO_URL=$(git config --get remote.origin.url 2>/dev/null)
             
-            # 如果是 HTTPS URL，添加 token
-            if [[ "$REPO_URL" == https://* ]]; then
-                # 提取仓库路径（去掉 https://）
-                REPO_PATH=${REPO_URL#https://}
-                REPO_PATH=${REPO_PATH#github.com/}
+            if [ -z "$REPO_URL" ]; then
+                echo "⚠️ 未检测到远程仓库，初始化远程仓库..."
+                # 假设仓库是 AWdress/AW98tamg
+                git remote add origin "https://${GITHUB_TOKEN}@github.com/AWdress/AW98tamg.git"
+                echo "✅ 远程仓库已配置"
+            else
+                echo "📍 当前远程 URL: ${REPO_URL}"
                 
-                # 配置带 token 的 URL
-                NEW_URL="https://${GITHUB_TOKEN}@github.com/${REPO_PATH}"
-                git remote set-url origin "$NEW_URL"
-                echo "✅ GitHub Token 配置成功"
+                # 如果是 HTTPS URL，添加 token
+                if [[ "$REPO_URL" == https://* ]]; then
+                    # 提取仓库路径
+                    REPO_PATH=${REPO_URL#https://}
+                    REPO_PATH=${REPO_PATH#github.com/}
+                    REPO_PATH=${REPO_PATH%.git}
+                    
+                    # 配置带 token 的 URL
+                    NEW_URL="https://${GITHUB_TOKEN}@github.com/${REPO_PATH}.git"
+                    git remote set-url origin "$NEW_URL"
+                    echo "✅ GitHub Token 配置成功"
+                else
+                    echo "⚠️ 不是 HTTPS URL，尝试转换为 HTTPS..."
+                    # 如果是 SSH URL，转换为 HTTPS
+                    if [[ "$REPO_URL" == git@github.com:* ]]; then
+                        REPO_PATH=${REPO_URL#git@github.com:}
+                        REPO_PATH=${REPO_PATH%.git}
+                        NEW_URL="https://${GITHUB_TOKEN}@github.com/${REPO_PATH}.git"
+                        git remote set-url origin "$NEW_URL"
+                        echo "✅ 已转换为 HTTPS 并配置 Token"
+                    fi
+                fi
             fi
         fi
         
@@ -38,9 +60,14 @@ if [ "${AUTO_UPDATE}" = "true" ]; then
         CURRENT_VERSION=$(git rev-parse HEAD 2>/dev/null || echo "unknown")
         echo "📌 当前版本: ${CURRENT_VERSION:0:8}"
         
+        # 配置 Git 用户信息（避免拉取时的警告）
+        git config --global user.email "bot@aw98tang.local"
+        git config --global user.name "AW98tang Bot"
+        
         # 尝试拉取更新
         echo "⬇️ 正在从远程仓库拉取更新..."
-        if git pull origin main 2>/dev/null; then
+        ERROR_MSG=$(git pull origin main 2>&1)
+        if [ $? -eq 0 ]; then
             NEW_VERSION=$(git rev-parse HEAD)
             
             if [ "$CURRENT_VERSION" != "$NEW_VERSION" ]; then
@@ -57,7 +84,9 @@ if [ "${AUTO_UPDATE}" = "true" ]; then
                 echo "✅ 代码已是最新版本"
             fi
         else
-            echo "⚠️ 拉取更新失败，使用当前版本继续运行"
+            echo "❌ 拉取更新失败！"
+            echo "错误信息: $ERROR_MSG"
+            echo "⚠️ 使用当前版本继续运行"
         fi
     else
         echo "ℹ️ 未检测到 Git 仓库，跳过更新检查"
