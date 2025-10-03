@@ -116,13 +116,20 @@ class SeleniumAutoBot:
         chrome_options.add_argument('--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
         
         try:
-            # 使用webdriver-manager自动管理ChromeDriver版本
-            from webdriver_manager.chrome import ChromeDriverManager
             from selenium.webdriver.chrome.service import Service
+            import os
             
-            # 自动下载匹配的ChromeDriver
-            service = Service(ChromeDriverManager().install())
-            self.driver = webdriver.Chrome(service=service, options=chrome_options)
+            # Docker环境优先使用预装的ChromeDriver
+            if os.path.exists('/usr/local/bin/chromedriver'):
+                logging.info("🚀 使用系统预装的 ChromeDriver")
+                service = Service('/usr/local/bin/chromedriver')
+                self.driver = webdriver.Chrome(service=service, options=chrome_options)
+            else:
+                # 本地环境使用webdriver-manager自动管理
+                from webdriver_manager.chrome import ChromeDriverManager
+                logging.info("📥 使用 webdriver-manager 自动下载 ChromeDriver")
+                service = Service(ChromeDriverManager().install())
+                self.driver = webdriver.Chrome(service=service, options=chrome_options)
             
             self.driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
             self.wait = WebDriverWait(self.driver, 20)
