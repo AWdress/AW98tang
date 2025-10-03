@@ -20,6 +20,13 @@ if [ "${AUTO_UPDATE}" = "true" ]; then
             # 配置 Git 安全目录（避免 dubious ownership 错误）
             git config --global --add safe.directory /app
             
+            # 禁用 Git 密码提示（关键：避免在非交互环境中要求密码）
+            export GIT_TERMINAL_PROMPT=0
+            export GIT_ASKPASS=/bin/echo
+            
+            # 配置 Git 不使用 credential helper
+            git config --global credential.helper ''
+            
             # 获取远程仓库 URL
             REPO_URL=$(git config --get remote.origin.url 2>/dev/null)
             
