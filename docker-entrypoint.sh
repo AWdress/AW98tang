@@ -78,29 +78,42 @@ if [ "${AUTO_UPDATE}" = "true" ]; then
         git config --global user.email "bot@aw98tang.local"
         git config --global user.name "AW98tang Bot"
         
-        # 尝试拉取更新
-        echo "⬇️ 正在从远程仓库拉取更新..."
-        ERROR_MSG=$(git pull origin main 2>&1)
-        if [ $? -eq 0 ]; then
-            NEW_VERSION=$(git rev-parse HEAD)
-            
-            if [ "$CURRENT_VERSION" != "$NEW_VERSION" ]; then
-                echo "✅ 代码已更新!"
-                echo "📌 新版本: ${NEW_VERSION:0:8}"
-                
-                # 检查是否需要重新安装依赖
-                if git diff --name-only $CURRENT_VERSION $NEW_VERSION | grep -q "requirements.txt"; then
-                    echo "📦 检测到依赖变更，重新安装依赖..."
-                    pip install --no-cache-dir -r requirements.txt
-                    echo "✅ 依赖安装完成"
-                fi
-            else
-                echo "✅ 代码已是最新版本"
-            fi
-        else
-            echo "❌ 拉取更新失败！"
-            echo "错误信息: $ERROR_MSG"
+        # 从远程仓库同步代码（强制覆盖，保持与远程一致）
+        echo "⬇️ 正在从远程仓库同步代码..."
+        
+        # 步骤1: 获取远程更新
+        FETCH_ERROR=$(git fetch origin main 2>&1)
+        if [ $? -ne 0 ]; then
+            echo "❌ 获取远程更新失败！"
+            echo "错误信息: $FETCH_ERROR"
             echo "⚠️ 使用当前版本继续运行"
+        else
+            echo "✅ 远程更新获取成功"
+            
+            # 步骤2: 强制重置到远程版本（保持与远程完全一致）
+            echo "🔄 强制同步到远程版本..."
+            RESET_ERROR=$(git reset --hard origin/main 2>&1)
+            if [ $? -ne 0 ]; then
+                echo "❌ 代码同步失败！"
+                echo "错误信息: $RESET_ERROR"
+                echo "⚠️ 使用当前版本继续运行"
+            else
+                NEW_VERSION=$(git rev-parse HEAD)
+                
+                if [ "$CURRENT_VERSION" != "$NEW_VERSION" ]; then
+                    echo "✅ 代码已同步到最新版本!"
+                    echo "📌 新版本: ${NEW_VERSION:0:8}"
+                    
+                    # 检查是否需要重新安装依赖
+                    if git diff --name-only $CURRENT_VERSION $NEW_VERSION 2>/dev/null | grep -q "requirements.txt"; then
+                        echo "📦 检测到依赖变更，重新安装依赖..."
+                        pip install --no-cache-dir -r requirements.txt
+                        echo "✅ 依赖安装完成"
+                    fi
+                else
+                    echo "✅ 代码已是最新版本"
+                fi
+            fi
         fi
     else
         echo "ℹ️ 未检测到 Git 仓库，跳过更新检查"
