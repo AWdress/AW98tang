@@ -13,6 +13,27 @@ if [ "${AUTO_UPDATE}" = "true" ]; then
     if [ -d ".git" ]; then
         echo "📦 检测到 Git 仓库"
         
+        # 配置 Git 使用 GitHub Token（用于私有仓库）
+        if [ -n "${GITHUB_TOKEN}" ]; then
+            echo "🔑 配置 GitHub Token 认证..."
+            git config --global credential.helper store
+            
+            # 获取远程仓库 URL
+            REPO_URL=$(git config --get remote.origin.url)
+            
+            # 如果是 HTTPS URL，添加 token
+            if [[ "$REPO_URL" == https://* ]]; then
+                # 提取仓库路径（去掉 https://）
+                REPO_PATH=${REPO_URL#https://}
+                REPO_PATH=${REPO_PATH#github.com/}
+                
+                # 配置带 token 的 URL
+                NEW_URL="https://${GITHUB_TOKEN}@github.com/${REPO_PATH}"
+                git remote set-url origin "$NEW_URL"
+                echo "✅ GitHub Token 配置成功"
+            fi
+        fi
+        
         # 保存当前版本
         CURRENT_VERSION=$(git rev-parse HEAD 2>/dev/null || echo "unknown")
         echo "📌 当前版本: ${CURRENT_VERSION:0:8}"
