@@ -35,7 +35,7 @@ chromedriver-win32/
 Thumbs.db
 
 # Docker
-.dockerignore
+# .dockerignore 需要提交
 
 # 临时文件
 *.tmp

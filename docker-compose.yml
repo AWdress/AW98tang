@@ -33,6 +33,9 @@ services:
       - WEB_USERNAME=Awhitedress      # 用户名
       - WEB_PASSWORD=qw5561255        # 密码
       
+      # 自动更新配置（启用后每次容器启动时自动从 GitHub 拉取最新代码）
+      - AUTO_UPDATE=${AUTO_UPDATE:-false}  # 设置为 true 启用自动更新
+      
       # 代理配置（可选，如需使用代理请取消注释并填写）
       # - http_proxy=${http_proxy:-}
       # - https_proxy=${https_proxy:-}

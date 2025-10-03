@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+
+# 日志和调试文件（容器会自己生成）
+logs/
+*.log
+debug/
+*.png
+*_debug.html
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Chrome Driver（容器会自己下载）
+chromedriver-win32/
+drivers/
+*.zip
+
+# 操作系统
+.DS_Store
+Thumbs.db
+
+# 临时文件
+*.tmp
+*.temp
+
+# 不要忽略 .git（需要用于自动更新）
+!.git/
+
+# 环境变量文件（敏感信息）
+.env
+
+# 敏感配置（使用 config.json.example）
+config.json
