@@ -50,7 +50,7 @@ RUN if [ ! -f config.json ]; then \
     fi
 
 # 创建必要的目录
-RUN mkdir -p logs debug
+RUN mkdir -p logs debug data
 
 # 设置时区
 ENV TZ=Asia/Shanghai

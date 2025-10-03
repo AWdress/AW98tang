@@ -11,6 +11,7 @@ import time
 import schedule
 from datetime import datetime
 from flask import Flask, render_template, jsonify, request, redirect, url_for, session, flash
+from stats_manager import StatsManager
 from selenium_auto_bot import SeleniumAutoBot
 import logging
 from functools import wraps
@@ -30,6 +31,7 @@ TEST_USERS = {
 bot_instance = None
 bot_thread = None
 bot_stop_flag = False  # 停止标志
+stats_manager = StatsManager()  # 统计管理器
 bot_status = {
     'running': False,
     'last_start': None,
@@ -217,6 +219,7 @@ def index():
 def get_status():
     """获取机器人状态"""
     config = load_config()
+    today_stats = stats_manager.get_today_stats()
     return jsonify({
         'status': bot_status,
         'config': {
@@ -224,8 +227,19 @@ def get_status():
             'target_forums': config.get('target_forums', []),
             'enable_daily_checkin': config.get('enable_daily_checkin', False),
             'reply_interval': config.get('reply_interval', [60, 180])
+        },
+        'stats': {
+            'today_replies': today_stats['reply_count'],
+            'checkin_success': today_stats['checkin_success'],
+            'checkin_time': today_stats['checkin_time']
         }
     })
+
+@app.route('/api/stats')
+@login_required
+def get_stats():
+    """获取详细统计信息"""
+    return jsonify(stats_manager.get_all_stats())
 
 @app.route('/api/logs')
 @login_required

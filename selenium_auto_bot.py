@@ -17,6 +17,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
+from stats_manager import StatsManager
 
 # 设置日志
 logging.basicConfig(
@@ -35,6 +36,7 @@ class SeleniumAutoBot:
         self.driver = None
         self.wait = None
         self.stop_flag = lambda: False  # 停止标志检查函数
+        self.stats = StatsManager()  # 初始化统计管理器
         
         # 配置信息
         self.base_url = self.config.get('base_url', 'https://sehuatang.org/')
@@ -549,6 +551,8 @@ class SeleniumAutoBot:
                                         # 正常模式：点击签到
                                         button.click()
                                         logging.info(f"✅ 签到成功 (选择器: {selector})")
+                                        # 记录签到统计
+                                        self.stats.mark_checkin_success()
                                         time.sleep(2)
                                     break
                             
@@ -822,6 +826,8 @@ class SeleniumAutoBot:
                     
                     if any(success_indicators):
                         logging.info("✅ 回复成功")
+                        # 记录回复统计
+                        self.stats.add_reply(post_title, post_url, reply_content)
                         return True
                     else:
                         # 保存页面用于调试

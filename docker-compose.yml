@@ -20,6 +20,7 @@ services:
       - /mnt/cache/docker/AW98tang/config.json:/app/config.json  # 配置文件（必须）
       - /mnt/cache/docker/AW98tang/logs:/app/logs                # 日志目录
       - /mnt/cache/docker/AW98tang/debug:/app/debug              # 调试文件目录
+      - /mnt/cache/docker/AW98tang/data:/app/data                # 统计数据目录
     
     # 环境变量配置
     environment:
