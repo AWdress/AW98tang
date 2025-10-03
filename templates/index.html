@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🌸 色花堂智能助手 Pro - 控制台</title>
+    <title>色花堂智能助手 Pro - 控制台</title>
+    <link rel="icon" href="https://www.sehuatang.net/favicon.ico" type="image/x-icon">
     <style>
         * {
             margin: 0;
@@ -13,59 +14,114 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Microsoft YaHei', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
             min-height: 100vh;
             padding: 20px;
+            color: #f1f5f9;
         }
 
         .container {
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 0 auto;
         }
 
         header {
-            text-align: center;
-            color: white;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 20px 30px;
             margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 20px;
         }
 
-        .subtitle {
-            font-size: 1.1rem;
-            opacity: 0.9;
+        .logo-img {
+            height: 50px;
+            width: auto;
+        }
+
+        .brand-info h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+            background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+        }
+
+        .brand-info p {
+            font-size: 0.95rem;
+            opacity: 0.7;
+        }
+
+        .user-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 10px 15px;
+            border-radius: 12px;
+        }
+
+        .logout-btn {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logout-btn:hover {
+            transform: scale(1.05);
         }
 
         .dashboard {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 20px;
             margin-bottom: 30px;
         }
 
         .card {
-            background: white;
-            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
             padding: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             transition: transform 0.3s ease;
         }
 
         .card:hover {
             transform: translateY(-5px);
+            border-color: rgba(236, 72, 153, 0.5);
         }
 
         .card-title {
-            font-size: 1.3rem;
-            color: #333;
-            margin-bottom: 15px;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
             display: flex;
             align-items: center;
             gap: 10px;
+            color: #f1f5f9;
         }
 
         .card-icon {
@@ -83,33 +139,58 @@
 
         .status-running {
             background: #10b981;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
         }
 
         .status-stopped {
             background: #ef4444;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
         }
 
         @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(0.95); }
         }
 
         .stat-value {
             font-size: 2.5rem;
             font-weight: bold;
-            color: #667eea;
+            background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
             margin: 10px 0;
         }
 
         .stat-label {
-            color: #666;
+            color: #94a3b8;
             font-size: 0.95rem;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: #94a3b8;
+            font-weight: 500;
+        }
+
+        .info-value {
+            color: #f1f5f9;
+            font-weight: 600;
         }
 
         .btn {
             padding: 12px 24px;
             border: none;
-            border-radius: 8px;
+            border-radius: 12px;
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
@@ -150,26 +231,27 @@
         }
 
         .log-container {
-            background: #1e293b;
+            background: #0f172a;
             border-radius: 12px;
             padding: 20px;
             max-height: 600px;
             overflow-y: auto;
             font-family: 'Consolas', 'Monaco', monospace;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .log-entry {
             padding: 8px 12px;
             margin: 4px 0;
-            border-radius: 4px;
+            border-radius: 6px;
             font-size: 0.9rem;
             display: flex;
             gap: 10px;
+            background: rgba(255, 255, 255, 0.02);
         }
 
         .log-time {
-            color: #94a3b8;
+            color: #64748b;
             min-width: 80px;
         }
 
@@ -189,13 +271,53 @@
             color: #34d399;
         }
 
+        .reply-item {
+            background: rgba(255, 255, 255, 0.02);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s;
+        }
+
+        .reply-item:hover {
+            border-color: rgba(236, 72, 153, 0.3);
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .reply-time {
+            color: #64748b;
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+        }
+
+        .reply-title {
+            color: #f1f5f9;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+
+        .reply-title a {
+            color: #ec4899;
+            text-decoration: none;
+        }
+
+        .reply-title a:hover {
+            text-decoration: underline;
+        }
+
+        .reply-content {
+            color: #94a3b8;
+            font-size: 0.95rem;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            border-left: 3px solid #ec4899;
+        }
+
         .config-section {
             display: none;
-            background: white;
-            border-radius: 12px;
-            padding: 30px;
-            margin: 20px 0;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
 
         .config-section.active {
@@ -209,57 +331,43 @@
         .form-group label {
             display: block;
             margin-bottom: 8px;
-            color: #333;
+            color: #f1f5f9;
             font-weight: 600;
         }
 
         .form-group input,
-        .form-group select,
-        .form-group textarea {
+        .form-group select {
             width: 100%;
-            padding: 10px 15px;
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
+            padding: 12px 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
             font-size: 1rem;
-            transition: border-color 0.3s ease;
+            background: rgba(255, 255, 255, 0.05);
+            color: #f1f5f9;
+            transition: all 0.3s ease;
         }
 
         .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
+        .form-group select:focus {
             outline: none;
-            border-color: #667eea;
-        }
-
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px solid #f3f4f6;
-        }
-
-        .info-label {
-            color: #666;
-            font-weight: 500;
-        }
-
-        .info-value {
-            color: #333;
-            font-weight: 600;
+            border-color: #ec4899;
+            background: rgba(255, 255, 255, 0.08);
         }
 
         .toast {
             position: fixed;
             top: 20px;
             right: 20px;
-            background: white;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
             padding: 15px 25px;
-            border-radius: 8px;
+            border-radius: 12px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             display: none;
             align-items: center;
             gap: 10px;
             z-index: 1000;
+            border: 1px solid rgba(0, 0, 0, 0.1);
         }
 
         .toast.show {
@@ -268,12 +376,8 @@
         }
 
         @keyframes slideIn {
-            from {
-                transform: translateX(400px);
-            }
-            to {
-                transform: translateX(0);
-            }
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
 
         .toast-success {
@@ -283,28 +387,85 @@
         .toast-error {
             border-left: 4px solid #ef4444;
         }
+
+        .toast-message {
+            color: #1e293b;
+            font-weight: 600;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .stat-box {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .stat-box-value {
+            font-size: 2rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-box-label {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #64748b;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+
+        .badge-danger {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <div style="flex: 1;"></div>
-                <div style="flex: 2; text-align: center;">
-                    <h1>🌸 色花堂智能助手 Pro</h1>
-                    <p class="subtitle">智能回复 · 自动签到 · 定时任务</p>
+            <div class="logo-section">
+                <img src="https://www.sehuatang.net/static/image/common/logo.png" alt="色花堂" class="logo-img">
+                <div class="brand-info">
+                    <h1>色花堂智能助手 Pro</h1>
+                    <p>智能回复 · 自动签到 · 数据统计</p>
                 </div>
-                <div style="flex: 1; text-align: right;">
-                    <div style="display: inline-flex; align-items: center; gap: 15px;">
-                        <span style="color: white; font-size: 1rem;">
-                            <span style="opacity: 0.9;">👤</span> 
-                            <strong>{{ username }}</strong>
-                        </span>
-                        <a href="/logout" style="background: rgba(255,255,255,0.2); color: white; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-weight: 600; transition: all 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">
-                            🚪 退出
-                        </a>
-                    </div>
+            </div>
+            <div class="user-section">
+                <div class="user-info">
+                    <span style="font-size: 1.2rem;">👤</span>
+                    <strong>{{ username }}</strong>
                 </div>
+                <a href="/logout" class="logout-btn">
+                    <span>🚪</span>
+                    退出登录
+                </a>
             </div>
         </header>
 
@@ -332,13 +493,28 @@
             <div class="card">
                 <h3 class="card-title">
                     <span class="card-icon">💬</span>
-                    回复统计
+                    今日回复
                 </h3>
                 <div class="stat-value" id="todayReplies">0</div>
-                <div class="stat-label">今日回复数</div>
+                <div class="stat-label">已回复 / 每日限额</div>
                 <div class="info-row">
                     <span class="info-label">每日限额</span>
                     <span class="info-value" id="maxReplies">30</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title">
+                    <span class="card-icon">✅</span>
+                    今日签到
+                </h3>
+                <div id="checkinStatus">
+                    <div class="stat-value" id="checkinSuccess">-</div>
+                    <div class="stat-label" id="checkinLabel">未签到</div>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">签到时间</span>
+                    <span class="info-value" id="checkinTime">-</span>
                 </div>
             </div>
 
@@ -358,19 +534,6 @@
                 <div class="info-row">
                     <span class="info-label">每日签到</span>
                     <span class="info-value" id="checkinEnabled">-</span>
-                </div>
-            </div>
-
-            <div class="card">
-                <h3 class="card-title">
-                    <span class="card-icon">⚠️</span>
-                    错误统计
-                </h3>
-                <div class="stat-value" id="errorCount">0</div>
-                <div class="stat-label">错误次数</div>
-                <div class="info-row">
-                    <span class="info-label">最后错误</span>
-                    <span class="info-value" id="lastError" style="font-size: 0.85rem;">-</span>
                 </div>
             </div>
         </div>
@@ -395,7 +558,7 @@
         </div>
 
         <!-- 配置面板 -->
-        <div class="config-section" id="configSection">
+        <div class="card config-section" id="configSection">
             <h3 class="card-title">
                 <span class="card-icon">⚙️</span>
                 配置设置
@@ -433,29 +596,6 @@
                         <option value="false">否</option>
                         <option value="true">是</option>
                     </select>
-                    <small style="color: #666; font-size: 0.85rem; display: block; margin-top: 5px;">
-                        ⚠️ 测试所有功能，但不实际提交
-                    </small>
-                </div>
-                <div class="form-group">
-                    <label>🧪 仅测试签到</label>
-                    <select id="config_test_checkin">
-                        <option value="false">否</option>
-                        <option value="true">是</option>
-                    </select>
-                    <small style="color: #666; font-size: 0.85rem; display: block; margin-top: 5px;">
-                        只测试签到功能，查找签到按钮但不点击
-                    </small>
-                </div>
-                <div class="form-group">
-                    <label>🧪 仅测试回复</label>
-                    <select id="config_test_reply">
-                        <option value="false">否</option>
-                        <option value="true">是</option>
-                    </select>
-                    <small style="color: #666; font-size: 0.85rem; display: block; margin-top: 5px;">
-                        只测试回复功能，打开帖子并输入但不发送
-                    </small>
                 </div>
                 <div class="form-group">
                     <label>⏰ 启用定时任务</label>
@@ -463,16 +603,10 @@
                         <option value="false">否</option>
                         <option value="true">是</option>
                     </select>
-                    <small style="color: #666; font-size: 0.85rem; display: block; margin-top: 5px;">
-                        启用后每天在指定时间自动运行
-                    </small>
                 </div>
                 <div class="form-group">
                     <label>⏰ 定时运行时间</label>
                     <input type="time" id="config_schedule_time" value="03:00">
-                    <small style="color: #666; font-size: 0.85rem; display: block; margin-top: 5px;">
-                        每天在此时间自动运行（24小时制，如：03:00 = 凌晨3点）
-                    </small>
                 </div>
                 <div class="controls">
                     <button type="submit" class="btn btn-start">💾 保存配置</button>
@@ -481,11 +615,24 @@
             </form>
         </div>
 
+        <!-- 今日回复详情 -->
+        <div class="card">
+            <h3 class="card-title">
+                <span class="card-icon">📝</span>
+                今日回复详情
+            </h3>
+            <div id="repliesContainer">
+                <div class="empty-state">
+                    <p>暂无回复记录</p>
+                </div>
+            </div>
+        </div>
+
         <!-- 日志面板 -->
         <div class="card">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                 <h3 class="card-title" style="margin-bottom: 0;">
-                    <span class="card-icon">📝</span>
+                    <span class="card-icon">📋</span>
                     实时日志
                 </h3>
                 <div>
@@ -509,17 +656,18 @@
     <!-- 提示消息 -->
     <div class="toast" id="toast">
         <span id="toastIcon">✅</span>
-        <span id="toastMessage">操作成功</span>
+        <span class="toast-message" id="toastMessage">操作成功</span>
     </div>
 
     <script>
-        // 更新状态
+        // 更新状态和统计
         function updateStatus() {
             fetch('/api/status')
                 .then(res => res.json())
                 .then(data => {
                     const status = data.status;
                     const config = data.config;
+                    const stats = data.stats || {};
 
                     // 更新运行状态
                     const indicator = document.getElementById('statusIndicator');
@@ -536,13 +684,21 @@
                     document.getElementById('lastStart').textContent = status.last_start || '-';
                     document.getElementById('lastStop').textContent = status.last_stop || '-';
 
-                    // 更新统计
-                    document.getElementById('todayReplies').textContent = status.today_replies || 0;
-                    document.getElementById('errorCount').textContent = status.errors || 0;
-                    document.getElementById('lastError').textContent = status.last_error || '-';
+                    // 更新回复统计
+                    document.getElementById('todayReplies').textContent = stats.today_replies || 0;
+                    document.getElementById('maxReplies').textContent = config.max_replies_per_day || 30;
+
+                    // 更新签到状态
+                    if (stats.checkin_success) {
+                        document.getElementById('checkinSuccess').textContent = '✅';
+                        document.getElementById('checkinLabel').textContent = '已签到';
+                    } else {
+                        document.getElementById('checkinSuccess').textContent = '❌';
+                        document.getElementById('checkinLabel').textContent = '未签到';
+                    }
+                    document.getElementById('checkinTime').textContent = stats.checkin_time || '-';
 
                     // 更新配置信息
-                    document.getElementById('maxReplies').textContent = config.max_replies_per_day || 30;
                     document.getElementById('targetForums').textContent = config.target_forums.join(', ') || '-';
                     const interval = config.reply_interval;
                     document.getElementById('replyInterval').textContent = 
@@ -552,16 +708,40 @@
                 .catch(err => console.error('获取状态失败:', err));
         }
 
+        // 更新回复详情
+        function updateReplies() {
+            fetch('/api/stats')
+                .then(res => res.json())
+                .then(data => {
+                    const container = document.getElementById('repliesContainer');
+                    const replies = data.today.replies || [];
+
+                    if (replies.length === 0) {
+                        container.innerHTML = '<div class="empty-state"><p>暂无回复记录</p></div>';
+                        return;
+                    }
+
+                    container.innerHTML = replies.map(reply => `
+                        <div class="reply-item">
+                            <div class="reply-time">⏰ ${reply.time}</div>
+                            <div class="reply-title">
+                                📌 <a href="${reply.url}" target="_blank">${reply.title}</a>
+                            </div>
+                            <div class="reply-content">💬 ${reply.content}</div>
+                        </div>
+                    `).join('');
+                })
+                .catch(err => console.error('获取回复详情失败:', err));
+        }
+
         // 更新日志
-        let autoScroll = true;  // 自动滚动开关
+        let autoScroll = true;
         
         function updateLogs() {
             fetch('/api/logs')
                 .then(res => res.json())
                 .then(data => {
                     const container = document.getElementById('logContainer');
-                    
-                    // 检查用户是否在查看历史日志（不在底部）
                     const isAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 50;
                     
                     container.innerHTML = '';
@@ -581,7 +761,6 @@
                         container.appendChild(entry);
                     });
 
-                    // 只有当用户在底部时才自动滚动
                     if (isAtBottom && autoScroll) {
                         container.scrollTop = container.scrollHeight;
                     }
@@ -589,32 +768,17 @@
                 .catch(err => console.error('获取日志失败:', err));
         }
         
-        // 滚动到顶部
         function scrollToTop() {
-            const container = document.getElementById('logContainer');
-            container.scrollTop = 0;
-            autoScroll = false;  // 手动操作后停止自动滚动
+            document.getElementById('logContainer').scrollTop = 0;
+            autoScroll = false;
         }
         
-        // 滚动到底部
         function scrollToBottom() {
             const container = document.getElementById('logContainer');
             container.scrollTop = container.scrollHeight;
-            autoScroll = true;  // 手动滚动到底部后恢复自动滚动
+            autoScroll = true;
         }
-        
-        // 添加滚动控制按钮事件
-        document.addEventListener('DOMContentLoaded', function() {
-            const container = document.getElementById('logContainer');
-            
-            // 检测用户手动滚动
-            container.addEventListener('scroll', function() {
-                const isAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 50;
-                autoScroll = isAtBottom;
-            });
-        });
 
-        // 启动机器人
         function startBot() {
             fetch('/api/start', { method: 'POST' })
                 .then(res => res.json())
@@ -625,7 +789,6 @@
                 .catch(err => showToast(false, '请求失败: ' + err));
         }
 
-        // 停止机器人
         function stopBot() {
             fetch('/api/stop', { method: 'POST' })
                 .then(res => res.json())
@@ -636,7 +799,6 @@
                 .catch(err => showToast(false, '请求失败: ' + err));
         }
 
-        // 切换配置面板
         function toggleConfig() {
             const section = document.getElementById('configSection');
             section.classList.toggle('active');
@@ -646,7 +808,6 @@
             }
         }
 
-        // 加载配置
         function loadConfig() {
             fetch('/api/config')
                 .then(res => res.json())
@@ -662,41 +823,28 @@
                     document.getElementById('config_checkin').value = config.enable_daily_checkin ? 'true' : 'false';
                     document.getElementById('config_auto_reply').value = config.enable_auto_reply !== false ? 'true' : 'false';
                     document.getElementById('config_test_mode').value = config.enable_test_mode ? 'true' : 'false';
-                    document.getElementById('config_test_checkin').value = config.enable_test_checkin ? 'true' : 'false';
-                    document.getElementById('config_test_reply').value = config.enable_test_reply ? 'true' : 'false';
                     document.getElementById('config_scheduler').value = config.enable_scheduler ? 'true' : 'false';
                     document.getElementById('config_schedule_time').value = config.schedule_time || '03:00';
                 })
                 .catch(err => console.error('加载配置失败:', err));
         }
 
-        // 保存配置
         document.getElementById('configForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
             fetch('/api/config')
                 .then(res => res.json())
                 .then(currentConfig => {
-                    const maxReplies = parseInt(document.getElementById('config_max_replies').value);
-                    const intervalMin = parseInt(document.getElementById('config_interval_min').value);
-                    const intervalMax = parseInt(document.getElementById('config_interval_max').value);
-                    const checkin = document.getElementById('config_checkin').value === 'true';
-                    const autoReply = document.getElementById('config_auto_reply').value === 'true';
-                    const testMode = document.getElementById('config_test_mode').value === 'true';
-                    const testCheckin = document.getElementById('config_test_checkin').value === 'true';
-                    const testReply = document.getElementById('config_test_reply').value === 'true';
-                    const scheduler = document.getElementById('config_scheduler').value === 'true';
-                    const scheduleTime = document.getElementById('config_schedule_time').value;
-
-                    currentConfig.max_replies_per_day = maxReplies;
-                    currentConfig.reply_interval = [intervalMin, intervalMax];
-                    currentConfig.enable_daily_checkin = checkin;
-                    currentConfig.enable_auto_reply = autoReply;
-                    currentConfig.enable_test_mode = testMode;
-                    currentConfig.enable_test_checkin = testCheckin;
-                    currentConfig.enable_test_reply = testReply;
-                    currentConfig.enable_scheduler = scheduler;
-                    currentConfig.schedule_time = scheduleTime;
+                    currentConfig.max_replies_per_day = parseInt(document.getElementById('config_max_replies').value);
+                    currentConfig.reply_interval = [
+                        parseInt(document.getElementById('config_interval_min').value),
+                        parseInt(document.getElementById('config_interval_max').value)
+                    ];
+                    currentConfig.enable_daily_checkin = document.getElementById('config_checkin').value === 'true';
+                    currentConfig.enable_auto_reply = document.getElementById('config_auto_reply').value === 'true';
+                    currentConfig.enable_test_mode = document.getElementById('config_test_mode').value === 'true';
+                    currentConfig.enable_scheduler = document.getElementById('config_scheduler').value === 'true';
+                    currentConfig.schedule_time = document.getElementById('config_schedule_time').value;
 
                     return fetch('/api/config', {
                         method: 'POST',
@@ -715,7 +863,6 @@
                 .catch(err => showToast(false, '保存失败: ' + err));
         });
 
-        // 显示提示消息
         function showToast(success, message) {
             const toast = document.getElementById('toast');
             const icon = document.getElementById('toastIcon');
@@ -733,11 +880,12 @@
         // 初始化
         updateStatus();
         updateLogs();
+        updateReplies();
 
         // 定时更新
         setInterval(updateStatus, 3000);
         setInterval(updateLogs, 2000);
+        setInterval(updateReplies, 5000);
     </script>
 </body>
 </html>
-
