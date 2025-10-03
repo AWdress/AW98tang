@@ -13,13 +13,13 @@ services:
     
     # 端口映射：主机端口:容器端口
     ports:
-      - "5000:5000"  # Web 控制面板端口
+      - "15000:5000"  # Web 控制面板端口
     
     # 数据卷挂载：将主机目录映射到容器内
     volumes:
-      - ./config.json:/app/config.json  # 配置文件（持久化配置）
-      - ./logs:/app/logs                # 日志目录
-      - ./debug:/app/debug              # 调试文件目录
+      - /mnt/cache/docker/AW98tang/config.json:/app/config.json  # 配置文件（必须）
+      - /mnt/cache/docker/AW98tang/logs:/app/logs                # 日志目录
+      - /mnt/cache/docker/AW98tang/debug:/app/debug              # 调试文件目录
     
     # 环境变量配置
     environment:
@@ -29,10 +29,14 @@ services:
       # 时区设置
       - TZ=Asia/Shanghai
       
-      # Web 控制面板登录配置（可通过 .env 文件自定义）
-      - WEB_USERNAME=${WEB_USERNAME:-admin}      # 默认用户名: admin
-      - WEB_PASSWORD=${WEB_PASSWORD:-admin123}   # 默认密码: admin123
-      - SECRET_KEY=${SECRET_KEY:-sehuatang-secret-key-2024}  # Session 密钥
+      # Web 控制面板登录配置
+      - WEB_USERNAME=Awhitedress      # 用户名
+      - WEB_PASSWORD=qw5561255        # 密码
+      
+      # 代理配置（可选，如需使用代理请取消注释并填写）
+      # - http_proxy=${http_proxy:-}
+      # - https_proxy=${https_proxy:-}
+      # - no_proxy=${no_proxy:-localhost,127.0.0.1}
     
     # 网络配置
     networks:

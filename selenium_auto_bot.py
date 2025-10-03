@@ -134,6 +134,10 @@ class SeleniumAutoBot:
             self.driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
             self.wait = WebDriverWait(self.driver, 20)
             
+            # 设置页面加载超时（防止页面加载卡住）
+            self.driver.set_page_load_timeout(30)
+            logging.info("⏱️ 设置页面加载超时: 30秒")
+            
             logging.info("✅ Chrome浏览器启动成功")
             return True
             
@@ -208,7 +212,15 @@ class SeleniumAutoBot:
             
             # 访问登录页面
             login_url = f"{self.base_url}member.php?mod=logging&action=login"
-            self.driver.get(login_url)
+            logging.info(f"🌐 正在访问登录页面: {login_url}")
+            
+            try:
+                self.driver.get(login_url)
+                logging.info(f"✅ 登录页面加载完成，当前URL: {self.driver.current_url}")
+            except Exception as e:
+                logging.error(f"❌ 访问登录页面失败: {e}")
+                logging.error(f"❌ 这可能是网络问题或网站访问受限")
+                return False
             
             # 处理年龄验证
             self.handle_age_verification()
