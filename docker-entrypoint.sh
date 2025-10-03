@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+# 注意：不使用 set -e，因为我们需要处理 git pull 可能的失败
 
 echo "================================"
 echo "🚀 AW98tang 容器启动中..."
@@ -29,28 +29,35 @@ if [ "${AUTO_UPDATE}" = "true" ]; then
                 git remote add origin "https://${GITHUB_TOKEN}@github.com/AWdress/AW98tamg.git"
                 echo "✅ 远程仓库已配置"
             else
-                echo "📍 当前远程 URL: ${REPO_URL}"
+                echo "📍 当前远程 URL: ${REPO_URL:0:50}..."  # 只显示前50个字符，避免暴露token
                 
-                # 如果是 HTTPS URL，添加 token
-                if [[ "$REPO_URL" == https://* ]]; then
-                    # 提取仓库路径
-                    REPO_PATH=${REPO_URL#https://}
-                    REPO_PATH=${REPO_PATH#github.com/}
-                    REPO_PATH=${REPO_PATH%.git}
-                    
-                    # 配置带 token 的 URL
-                    NEW_URL="https://${GITHUB_TOKEN}@github.com/${REPO_PATH}.git"
-                    git remote set-url origin "$NEW_URL"
-                    echo "✅ GitHub Token 配置成功"
+                # 检查 URL 中是否已经包含 token
+                if [[ "$REPO_URL" == *"${GITHUB_TOKEN}"* ]]; then
+                    echo "✅ GitHub Token 已配置，跳过"
                 else
-                    echo "⚠️ 不是 HTTPS URL，尝试转换为 HTTPS..."
-                    # 如果是 SSH URL，转换为 HTTPS
-                    if [[ "$REPO_URL" == git@github.com:* ]]; then
-                        REPO_PATH=${REPO_URL#git@github.com:}
+                    # 清理 URL 中可能存在的旧 token
+                    CLEAN_URL="$REPO_URL"
+                    # 移除 URL 中的所有认证信息
+                    CLEAN_URL=$(echo "$CLEAN_URL" | sed 's|https://[^@]*@|https://|g')
+                    
+                    # 提取仓库路径
+                    if [[ "$CLEAN_URL" == https://github.com/* ]]; then
+                        REPO_PATH=${CLEAN_URL#https://github.com/}
+                        REPO_PATH=${REPO_PATH%.git}
+                        
+                        # 配置带 token 的 URL
+                        NEW_URL="https://${GITHUB_TOKEN}@github.com/${REPO_PATH}.git"
+                        git remote set-url origin "$NEW_URL"
+                        echo "✅ GitHub Token 配置成功"
+                    elif [[ "$CLEAN_URL" == git@github.com:* ]]; then
+                        # SSH URL 转换为 HTTPS
+                        REPO_PATH=${CLEAN_URL#git@github.com:}
                         REPO_PATH=${REPO_PATH%.git}
                         NEW_URL="https://${GITHUB_TOKEN}@github.com/${REPO_PATH}.git"
                         git remote set-url origin "$NEW_URL"
                         echo "✅ 已转换为 HTTPS 并配置 Token"
+                    else
+                        echo "⚠️ 未知的 URL 格式，跳过配置"
                     fi
                 fi
             fi
