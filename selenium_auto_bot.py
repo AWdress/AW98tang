@@ -135,8 +135,8 @@ class SeleniumAutoBot:
             self.wait = WebDriverWait(self.driver, 20)
             
             # 设置页面加载超时（防止页面加载卡住）
-            self.driver.set_page_load_timeout(30)
-            logging.info("⏱️ 设置页面加载超时: 30秒")
+            self.driver.set_page_load_timeout(60)
+            logging.info("⏱️ 设置页面加载超时: 60秒")
             
             logging.info("✅ Chrome浏览器启动成功")
             return True
