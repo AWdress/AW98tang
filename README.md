@@ -104,113 +104,108 @@
 
 ### 方式A：Docker Compose 部署（推荐⭐）
 
-#### 1️⃣ 准备工作
-
-**创建数据目录和配置文件：**
+#### 1️⃣ 准备配置文件
 
 ```bash
 # 创建数据目录
 mkdir -p AW98tang/logs AW98tang/debug AW98tang/data
 
-# 复制配置文件示例
+# 复制并编辑配置文件
 cp config.json.example AW98tang/config.json
-
-# 编辑配置文件（填写论坛账号密码）
-# Windows: notepad AW98tang/config.json
-# Linux/Mac: nano AW98tang/config.json
+# 编辑 AW98tang/config.json，填写论坛账号密码
 ```
 
-**必须修改的配置项：**
-```json
-{
-  "username": "你的论坛用户名",
-  "password": "你的论坛密码",
-  "security_question_id": "3",  // 根据对照表选择
-  "security_answer": "你的安全问题答案"
-}
+#### 2️⃣ docker-compose.yml 配置
+
+```yaml
+version: '3.8'
+
+services:
+  AW98tang:
+    # 使用 Docker Hub 镜像（如需本地构建，将 image 改为 build: .）
+    image: awdress/aw98tang:latest
+    
+    # 容器名称
+    container_name: AW98tang
+    
+    # 自动重启策略：除非手动停止，否则总是重启
+    restart: unless-stopped
+    
+    # 端口映射：主机端口:容器端口
+    ports:
+      - "5000:5000"  # Web 控制面板端口（可自定义主机端口，如：15000:5000）
+    
+    # 数据卷挂载：将主机目录映射到容器内
+    volumes:
+      - ./AW98tang/config.json:/app/config.json  # 配置文件（必须）
+      - ./AW98tang/logs:/app/logs                # 日志目录
+      - ./AW98tang/debug:/app/debug              # 调试文件目录
+      - ./AW98tang/data:/app/data                # 统计数据目录
+    
+    # 环境变量配置
+    environment:
+      # Python 输出不缓冲，实时显示日志
+      - PYTHONUNBUFFERED=1
+      
+      # 时区设置
+      - TZ=Asia/Shanghai
+      
+      # Web 控制面板登录配置（建议修改默认密码）
+      - WEB_USERNAME=${WEB_USERNAME:-admin}      # 默认用户名: admin
+      - WEB_PASSWORD=${WEB_PASSWORD:-password}   # 默认密码: password
+      
+      # 自动更新配置（可选，启用后每次容器启动时自动从 GitHub 拉取最新代码）
+      # - AUTO_UPDATE=true  # 启用自动更新
+      # - GITHUB_TOKEN=ghp_YOUR_GITHUB_TOKEN_HERE  # GitHub 私有仓库访问令牌
+      
+      # 代理配置（可选，如需使用代理请取消注释并填写）
+      # - http_proxy=http://proxy.example.com:8080
+      # - https_proxy=http://proxy.example.com:8080
+      # - no_proxy=localhost,127.0.0.1
+    
+    # 网络配置
+    networks:
+      - sehuatang-net
+    
+    # 资源限制
+    deploy:
+      resources:
+        limits:
+          memory: 1G      # 最大内存使用 1GB
+        reservations:
+          memory: 512M    # 预留内存 512MB
+
+# 网络定义
+networks:
+  sehuatang-net:
+    driver: bridge  # 使用桥接网络
 ```
 
-#### 2️⃣ 启动容器
+#### 3️⃣ 启动服务
 
-**Windows 用户：**
 ```bash
-# 方式1：双击运行启动脚本
-docker-start.bat
-
-# 方式2：命令行启动
+# 启动容器
 docker-compose up -d
+
+# 查看日志
+docker-compose logs -f
 ```
 
-**Linux / Mac 用户：**
-```bash
-# 赋予执行权限
-chmod +x docker-start.sh
+#### 4️⃣ 访问控制面板
 
-# 启动服务
-./docker-start.sh
-
-# 或直接使用 docker-compose
-docker-compose up -d
-```
-
-#### 3️⃣ 访问控制面板
-
-打开浏览器访问：
 ```
 http://localhost:5000
 ```
 
-**默认登录凭据：**
-- 用户名：`admin`
-- 密码：`password`
+**默认登录：** `admin / password`
 
-⚠️ **强烈建议修改默认密码！**
-
-#### 4️⃣ 常用命令
+#### 5️⃣ 常用命令
 
 ```bash
-# 查看运行日志
-docker-compose logs -f
-
-# 停止容器
-docker-compose down
-
-# 重启容器
-docker-compose restart
-
-# 更新镜像并重启
-docker-compose pull
-docker-compose up -d
-
-# 查看容器状态
-docker-compose ps
-```
-
-#### 5️⃣ 自定义配置（可选）
-
-**修改端口：**
-
-编辑 `docker-compose.yml`：
-```yaml
-ports:
-  - "8080:5000"  # 改为 8080 端口
-```
-
-**修改登录密码：**
-
-创建 `.env` 文件：
-```env
-WEB_USERNAME=myuser
-WEB_PASSWORD=mypassword
-```
-
-**启用自动更新（可选）：**
-
-编辑 `docker-compose.yml`，取消注释：
-```yaml
-environment:
-  - AUTO_UPDATE=true
-  - GITHUB_TOKEN=ghp_YOUR_GITHUB_TOKEN_HERE
+docker-compose down      # 停止容器
+docker-compose restart   # 重启容器
+docker-compose pull      # 更新镜像
+docker-compose ps        # 查看状态
 ```
 
 ---
