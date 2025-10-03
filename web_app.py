@@ -321,19 +321,6 @@ def stop_bot():
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
 
-@app.route('/api/stats')
-@login_required
-def get_stats():
-    """获取统计信息"""
-    # 这里可以从日志文件或数据库读取统计信息
-    # 简化版本，返回基本统计
-    return jsonify({
-        'total_replies': bot_status.get('total_replies', 0),
-        'today_replies': bot_status.get('today_replies', 0),
-        'errors': bot_status.get('errors', 0),
-        'uptime': calculate_uptime()
-    })
-
 def calculate_uptime():
     """计算运行时间"""
     if bot_status.get('last_start'):
