@@ -21,7 +21,7 @@ app.secret_key = os.getenv('SECRET_KEY', 'your-secret-key-change-this-in-product
 
 # 从环境变量读取用户配置
 WEB_USERNAME = os.getenv('WEB_USERNAME', 'admin')
-WEB_PASSWORD = os.getenv('WEB_PASSWORD', 'admin123')
+WEB_PASSWORD = os.getenv('WEB_PASSWORD', 'password')
 
 TEST_USERS = {
     WEB_USERNAME: WEB_PASSWORD

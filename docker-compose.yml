@@ -31,8 +31,8 @@ services:
       - TZ=Asia/Shanghai
       
       # Web 控制面板登录配置（建议修改默认密码）
-      - WEB_USERNAME=${WEB_USERNAME:-admin}      # 用户名
-      - WEB_PASSWORD=${WEB_PASSWORD:-admin123}   # 密码
+      - WEB_USERNAME=${WEB_USERNAME:-admin}      # 默认用户名: admin
+      - WEB_PASSWORD=${WEB_PASSWORD:-password}   # 默认密码: password
       
       # 自动更新配置（可选，启用后每次容器启动时自动从 GitHub 拉取最新代码）
       # - AUTO_UPDATE=true  # 启用自动更新
