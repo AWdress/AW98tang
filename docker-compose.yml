@@ -13,14 +13,14 @@ services:
     
     # 端口映射：主机端口:容器端口
     ports:
-      - "15000:5000"  # Web 控制面板端口
+      - "5000:5000"  # Web 控制面板端口（可自定义主机端口，如：15000:5000）
     
     # 数据卷挂载：将主机目录映射到容器内
     volumes:
-      - /mnt/cache/docker/AW98tang/config.json:/app/config.json  # 配置文件（必须）
-      - /mnt/cache/docker/AW98tang/logs:/app/logs                # 日志目录
-      - /mnt/cache/docker/AW98tang/debug:/app/debug              # 调试文件目录
-      - /mnt/cache/docker/AW98tang/data:/app/data                # 统计数据目录
+      - ./config.json:/app/config.json  # 配置文件（必须）
+      - ./logs:/app/logs                # 日志目录
+      - ./debug:/app/debug              # 调试文件目录
+      - ./data:/app/data                # 统计数据目录
     
     # 环境变量配置
     environment:
@@ -30,18 +30,18 @@ services:
       # 时区设置
       - TZ=Asia/Shanghai
       
-      # Web 控制面板登录配置
-      - WEB_USERNAME=Awhitedress      # 用户名
-      - WEB_PASSWORD=qw5561255        # 密码
+      # Web 控制面板登录配置（建议修改默认密码）
+      - WEB_USERNAME=${WEB_USERNAME:-admin}      # 用户名
+      - WEB_PASSWORD=${WEB_PASSWORD:-admin123}   # 密码
       
-      # 自动更新配置（启用后每次容器启动时自动从 GitHub 拉取最新代码）
-      - AUTO_UPDATE=${AUTO_UPDATE:-false}  # 设置为 true 启用自动更新
-      - GITHUB_TOKEN=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  # GitHub 私有仓库访问令牌
+      # 自动更新配置（可选，启用后每次容器启动时自动从 GitHub 拉取最新代码）
+      # - AUTO_UPDATE=true  # 启用自动更新
+      # - GITHUB_TOKEN=ghp_YOUR_GITHUB_TOKEN_HERE  # GitHub 私有仓库访问令牌
       
       # 代理配置（可选，如需使用代理请取消注释并填写）
-      # - http_proxy=${http_proxy:-}
-      # - https_proxy=${https_proxy:-}
-      # - no_proxy=${no_proxy:-localhost,127.0.0.1}
+      # - http_proxy=http://proxy.example.com:8080
+      # - https_proxy=http://proxy.example.com:8080
+      # - no_proxy=localhost,127.0.0.1
     
     # 网络配置
     networks:
