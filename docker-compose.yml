@@ -17,10 +17,10 @@ services:
     
     # 数据卷挂载：将主机目录映射到容器内
     volumes:
-      - ./config.json:/app/config.json  # 配置文件（必须）
-      - ./logs:/app/logs                # 日志目录
-      - ./debug:/app/debug              # 调试文件目录
-      - ./data:/app/data                # 统计数据目录
+      - ./AW98tang/config.json:/app/config.json  # 配置文件（必须）
+      - ./AW98tang/logs:/app/logs                # 日志目录
+      - ./AW98tang/debug:/app/debug              # 调试文件目录
+      - ./AW98tang/data:/app/data                # 统计数据目录
     
     # 环境变量配置
     environment:
