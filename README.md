@@ -102,34 +102,116 @@
 
 ## 🚀 快速开始
 
-### 方式A：Docker部署（推荐⭐）
+### 方式A：Docker Compose 部署（推荐⭐）
 
-#### Windows
+#### 1️⃣ 准备工作
+
+**创建数据目录和配置文件：**
+
 ```bash
-# 双击运行
+# 创建数据目录
+mkdir -p AW98tang/logs AW98tang/debug AW98tang/data
+
+# 复制配置文件示例
+cp config.json.example AW98tang/config.json
+
+# 编辑配置文件（填写论坛账号密码）
+# Windows: notepad AW98tang/config.json
+# Linux/Mac: nano AW98tang/config.json
+```
+
+**必须修改的配置项：**
+```json
+{
+  "username": "你的论坛用户名",
+  "password": "你的论坛密码",
+  "security_question_id": "3",  // 根据对照表选择
+  "security_answer": "你的安全问题答案"
+}
+```
+
+#### 2️⃣ 启动容器
+
+**Windows 用户：**
+```bash
+# 方式1：双击运行启动脚本
 docker-start.bat
 
-# 或命令行
+# 方式2：命令行启动
 docker-compose up -d
 ```
 
-#### Linux / Mac
+**Linux / Mac 用户：**
 ```bash
 # 赋予执行权限
 chmod +x docker-start.sh
 
 # 启动服务
 ./docker-start.sh
-# 或
+
+# 或直接使用 docker-compose
 docker-compose up -d
 ```
 
-#### 访问控制面板
+#### 3️⃣ 访问控制面板
+
+打开浏览器访问：
 ```
 http://localhost:5000
 ```
 
-默认账号：`admin / admin123`（可通过环境变量自定义）
+**默认登录凭据：**
+- 用户名：`admin`
+- 密码：`password`
+
+⚠️ **强烈建议修改默认密码！**
+
+#### 4️⃣ 常用命令
+
+```bash
+# 查看运行日志
+docker-compose logs -f
+
+# 停止容器
+docker-compose down
+
+# 重启容器
+docker-compose restart
+
+# 更新镜像并重启
+docker-compose pull
+docker-compose up -d
+
+# 查看容器状态
+docker-compose ps
+```
+
+#### 5️⃣ 自定义配置（可选）
+
+**修改端口：**
+
+编辑 `docker-compose.yml`：
+```yaml
+ports:
+  - "8080:5000"  # 改为 8080 端口
+```
+
+**修改登录密码：**
+
+创建 `.env` 文件：
+```env
+WEB_USERNAME=myuser
+WEB_PASSWORD=mypassword
+```
+
+**启用自动更新（可选）：**
+
+编辑 `docker-compose.yml`，取消注释：
+```yaml
+environment:
+  - AUTO_UPDATE=true
+  - GITHUB_TOKEN=ghp_YOUR_GITHUB_TOKEN_HERE
+```
 
 ---
 
