@@ -32,14 +32,14 @@ if [ "${AUTO_UPDATE}" = "true" ]; then
             
             if [ -z "$REPO_URL" ]; then
                 echo "⚠️ 未检测到远程仓库，初始化远程仓库..."
-                # 假设仓库是 AWdress/AW98tamg
-                git remote add origin "https://${GITHUB_TOKEN}@github.com/AWdress/AW98tamg.git"
+                # 使用 GitHub 推荐的 Token 格式
+                git remote add origin "https://x-access-token:${GITHUB_TOKEN}@github.com/AWdress/AW98tamg.git"
                 echo "✅ 远程仓库已配置"
             else
                 echo "📍 当前远程 URL: ${REPO_URL:0:50}..."  # 只显示前50个字符，避免暴露token
                 
-                # 检查 URL 中是否已经包含 token
-                if [[ "$REPO_URL" == *"${GITHUB_TOKEN}"* ]]; then
+                # 检查 URL 中是否已经包含正确格式的 token
+                if [[ "$REPO_URL" == *"x-access-token:"*"${GITHUB_TOKEN}"* ]] || [[ "$REPO_URL" == *"${GITHUB_TOKEN}@"* ]]; then
                     echo "✅ GitHub Token 已配置，跳过"
                 else
                     # 清理 URL 中可能存在的旧 token
@@ -52,15 +52,15 @@ if [ "${AUTO_UPDATE}" = "true" ]; then
                         REPO_PATH=${CLEAN_URL#https://github.com/}
                         REPO_PATH=${REPO_PATH%.git}
                         
-                        # 配置带 token 的 URL
-                        NEW_URL="https://${GITHUB_TOKEN}@github.com/${REPO_PATH}.git"
+                        # 配置带 token 的 URL (使用 GitHub 推荐的格式)
+                        NEW_URL="https://x-access-token:${GITHUB_TOKEN}@github.com/${REPO_PATH}.git"
                         git remote set-url origin "$NEW_URL"
                         echo "✅ GitHub Token 配置成功"
                     elif [[ "$CLEAN_URL" == git@github.com:* ]]; then
                         # SSH URL 转换为 HTTPS
                         REPO_PATH=${CLEAN_URL#git@github.com:}
                         REPO_PATH=${REPO_PATH%.git}
-                        NEW_URL="https://${GITHUB_TOKEN}@github.com/${REPO_PATH}.git"
+                        NEW_URL="https://x-access-token:${GITHUB_TOKEN}@github.com/${REPO_PATH}.git"
                         git remote set-url origin "$NEW_URL"
                         echo "✅ 已转换为 HTTPS 并配置 Token"
                     else
