@@ -220,7 +220,7 @@ def get_status():
     """获取机器人状态"""
     config = load_config()
     today_stats = stats_manager.get_today_stats()
-    return jsonify({
+    response = jsonify({
         'status': bot_status,
         'config': {
             'max_replies_per_day': config.get('max_replies_per_day', 0),
@@ -235,20 +235,35 @@ def get_status():
             'checkin_time': today_stats['checkin_time']
         }
     })
+    # 禁用缓存，确保实时更新
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    return response
 
 @app.route('/api/stats')
 @login_required
 def get_stats():
     """获取详细统计信息"""
-    return jsonify(stats_manager.get_all_stats())
+    response = jsonify(stats_manager.get_all_stats())
+    # 禁用缓存，确保每次都获取最新数据
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    return response
 
 @app.route('/api/logs')
 @login_required
 def get_logs():
     """获取日志"""
-    return jsonify({
+    response = jsonify({
         'logs': log_messages[-200:]  # 返回最新200条日志
     })
+    # 禁用缓存，确保实时更新
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    return response
 
 @app.route('/api/config', methods=['GET', 'POST'])
 @login_required

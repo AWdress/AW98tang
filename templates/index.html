@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>色花堂智能助手 Pro</title>
     <link rel="icon" href="https://www.sehuatang.net/favicon.ico" type="image/x-icon">
     <style>
@@ -74,6 +77,7 @@
             font-size: 1.2rem;
             background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
             font-weight: 700;
         }
@@ -195,6 +199,7 @@
             font-weight: 700;
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
@@ -228,6 +233,7 @@
             margin-bottom: 8px;
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
@@ -292,6 +298,7 @@
             font-weight: 700;
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
             margin-bottom: 8px;
         }
@@ -1004,6 +1011,63 @@
                     </div>
                 </div>
 
+                <!-- 代理配置区域 -->
+                <div class="stat-card" style="margin-top: 30px;">
+                    <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: #f1f5f9;">
+                        <span style="font-size: 1.5rem;">🌐</span>
+                        <span>网络代理配置</span>
+                    </h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>启用代理</label>
+                            <select id="config_proxy_enabled">
+                                <option value="false">否</option>
+                                <option value="true">是</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>HTTP 代理地址</label>
+                            <input type="text" id="config_http_proxy" placeholder="http://192.168.50.113:7890">
+                        </div>
+                        <div class="form-group">
+                            <label>HTTPS 代理地址</label>
+                            <input type="text" id="config_https_proxy" placeholder="http://192.168.50.113:7890">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>不使用代理的地址</label>
+                            <input type="text" id="config_no_proxy" placeholder="localhost,127.0.0.1">
+                        </div>
+                        <div class="form-group">
+                            <label>Git 更新使用代理</label>
+                            <select id="config_proxy_for_git">
+                                <option value="false">否</option>
+                                <option value="true">是（推荐）</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Selenium 使用代理</label>
+                            <select id="config_proxy_for_selenium">
+                                <option value="false">否（推荐）</option>
+                                <option value="true">是</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 15px; padding: 12px; background: rgba(59, 130, 246, 0.1); border-left: 3px solid #3b82f6; border-radius: 4px; font-size: 0.85rem; color: #cbd5e1;">
+                        <strong>💡 代理配置说明：</strong>
+                        <ul style="margin: 8px 0 0 20px; line-height: 1.8;">
+                            <li><strong>启用代理：</strong>如果需要通过代理访问网络，启用此选项</li>
+                            <li><strong>Git 更新使用代理：</strong>如果 GitHub 需要代理访问，建议启用</li>
+                            <li><strong>Selenium 使用代理：</strong>如果目标网站需要代理访问，才启用</li>
+                            <li><strong>格式示例：</strong>http://192.168.1.100:7890 或 socks5://127.0.0.1:1080</li>
+                        </ul>
+                    </div>
+                </div>
+
                 <!-- AI配置区域 -->
                 <div class="stat-card" style="margin-top: 30px;">
                     <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: #f1f5f9;">
@@ -1353,6 +1417,15 @@
                     document.getElementById('config_schedule_time').value = config.schedule_time || '03:00';
                     document.getElementById('config_test_mode').value = config.enable_test_mode ? 'true' : 'false';
                     
+                    // 加载代理配置
+                    const proxy = config.proxy || {};
+                    document.getElementById('config_proxy_enabled').value = proxy.enabled ? 'true' : 'false';
+                    document.getElementById('config_http_proxy').value = proxy.http_proxy || '';
+                    document.getElementById('config_https_proxy').value = proxy.https_proxy || '';
+                    document.getElementById('config_no_proxy').value = proxy.no_proxy || 'localhost,127.0.0.1';
+                    document.getElementById('config_proxy_for_git').value = proxy.use_for_git ? 'true' : 'false';
+                    document.getElementById('config_proxy_for_selenium').value = proxy.use_for_selenium ? 'true' : 'false';
+                    
                     // 加载AI配置
                     document.getElementById('config_enable_ai_reply').value = config.enable_ai_reply ? 'true' : 'false';
                     document.getElementById('config_ai_api_type').value = config.ai_api_type || 'openai';
@@ -1384,6 +1457,16 @@
                     currentConfig.enable_scheduler = document.getElementById('config_scheduler').value === 'true';
                     currentConfig.schedule_time = document.getElementById('config_schedule_time').value;
                     currentConfig.enable_test_mode = document.getElementById('config_test_mode').value === 'true';
+                    
+                    // 保存代理配置
+                    currentConfig.proxy = {
+                        enabled: document.getElementById('config_proxy_enabled').value === 'true',
+                        http_proxy: document.getElementById('config_http_proxy').value,
+                        https_proxy: document.getElementById('config_https_proxy').value,
+                        no_proxy: document.getElementById('config_no_proxy').value,
+                        use_for_git: document.getElementById('config_proxy_for_git').value === 'true',
+                        use_for_selenium: document.getElementById('config_proxy_for_selenium').value === 'true'
+                    };
                     
                     // 保存AI配置
                     currentConfig.enable_ai_reply = document.getElementById('config_enable_ai_reply').value === 'true';
