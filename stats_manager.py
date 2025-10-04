@@ -37,7 +37,8 @@ class StatsManager:
             "checkin_success": False,
             "checkin_time": None,
             "replies": [],
-            "history": []
+            "history": [],
+            "all_replies": []  # 保存所有历史回复
         }
     
     def save_stats(self):
@@ -88,9 +89,17 @@ class StatsManager:
         
         if "replies" not in self.stats:
             self.stats["replies"] = []
+        if "all_replies" not in self.stats:
+            self.stats["all_replies"] = []
         
+        # 添加到今日回复
         self.stats["replies"].append(reply_record)
         self.stats["reply_count"] = len(self.stats["replies"])
+        
+        # 添加到所有回复历史（保留最近1000条）
+        self.stats["all_replies"].insert(0, reply_record)
+        self.stats["all_replies"] = self.stats["all_replies"][:1000]
+        
         self.save_stats()
     
     def mark_checkin_success(self):
@@ -115,11 +124,17 @@ class StatsManager:
         """获取历史统计"""
         return self.stats.get("history", [])[:days]
     
+    def get_all_replies(self, limit: int = 100) -> List[Dict]:
+        """获取所有历史回复"""
+        all_replies = self.stats.get("all_replies", [])
+        return all_replies[:limit]
+    
     def get_all_stats(self) -> Dict:
         """获取完整统计数据"""
         self.check_and_reset_daily()
         return {
             "today": self.get_today_stats(),
-            "history": self.get_history()
+            "history": self.get_history(),
+            "all_replies": self.get_all_replies(100)
         }
 

@@ -9,6 +9,8 @@ import json
 import time
 import random
 import logging
+import pickle
+import os
 from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -44,6 +46,10 @@ class SeleniumAutoBot:
         self.password = self.config.get('password', '')
         self.security_question_id = self.config.get('security_question_id', '')
         self.security_answer = self.config.get('security_answer', '')
+        
+        # Cookies 保存路径
+        self.cookies_file = 'data/cookies.pkl'
+        os.makedirs('data', exist_ok=True)
         
         # 自动化配置
         self.daily_reply_limit = self.config.get('max_replies_per_day', 10)
@@ -395,6 +401,10 @@ class SeleniumAutoBot:
             if any(success_indicators):
                 logging.info("🎉 登录成功！")
                 logging.info(f"当前页面: {current_url}")
+                
+                # 保存登录状态
+                self.save_cookies()
+                
                 return True
             else:
                 logging.error("❌ 登录失败，请检查账号信息")
@@ -409,6 +419,82 @@ class SeleniumAutoBot:
                 
         except Exception as e:
             logging.error(f"❌ 登录过程发生错误: {e}")
+            return False
+    
+    def save_cookies(self):
+        """保存登录cookies到文件"""
+        try:
+            cookies = self.driver.get_cookies()
+            with open(self.cookies_file, 'wb') as f:
+                pickle.dump(cookies, f)
+            logging.info(f"🍪 登录状态已保存到 {self.cookies_file}")
+            return True
+        except Exception as e:
+            logging.error(f"❌ 保存cookies失败: {e}")
+            return False
+    
+    def load_cookies(self):
+        """从文件加载cookies"""
+        try:
+            if not os.path.exists(self.cookies_file):
+                logging.info("ℹ️ 未找到已保存的登录状态")
+                return False
+            
+            # 先访问网站，确保域名匹配
+            logging.info("🌐 正在访问网站...")
+            self.driver.get(self.base_url)
+            time.sleep(2)
+            
+            # 加载cookies
+            with open(self.cookies_file, 'rb') as f:
+                cookies = pickle.load(f)
+            
+            for cookie in cookies:
+                try:
+                    # 移除可能导致问题的字段
+                    if 'expiry' in cookie:
+                        cookie['expiry'] = int(cookie['expiry'])
+                    self.driver.add_cookie(cookie)
+                except Exception as e:
+                    logging.debug(f"添加cookie失败: {e}")
+            
+            logging.info("✅ 登录状态已加载")
+            
+            # 刷新页面以应用cookies
+            self.driver.refresh()
+            time.sleep(3)
+            
+            return True
+            
+        except Exception as e:
+            logging.error(f"❌ 加载cookies失败: {e}")
+            return False
+    
+    def check_login_status(self):
+        """检查当前是否已登录"""
+        try:
+            # 访问个人中心页面，如果能访问则说明已登录
+            current_url = self.driver.current_url
+            page_source = self.driver.page_source
+            
+            # 多种已登录的判断条件
+            login_indicators = [
+                "退出" in page_source,
+                "个人资料" in page_source,
+                "我的帖子" in page_source,
+                "member.php?mod=logging&action=logout" in page_source,
+                self.username in page_source  # 页面中包含用户名
+            ]
+            
+            if any(login_indicators):
+                logging.info("✅ 检测到已登录状态")
+                return True
+            else:
+                logging.info("ℹ️ 未检测到登录状态")
+                return False
+                
+        except Exception as e:
+            logging.error(f"❌ 检查登录状态失败: {e}")
             return False
     
     def daily_checkin(self, test_mode=False):
@@ -1486,9 +1572,28 @@ class SeleniumAutoBot:
             if not self.setup_driver():
                 return False
             
-            # 登录
-            if not self.login():
-                return False
+            # 尝试使用已保存的登录状态
+            logged_in = False
+            if os.path.exists(self.cookies_file):
+                logging.info("🔍 发现已保存的登录状态，尝试恢复...")
+                if self.load_cookies():
+                    if self.check_login_status():
+                        logging.info("🎉 使用已保存的登录状态成功！")
+                        logged_in = True
+                    else:
+                        logging.info("⚠️ 登录状态已过期，需要重新登录")
+                        # 删除过期的cookies文件
+                        try:
+                            os.remove(self.cookies_file)
+                            logging.info("🗑️ 已删除过期的登录状态文件")
+                        except:
+                            pass
+            
+            # 如果没有登录成功，执行正常登录流程
+            if not logged_in:
+                logging.info("🔐 开始登录流程...")
+                if not self.login():
+                    return False
             
             # 运行自动化任务
             self.run_auto_tasks()

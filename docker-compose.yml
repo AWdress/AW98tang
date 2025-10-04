@@ -20,7 +20,7 @@ services:
       - ./AW98tang/config.json:/app/config.json  # 配置文件（必须）
       - ./AW98tang/logs:/app/logs                # 日志目录
       - ./AW98tang/debug:/app/debug              # 调试文件目录
-      - ./AW98tang/data:/app/data                # 统计数据目录
+      - ./AW98tang/data:/app/data                # 统计数据和登录状态目录（重要）
     
     # 环境变量配置
     environment:

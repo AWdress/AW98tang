@@ -2,8 +2,8 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>色花堂智能助手 Pro - 控制台</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>色花堂智能助手 Pro</title>
     <link rel="icon" href="https://www.sehuatang.net/favicon.ico" type="image/x-icon">
     <style>
         * {
@@ -12,241 +12,496 @@
             box-sizing: border-box;
         }
 
+        :root {
+            --primary: #ec4899;
+            --primary-dark: #be185d;
+            --secondary: #8b5cf6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+            --dark: #0f172a;
+            --dark-2: #1e293b;
+            --dark-3: #334155;
+            --sidebar-width: 260px;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Microsoft YaHei', sans-serif;
             background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-            min-height: 100vh;
-            padding: 20px;
             color: #f1f5f9;
+            min-height: 100vh;
+            overflow-x: hidden;
         }
 
-        .container {
-            max-width: 1600px;
-            margin: 0 auto;
-        }
-
-        header {
-            background: rgba(255, 255, 255, 0.05);
+        /* 侧边栏 */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: rgba(15, 23, 42, 0.95);
             backdrop-filter: blur(10px);
-            border-radius: 16px;
-            padding: 20px 30px;
-            margin-bottom: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px 0;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+            overflow-y: auto;
         }
 
-        .logo-section {
+        .sidebar-header {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 12px;
+            margin-bottom: 10px;
         }
 
         .logo-img {
-            height: 50px;
-            width: auto;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
         }
 
-        .brand-info h1 {
-            font-size: 1.8rem;
-            margin-bottom: 5px;
-            background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
+        .logo-text h1 {
+            font-size: 1.2rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             font-weight: 700;
         }
 
-        .brand-info p {
-            font-size: 0.95rem;
-            opacity: 0.7;
+        .logo-text p {
+            font-size: 0.75rem;
+            opacity: 0.6;
+            margin-top: 2px;
+        }
+
+        .menu {
+            padding: 20px 0;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            color: #94a3b8;
+            text-decoration: none;
+            transition: all 0.3s;
+            cursor: pointer;
+            border-left: 3px solid transparent;
+        }
+
+        .menu-item:hover, .menu-item.active {
+            background: rgba(236, 72, 153, 0.1);
+            color: var(--primary);
+            border-left-color: var(--primary);
+        }
+
+        .menu-item-icon {
+            font-size: 1.3rem;
+            width: 24px;
+            text-align: center;
+        }
+
+        .menu-item-text {
+            font-weight: 500;
         }
 
         .user-section {
-            display: flex;
-            align-items: center;
-            gap: 15px;
+            padding: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: auto;
         }
 
         .user-info {
             display: flex;
             align-items: center;
             gap: 10px;
-            background: rgba(255, 255, 255, 0.08);
-            padding: 10px 15px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
             border-radius: 12px;
+            margin-bottom: 10px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
         }
 
         .logout-btn {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            width: 100%;
+            padding: 10px;
+            background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%);
             color: white;
-            padding: 10px 20px;
-            border-radius: 12px;
-            text-decoration: none;
+            border: none;
+            border-radius: 8px;
             font-weight: 600;
+            cursor: pointer;
             transition: all 0.3s;
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 8px;
         }
 
         .logout-btn:hover {
-            transform: scale(1.05);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
         }
 
-        .dashboard {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
+        /* 移动端菜单 */
+        .mobile-header {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 1001;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+        }
+
+        .menu-toggle {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        .mobile-logo {
+            font-size: 1.1rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* 主内容区 */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 30px;
+            min-height: 100vh;
+        }
+
+        .page-section {
+            display: none;
+        }
+
+        .page-section.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .page-header {
             margin-bottom: 30px;
         }
 
-        .card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border-radius: 16px;
-            padding: 25px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: transform 0.3s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-            border-color: rgba(236, 72, 153, 0.5);
-        }
-
-        .card-title {
-            font-size: 1.2rem;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: #f1f5f9;
-        }
-
-        .card-icon {
-            font-size: 1.5rem;
-        }
-
-        .status-indicator {
-            display: inline-block;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            margin-right: 8px;
-            animation: pulse 2s infinite;
-        }
-
-        .status-running {
-            background: #10b981;
-            box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
-        }
-
-        .status-stopped {
-            background: #ef4444;
-            box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.6; transform: scale(0.95); }
-        }
-
-        .stat-value {
-            font-size: 2.5rem;
-            font-weight: bold;
-            background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
+        .page-title {
+            font-size: 2rem;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin: 10px 0;
         }
 
-        .stat-label {
+        .page-subtitle {
             color: #94a3b8;
             font-size: 0.95rem;
         }
 
-        .info-row {
+        /* 统计卡片 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(236, 72, 153, 0.5);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .stat-header {
             display: flex;
-            justify-content: space-between;
-            padding: 12px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
         }
 
-        .info-row:last-child {
-            border-bottom: none;
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
         }
 
-        .info-label {
+        .stat-icon.primary { background: rgba(236, 72, 153, 0.2); }
+        .stat-icon.success { background: rgba(16, 185, 129, 0.2); }
+        .stat-icon.info { background: rgba(59, 130, 246, 0.2); }
+        .stat-icon.warning { background: rgba(245, 158, 11, 0.2); }
+
+        .stat-info h3 {
+            font-size: 0.9rem;
             color: #94a3b8;
             font-weight: 500;
         }
 
-        .info-value {
-            color: #f1f5f9;
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            color: #64748b;
+            font-size: 0.85rem;
+        }
+
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
             font-weight: 600;
+        }
+
+        .status-running {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+        }
+
+        .status-stopped {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .status-running .status-dot { background: var(--success); }
+        .status-stopped .status-dot { background: var(--danger); }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(0.9); }
+        }
+
+        /* 按钮区 */
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 30px;
         }
 
         .btn {
             padding: 12px 24px;
             border: none;
             border-radius: 12px;
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
-            margin: 5px;
+            transition: all 0.3s;
             display: inline-flex;
             align-items: center;
             gap: 8px;
         }
 
         .btn:hover {
-            transform: scale(1.05);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
 
-        .btn-start {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: white;
+        .btn-primary { background: linear-gradient(135deg, var(--success), #059669); color: white; }
+        .btn-danger { background: linear-gradient(135deg, var(--danger), #dc2626); color: white; }
+        .btn-info { background: linear-gradient(135deg, var(--info), #2563eb); color: white; }
+
+        /* 回复列表 */
+        .reply-list {
+            display: grid;
+            gap: 16px;
         }
 
-        .btn-stop {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-            color: white;
+        .reply-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.3s;
+            cursor: pointer;
         }
 
-        .btn-config {
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-            color: white;
+        .reply-card:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(236, 72, 153, 0.3);
+            transform: translateX(5px);
         }
 
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
+        .reply-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
-        .controls {
+        .reply-time {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #64748b;
+            font-size: 0.85rem;
+        }
+
+        .reply-title {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: #f1f5f9;
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+
+        .reply-title a {
+            color: var(--primary);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .reply-title a:hover {
+            color: var(--primary-dark);
+            text-decoration: underline;
+        }
+
+        .reply-content {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 12px 16px;
+            border-radius: 8px;
+            border-left: 3px solid var(--primary);
+            color: #cbd5e1;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .empty-state {
             text-align: center;
-            margin: 20px 0;
+            padding: 60px 20px;
+            color: #64748b;
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 16px;
+            opacity: 0.3;
+        }
+
+        /* 日志面板 */
+        .log-panel {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+        }
+
+        .log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .log-title {
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .log-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .log-btn {
+            padding: 6px 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+        }
+
+        .log-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
         }
 
         .log-container {
-            background: #0f172a;
-            border-radius: 12px;
-            padding: 20px;
-            max-height: 600px;
+            height: 500px;
             overflow-y: auto;
+            padding: 16px;
             font-family: 'Consolas', 'Monaco', monospace;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.875rem;
         }
 
         .log-entry {
-            padding: 8px 12px;
-            margin: 4px 0;
-            border-radius: 6px;
-            font-size: 0.9rem;
             display: flex;
-            gap: 10px;
+            gap: 12px;
+            padding: 8px 12px;
+            margin-bottom: 4px;
+            border-radius: 6px;
             background: rgba(255, 255, 255, 0.02);
         }
 
@@ -255,124 +510,29 @@
             min-width: 80px;
         }
 
-        .log-INFO {
-            color: #60a5fa;
-        }
+        .log-INFO { color: #60a5fa; }
+        .log-WARNING { color: #fbbf24; }
+        .log-ERROR { color: #f87171; }
+        .log-SUCCESS { color: #34d399; }
 
-        .log-WARNING {
-            color: #fbbf24;
-        }
-
-        .log-ERROR {
-            color: #f87171;
-        }
-
-        .log-SUCCESS {
-            color: #34d399;
-        }
-
-        .reply-item {
-            background: rgba(255, 255, 255, 0.02);
-            padding: 15px;
-            border-radius: 12px;
-            margin-bottom: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            transition: all 0.3s;
-        }
-
-        .reply-item:hover {
-            border-color: rgba(236, 72, 153, 0.3);
-            background: rgba(255, 255, 255, 0.04);
-        }
-
-        .reply-time {
-            color: #64748b;
-            font-size: 0.85rem;
-            margin-bottom: 8px;
-        }
-
-        .reply-title {
-            color: #f1f5f9;
-            font-weight: 600;
-            margin-bottom: 8px;
-            font-size: 1rem;
-        }
-
-        .reply-title a {
-            color: #ec4899;
-            text-decoration: none;
-        }
-
-        .reply-title a:hover {
-            text-decoration: underline;
-        }
-
-        .reply-content {
-            color: #94a3b8;
-            font-size: 0.95rem;
-            padding: 10px;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 8px;
-            border-left: 3px solid #ec4899;
-        }
-
-        .config-section {
-            display: none;
-        }
-
-        .config-section.active {
-            display: block;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #f1f5f9;
-            font-weight: 600;
-        }
-
-        .form-group input,
-        .form-group select {
-            width: 100%;
-            padding: 12px 15px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            font-size: 1rem;
-            background: rgba(255, 255, 255, 0.05);
-            color: #f1f5f9;
-            transition: all 0.3s ease;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus {
-            outline: none;
-            border-color: #ec4899;
-            background: rgba(255, 255, 255, 0.08);
-        }
-
+        /* Toast通知 */
         .toast {
             position: fixed;
-            top: 20px;
+            top: 80px;
             right: 20px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 15px 25px;
+            background: white;
+            padding: 16px 24px;
             border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
             display: none;
             align-items: center;
-            gap: 10px;
-            z-index: 1000;
-            border: 1px solid rgba(0, 0, 0, 0.1);
+            gap: 12px;
+            z-index: 9999;
+            animation: slideIn 0.3s ease;
         }
 
         .toast.show {
             display: flex;
-            animation: slideIn 0.3s ease;
         }
 
         @keyframes slideIn {
@@ -380,12 +540,11 @@
             to { transform: translateX(0); opacity: 1; }
         }
 
-        .toast-success {
-            border-left: 4px solid #10b981;
-        }
+        .toast-success { border-left: 4px solid var(--success); }
+        .toast-error { border-left: 4px solid var(--danger); }
 
-        .toast-error {
-            border-left: 4px solid #ef4444;
+        .toast-icon {
+            font-size: 1.5rem;
         }
 
         .toast-message {
@@ -393,274 +552,403 @@
             font-weight: 600;
         }
 
-        .stats-grid {
+        /* 配置表单 */
+        .config-form {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-top: 15px;
+            gap: 20px;
         }
 
-        .stat-box {
-            background: rgba(0, 0, 0, 0.2);
-            padding: 15px;
-            border-radius: 12px;
-            text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
         }
 
-        .stat-box-value {
-            font-size: 2rem;
-            font-weight: bold;
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
 
-        .stat-box-label {
-            color: #94a3b8;
-            font-size: 0.9rem;
-            margin-top: 5px;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 40px;
-            color: #64748b;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 0.85rem;
+        .form-group label {
+            color: #f1f5f9;
             font-weight: 600;
+            font-size: 0.9rem;
         }
 
-        .badge-success {
-            background: rgba(16, 185, 129, 0.2);
-            color: #10b981;
+        .form-group input,
+        .form-group select {
+            padding: 12px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #f1f5f9;
+            font-size: 0.95rem;
+            transition: all 0.3s;
         }
 
-        .badge-danger {
-            background: rgba(239, 68, 68, 0.2);
-            color: #ef4444;
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.show {
+                transform: translateX(0);
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 80px 15px 20px;
+            }
+
+            .page-title {
+                font-size: 1.5rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .reply-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .log-container {
+                height: 300px;
+                font-size: 0.8rem;
+            }
+
+            .log-time {
+                min-width: 70px;
+                font-size: 0.75rem;
+            }
+
+            .toast {
+                top: 70px;
+                right: 10px;
+                left: 10px;
+            }
+        }
+
+        /* 滚动条样式 */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(236, 72, 153, 0.5);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(236, 72, 153, 0.7);
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <div class="logo-section">
-                <img src="https://www.sehuatang.net/static/image/common/logo.png" alt="色花堂" class="logo-img">
-                <div class="brand-info">
-                    <h1>色花堂智能助手 Pro</h1>
-                    <p>智能回复 · 自动签到 · 数据统计</p>
-                </div>
-            </div>
-            <div class="user-section">
-                <div class="user-info">
-                    <span style="font-size: 1.2rem;">👤</span>
-                    <strong>{{ username }}</strong>
-                </div>
-                <a href="/logout" class="logout-btn">
-                    <span>🚪</span>
-                    退出登录
-                </a>
-            </div>
-        </header>
+    <!-- 移动端顶部栏 -->
+    <div class="mobile-header">
+        <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+        <div class="mobile-logo">色花堂助手</div>
+        <div></div>
+    </div>
 
-        <!-- 统计面板 -->
-        <div class="dashboard">
-            <div class="card">
-                <h3 class="card-title">
-                    <span class="card-icon">📊</span>
-                    运行状态
-                </h3>
-                <div class="controls">
-                    <span class="status-indicator status-stopped" id="statusIndicator"></span>
-                    <span id="statusText">已停止</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">上次启动</span>
-                    <span class="info-value" id="lastStart">-</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">上次停止</span>
-                    <span class="info-value" id="lastStop">-</span>
-                </div>
-            </div>
-
-            <div class="card">
-                <h3 class="card-title">
-                    <span class="card-icon">💬</span>
-                    今日回复
-                </h3>
-                <div class="stat-value" id="todayReplies">0</div>
-                <div class="stat-label">已回复 / 每日限额</div>
-                <div class="info-row">
-                    <span class="info-label">每日限额</span>
-                    <span class="info-value" id="maxReplies">30</span>
-                </div>
-            </div>
-
-            <div class="card">
-                <h3 class="card-title">
-                    <span class="card-icon">✅</span>
-                    今日签到
-                </h3>
-                <div id="checkinStatus">
-                    <div class="stat-value" id="checkinSuccess">-</div>
-                    <div class="stat-label" id="checkinLabel">未签到</div>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">签到时间</span>
-                    <span class="info-value" id="checkinTime">-</span>
-                </div>
-            </div>
-
-            <div class="card">
-                <h3 class="card-title">
-                    <span class="card-icon">⚙️</span>
-                    配置信息
-                </h3>
-                <div class="info-row">
-                    <span class="info-label">目标论坛</span>
-                    <span class="info-value" id="targetForums">-</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">回复间隔</span>
-                    <span class="info-value" id="replyInterval">-</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">每日签到</span>
-                    <span class="info-value" id="checkinEnabled">-</span>
+    <!-- 侧边栏 -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <img src="https://www.sehuatang.net/static/image/common/logo.png" alt="Logo" class="logo-img">
+                <div class="logo-text">
+                    <h1>色花堂助手</h1>
+                    <p>智能自动化系统</p>
                 </div>
             </div>
         </div>
 
-        <!-- 控制按钮 -->
-        <div class="card">
-            <h3 class="card-title">
-                <span class="card-icon">🎮</span>
-                控制面板
-            </h3>
-            <div class="controls">
-                <button class="btn btn-start" onclick="startBot()">
+        <div class="menu">
+            <a class="menu-item active" onclick="showPage('dashboard')">
+                <span class="menu-item-icon">📊</span>
+                <span class="menu-item-text">仪表盘</span>
+            </a>
+            <a class="menu-item" onclick="showPage('replies')">
+                <span class="menu-item-icon">💬</span>
+                <span class="menu-item-text">回复记录</span>
+            </a>
+            <a class="menu-item" onclick="showPage('logs')">
+                <span class="menu-item-icon">📋</span>
+                <span class="menu-item-text">运行日志</span>
+            </a>
+            <a class="menu-item" onclick="showPage('config')">
+                <span class="menu-item-icon">⚙️</span>
+                <span class="menu-item-text">系统配置</span>
+            </a>
+        </div>
+
+        <div class="user-section">
+            <div class="user-info">
+                <div class="user-avatar">👤</div>
+                <div>
+                    <strong>{{ username }}</strong>
+                    <div style="font-size: 0.8rem; color: #64748b;">管理员</div>
+                </div>
+            </div>
+            <button class="logout-btn" onclick="logout()">
+                <span>🚪</span>
+                <span>退出登录</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- 主内容区 -->
+    <main class="main-content">
+        <!-- 仪表盘页面 -->
+        <section class="page-section active" id="page-dashboard">
+            <div class="page-header">
+                <h2 class="page-title">仪表盘</h2>
+                <p class="page-subtitle">实时监控系统运行状态</p>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon primary">📊</div>
+                        <div class="stat-info">
+                            <h3>运行状态</h3>
+                        </div>
+                    </div>
+                    <div id="statusBadge" class="status-indicator status-stopped">
+                        <span class="status-dot"></span>
+                        <span id="statusText">已停止</span>
+                    </div>
+                    <div style="margin-top: 12px; font-size: 0.85rem; color: #64748b;">
+                        <div>启动: <span id="lastStart">-</span></div>
+                        <div>停止: <span id="lastStop">-</span></div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon success">💬</div>
+                        <div class="stat-info">
+                            <h3>今日回复</h3>
+                        </div>
+                    </div>
+                    <div class="stat-value" id="todayReplies">0</div>
+                    <div class="stat-label">每日限额: <span id="maxReplies">30</span></div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon info">✅</div>
+                        <div class="stat-info">
+                            <h3>今日签到</h3>
+                        </div>
+                    </div>
+                    <div class="stat-value" id="checkinStatus">❌</div>
+                    <div class="stat-label" id="checkinLabel">未签到</div>
+                    <div style="margin-top: 8px; font-size: 0.85rem; color: #64748b;">
+                        时间: <span id="checkinTime">-</span>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon warning">⚙️</div>
+                        <div class="stat-info">
+                            <h3>配置信息</h3>
+                        </div>
+                    </div>
+                    <div style="font-size: 0.9rem; color: #cbd5e1; line-height: 1.8;">
+                        <div>论坛: <span id="targetForums">-</span></div>
+                        <div>间隔: <span id="replyInterval">-</span></div>
+                        <div>签到: <span id="checkinEnabled">-</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="startBot()">
                     ▶️ 启动机器人
                 </button>
-                <button class="btn btn-stop" onclick="stopBot()">
+                <button class="btn btn-danger" onclick="stopBot()">
                     ⏹️ 停止机器人
                 </button>
-                <button class="btn btn-config" onclick="toggleConfig()">
-                    ⚙️ 配置设置
+                <button class="btn btn-info" onclick="showPage('config')">
+                    ⚙️ 系统配置
                 </button>
             </div>
-        </div>
+        </section>
 
-        <!-- 配置面板 -->
-        <div class="card config-section" id="configSection">
-            <h3 class="card-title">
-                <span class="card-icon">⚙️</span>
-                配置设置
-            </h3>
-            <form id="configForm">
-                <div class="form-group">
-                    <label>每日回复上限</label>
-                    <input type="number" id="config_max_replies" value="30" min="1" max="100">
-                </div>
-                <div class="form-group">
-                    <label>回复间隔（秒）- 最小值</label>
-                    <input type="number" id="config_interval_min" value="60" min="30">
-                </div>
-                <div class="form-group">
-                    <label>回复间隔（秒）- 最大值</label>
-                    <input type="number" id="config_interval_max" value="180" min="60">
-                </div>
-                <div class="form-group">
-                    <label>启用每日签到</label>
-                    <select id="config_checkin">
-                        <option value="true">是</option>
-                        <option value="false">否</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>启用自动回复</label>
-                    <select id="config_auto_reply">
-                        <option value="true">是</option>
-                        <option value="false">否</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>🧪 全部测试模式（签到+回复）</label>
-                    <select id="config_test_mode">
-                        <option value="false">否</option>
-                        <option value="true">是</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>⏰ 启用定时任务</label>
-                    <select id="config_scheduler">
-                        <option value="false">否</option>
-                        <option value="true">是</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>⏰ 定时运行时间</label>
-                    <input type="time" id="config_schedule_time" value="03:00">
-                </div>
-                <div class="controls">
-                    <button type="submit" class="btn btn-start">💾 保存配置</button>
-                    <button type="button" class="btn btn-stop" onclick="toggleConfig()">❌ 取消</button>
-                </div>
-            </form>
-        </div>
+        <!-- 回复记录页面 -->
+        <section class="page-section" id="page-replies">
+            <div class="page-header">
+                <h2 class="page-title">回复记录</h2>
+                <p class="page-subtitle">查看所有历史回复内容</p>
+            </div>
 
-        <!-- 今日回复详情 -->
-        <div class="card">
-            <h3 class="card-title">
-                <span class="card-icon">📝</span>
-                今日回复详情
-            </h3>
-            <div id="repliesContainer">
+            <div class="reply-list" id="replyList">
                 <div class="empty-state">
+                    <div class="empty-icon">📭</div>
                     <p>暂无回复记录</p>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <!-- 日志面板 -->
-        <div class="card">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <h3 class="card-title" style="margin-bottom: 0;">
-                    <span class="card-icon">📋</span>
-                    实时日志
-                </h3>
-                <div>
-                    <button onclick="scrollToTop()" class="btn" style="padding: 6px 12px; font-size: 0.85rem; margin: 0 5px; background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%); color: white;">
-                        ⬆️ 顶部
-                    </button>
-                    <button onclick="scrollToBottom()" class="btn" style="padding: 6px 12px; font-size: 0.85rem; margin: 0; background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%); color: white;">
-                        ⬇️ 底部
-                    </button>
+        <!-- 日志页面 -->
+        <section class="page-section" id="page-logs">
+            <div class="page-header">
+                <h2 class="page-title">运行日志</h2>
+                <p class="page-subtitle">实时查看系统运行日志</p>
+            </div>
+
+            <div class="log-panel">
+                <div class="log-header">
+                    <div class="log-title">
+                        <span>📋</span>
+                        <span>实时日志</span>
+                    </div>
+                    <div class="log-actions">
+                        <button class="log-btn" onclick="scrollToTop()">⬆️ 顶部</button>
+                        <button class="log-btn" onclick="scrollToBottom()">⬇️ 底部</button>
+                    </div>
+                </div>
+                <div class="log-container" id="logContainer">
+                    <div class="log-entry log-INFO">
+                        <span class="log-time">--:--:--</span>
+                        <span>等待连接...</span>
+                    </div>
                 </div>
             </div>
-            <div class="log-container" id="logContainer">
-                <div class="log-entry log-INFO">
-                    <span class="log-time">--:--:--</span>
-                    <span>等待连接...</span>
-                </div>
-            </div>
-        </div>
-    </div>
+        </section>
 
-    <!-- 提示消息 -->
+        <!-- 配置页面 -->
+        <section class="page-section" id="page-config">
+            <div class="page-header">
+                <h2 class="page-title">系统配置</h2>
+                <p class="page-subtitle">调整机器人运行参数</p>
+            </div>
+
+            <form class="config-form" id="configForm" onsubmit="saveConfig(event)">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>每日回复上限</label>
+                        <input type="number" id="config_max_replies" min="1" max="100" required>
+                    </div>
+                    <div class="form-group">
+                        <label>回复间隔-最小值（秒）</label>
+                        <input type="number" id="config_interval_min" min="30" required>
+                    </div>
+                    <div class="form-group">
+                        <label>回复间隔-最大值（秒）</label>
+                        <input type="number" id="config_interval_max" min="60" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>启用自动回复</label>
+                        <select id="config_auto_reply">
+                            <option value="true">是</option>
+                            <option value="false">否</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>启用每日签到</label>
+                        <select id="config_checkin">
+                            <option value="true">是</option>
+                            <option value="false">否</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>启用定时任务</label>
+                        <select id="config_scheduler">
+                            <option value="false">否</option>
+                            <option value="true">是</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>定时运行时间</label>
+                        <input type="time" id="config_schedule_time">
+                    </div>
+                    <div class="form-group">
+                        <label>测试模式（全部）</label>
+                        <select id="config_test_mode">
+                            <option value="false">否</option>
+                            <option value="true">是</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button type="submit" class="btn btn-primary">💾 保存配置</button>
+                    <button type="button" class="btn btn-danger" onclick="loadConfig()">🔄 重置</button>
+                </div>
+            </form>
+        </section>
+    </main>
+
+    <!-- Toast通知 -->
     <div class="toast" id="toast">
-        <span id="toastIcon">✅</span>
+        <span class="toast-icon" id="toastIcon">✅</span>
         <span class="toast-message" id="toastMessage">操作成功</span>
     </div>
 
     <script>
-        // 更新状态和统计
+        // 页面切换
+        function showPage(pageName) {
+            document.querySelectorAll('.page-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById('page-' + pageName).classList.add('active');
+
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+
+            // 关闭移动端菜单
+            if (window.innerWidth <= 768) {
+                document.getElementById('sidebar').classList.remove('show');
+            }
+        }
+
+        // 切换侧边栏
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('show');
+        }
+
+        // 更新状态
         function updateStatus() {
             fetch('/api/status')
                 .then(res => res.json())
@@ -669,36 +957,30 @@
                     const config = data.config;
                     const stats = data.stats || {};
 
-                    // 更新运行状态
-                    const indicator = document.getElementById('statusIndicator');
+                    // 运行状态
+                    const statusBadge = document.getElementById('statusBadge');
                     const statusText = document.getElementById('statusText');
                     if (status.running) {
-                        indicator.className = 'status-indicator status-running';
+                        statusBadge.className = 'status-indicator status-running';
                         statusText.textContent = '运行中';
                     } else {
-                        indicator.className = 'status-indicator status-stopped';
+                        statusBadge.className = 'status-indicator status-stopped';
                         statusText.textContent = '已停止';
                     }
 
-                    // 更新时间
                     document.getElementById('lastStart').textContent = status.last_start || '-';
                     document.getElementById('lastStop').textContent = status.last_stop || '-';
 
-                    // 更新回复统计
+                    // 回复统计
                     document.getElementById('todayReplies').textContent = stats.today_replies || 0;
                     document.getElementById('maxReplies').textContent = config.max_replies_per_day || 30;
 
-                    // 更新签到状态
-                    if (stats.checkin_success) {
-                        document.getElementById('checkinSuccess').textContent = '✅';
-                        document.getElementById('checkinLabel').textContent = '已签到';
-                    } else {
-                        document.getElementById('checkinSuccess').textContent = '❌';
-                        document.getElementById('checkinLabel').textContent = '未签到';
-                    }
+                    // 签到状态
+                    document.getElementById('checkinStatus').textContent = stats.checkin_success ? '✅' : '❌';
+                    document.getElementById('checkinLabel').textContent = stats.checkin_success ? '已签到' : '未签到';
                     document.getElementById('checkinTime').textContent = stats.checkin_time || '-';
 
-                    // 更新配置信息
+                    // 配置信息
                     document.getElementById('targetForums').textContent = config.target_forums.join(', ') || '-';
                     const interval = config.reply_interval;
                     document.getElementById('replyInterval').textContent = 
@@ -708,22 +990,32 @@
                 .catch(err => console.error('获取状态失败:', err));
         }
 
-        // 更新回复详情
+        // 更新回复列表
         function updateReplies() {
             fetch('/api/stats')
                 .then(res => res.json())
                 .then(data => {
-                    const container = document.getElementById('repliesContainer');
-                    const replies = data.today.replies || [];
+                    const replies = data.all_replies || [];
+                    const container = document.getElementById('replyList');
 
                     if (replies.length === 0) {
-                        container.innerHTML = '<div class="empty-state"><p>暂无回复记录</p></div>';
+                        container.innerHTML = `
+                            <div class="empty-state">
+                                <div class="empty-icon">📭</div>
+                                <p>暂无回复记录</p>
+                            </div>
+                        `;
                         return;
                     }
 
                     container.innerHTML = replies.map(reply => `
-                        <div class="reply-item">
-                            <div class="reply-time">⏰ ${reply.time}</div>
+                        <div class="reply-card">
+                            <div class="reply-header">
+                                <div class="reply-time">
+                                    <span>🕐</span>
+                                    <span>${reply.time}</span>
+                                </div>
+                            </div>
                             <div class="reply-title">
                                 📌 <a href="${reply.url}" target="_blank">${reply.title}</a>
                             </div>
@@ -731,21 +1023,20 @@
                         </div>
                     `).join('');
                 })
-                .catch(err => console.error('获取回复详情失败:', err));
+                .catch(err => console.error('获取回复失败:', err));
         }
 
         // 更新日志
         let autoScroll = true;
-        
         function updateLogs() {
             fetch('/api/logs')
                 .then(res => res.json())
                 .then(data => {
                     const container = document.getElementById('logContainer');
                     const isAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 50;
-                    
+
                     container.innerHTML = '';
-                    
+
                     if (data.logs.length === 0) {
                         container.innerHTML = '<div class="log-entry log-INFO"><span class="log-time">--:--:--</span><span>暂无日志</span></div>';
                         return;
@@ -767,18 +1058,19 @@
                 })
                 .catch(err => console.error('获取日志失败:', err));
         }
-        
+
         function scrollToTop() {
             document.getElementById('logContainer').scrollTop = 0;
             autoScroll = false;
         }
-        
+
         function scrollToBottom() {
             const container = document.getElementById('logContainer');
             container.scrollTop = container.scrollHeight;
             autoScroll = true;
         }
 
+        // 启动机器人
         function startBot() {
             fetch('/api/start', { method: 'POST' })
                 .then(res => res.json())
@@ -789,6 +1081,7 @@
                 .catch(err => showToast(false, '请求失败: ' + err));
         }
 
+        // 停止机器人
         function stopBot() {
             fetch('/api/stop', { method: 'POST' })
                 .then(res => res.json())
@@ -799,15 +1092,7 @@
                 .catch(err => showToast(false, '请求失败: ' + err));
         }
 
-        function toggleConfig() {
-            const section = document.getElementById('configSection');
-            section.classList.toggle('active');
-            
-            if (section.classList.contains('active')) {
-                loadConfig();
-            }
-        }
-
+        // 加载配置
         function loadConfig() {
             fetch('/api/config')
                 .then(res => res.json())
@@ -820,17 +1105,18 @@
                         document.getElementById('config_interval_max').value = interval[1];
                     }
                     
-                    document.getElementById('config_checkin').value = config.enable_daily_checkin ? 'true' : 'false';
                     document.getElementById('config_auto_reply').value = config.enable_auto_reply !== false ? 'true' : 'false';
-                    document.getElementById('config_test_mode').value = config.enable_test_mode ? 'true' : 'false';
+                    document.getElementById('config_checkin').value = config.enable_daily_checkin ? 'true' : 'false';
                     document.getElementById('config_scheduler').value = config.enable_scheduler ? 'true' : 'false';
                     document.getElementById('config_schedule_time').value = config.schedule_time || '03:00';
+                    document.getElementById('config_test_mode').value = config.enable_test_mode ? 'true' : 'false';
                 })
                 .catch(err => console.error('加载配置失败:', err));
         }
 
-        document.getElementById('configForm').addEventListener('submit', function(e) {
-            e.preventDefault();
+        // 保存配置
+        function saveConfig(event) {
+            event.preventDefault();
             
             fetch('/api/config')
                 .then(res => res.json())
@@ -840,11 +1126,11 @@
                         parseInt(document.getElementById('config_interval_min').value),
                         parseInt(document.getElementById('config_interval_max').value)
                     ];
-                    currentConfig.enable_daily_checkin = document.getElementById('config_checkin').value === 'true';
                     currentConfig.enable_auto_reply = document.getElementById('config_auto_reply').value === 'true';
-                    currentConfig.enable_test_mode = document.getElementById('config_test_mode').value === 'true';
+                    currentConfig.enable_daily_checkin = document.getElementById('config_checkin').value === 'true';
                     currentConfig.enable_scheduler = document.getElementById('config_scheduler').value === 'true';
                     currentConfig.schedule_time = document.getElementById('config_schedule_time').value;
+                    currentConfig.enable_test_mode = document.getElementById('config_test_mode').value === 'true';
 
                     return fetch('/api/config', {
                         method: 'POST',
@@ -856,13 +1142,18 @@
                 .then(data => {
                     showToast(data.success, data.message);
                     if (data.success) {
-                        toggleConfig();
                         updateStatus();
                     }
                 })
                 .catch(err => showToast(false, '保存失败: ' + err));
-        });
+        }
 
+        // 退出登录
+        function logout() {
+            window.location.href = '/logout';
+        }
+
+        // 显示提示
         function showToast(success, message) {
             const toast = document.getElementById('toast');
             const icon = document.getElementById('toastIcon');
@@ -881,11 +1172,23 @@
         updateStatus();
         updateLogs();
         updateReplies();
+        loadConfig();
 
         // 定时更新
         setInterval(updateStatus, 3000);
         setInterval(updateLogs, 2000);
         setInterval(updateReplies, 5000);
+
+        // 点击外部关闭侧边栏（移动端）
+        document.addEventListener('click', function(event) {
+            if (window.innerWidth <= 768) {
+                const sidebar = document.getElementById('sidebar');
+                const menuToggle = document.querySelector('.menu-toggle');
+                if (!sidebar.contains(event.target) && !menuToggle.contains(event.target)) {
+                    sidebar.classList.remove('show');
+                }
+            }
+        });
     </script>
 </body>
 </html>
