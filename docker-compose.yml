@@ -36,7 +36,13 @@ services:
       
       # 自动更新配置（可选，启用后每次容器启动时自动从 GitHub 拉取最新代码）
       # - AUTO_UPDATE=true  # 启用自动更新
-      # - GITHUB_TOKEN=ghp_YOUR_GITHUB_TOKEN_HERE  # GitHub 私有仓库访问令牌
+      # - GITHUB_TOKEN=ghp_YOUR_GITHUB_TOKEN_HERE  # GitHub 私有仓库访问令牌（必须有repo权限）
+      # - SKIP_GIT=true     # 跳过所有Git操作，即使开启了AUTO_UPDATE
+      
+      # 如果遇到 Git 认证失败，可以：
+      # 方案1：设置 SKIP_GIT=true（推荐，直接跳过更新）
+      # 方案2：设置正确的 GITHUB_TOKEN
+      # 方案3：不设置 AUTO_UPDATE（默认禁用自动更新）
       
       # 代理配置（可选，如需使用代理请取消注释并填写）
       # - http_proxy=http://proxy.example.com:8080

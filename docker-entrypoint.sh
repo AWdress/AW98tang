@@ -5,67 +5,83 @@ echo "================================"
 echo "🚀 AW98tang 容器启动中..."
 echo "================================"
 
+# 调试信息
+echo "[Debug] 当前目录: $(pwd)"
+echo "[Debug] AUTO_UPDATE=$AUTO_UPDATE"
+echo "[Debug] SKIP_GIT=$SKIP_GIT"
+echo "[Debug] GITHUB_TOKEN=$([ -n "$GITHUB_TOKEN" ] && echo '已设置' || echo '未设置')"
+
+# Git 拉取函数
+gitpull() {
+    echo "[Git] 拉取远程分支..."
+    git reset --hard origin/main
+    git pull origin main
+}
+
+# 检查是否跳过 Git 操作
+if [ "${SKIP_GIT}" = "true" ]; then
+    echo "ℹ️ SKIP_GIT=true，跳过所有 Git 操作"
+    AUTO_UPDATE="false"
+fi
+
 # 检查是否启用自动更新
 if [ "${AUTO_UPDATE}" = "true" ]; then
     echo "🔄 检查代码更新..."
     
     # 检查是否在 git 仓库中
-    if [ -d ".git" ]; then
+    if [ ! -d ".git" ]; then
+        echo "ℹ️ 未检测到 Git 仓库，跳过更新检查"
+    else
         echo "📦 检测到 Git 仓库"
         
-        # 配置 Git 使用 GitHub Token（用于私有仓库）
-        if [ -n "${GITHUB_TOKEN}" ]; then
-            echo "🔑 配置 GitHub Token 认证..."
-            
-            # 配置 Git 安全目录（避免 dubious ownership 错误）
-            git config --global --add safe.directory /app
-            
-            # 禁用 Git 密码提示（关键：避免在非交互环境中要求密码）
-            export GIT_TERMINAL_PROMPT=0
-            export GIT_ASKPASS=/bin/echo
-            
-            # 配置 Git 不使用 credential helper
-            git config --global credential.helper ''
-            
-            # 获取远程仓库 URL
-            REPO_URL=$(git config --get remote.origin.url 2>/dev/null)
-            
-            if [ -z "$REPO_URL" ]; then
-                echo "⚠️ 未检测到远程仓库，初始化远程仓库..."
-                # 使用 GitHub 推荐的 Token 格式
+        # 配置 Git 安全目录
+        git config --global --add safe.directory /app
+        
+        # 配置 Git 用户信息
+        git config --global user.email "bot@aw98tang.local"
+        git config --global user.name "AW98tang Bot"
+        
+        # 禁用 Git 密码提示
+        export GIT_TERMINAL_PROMPT=0
+        export GIT_ASKPASS=/bin/echo
+        git config --global credential.helper ''
+        
+        # 获取当前远程仓库 URL
+        CURRENT_REMOTE=$(git config --get remote.origin.url 2>/dev/null || echo "")
+        
+        # 如果没有配置远程仓库
+        if [ -z "$CURRENT_REMOTE" ]; then
+            echo "[Git] 初始化远程仓库..."
+            if [ -n "${GITHUB_TOKEN}" ]; then
                 git remote add origin "https://x-access-token:${GITHUB_TOKEN}@github.com/AWdress/AW98tamg.git"
-                echo "✅ 远程仓库已配置"
+                echo "[Git] 使用 GitHub Token 进行认证"
             else
-                echo "📍 当前远程 URL: ${REPO_URL:0:50}..."  # 只显示前50个字符，避免暴露token
+                git remote add origin "https://github.com/AWdress/AW98tamg.git"
+                echo "[Git] 未设置 GITHUB_TOKEN，使用公开访问"
+            fi
+        else
+            echo "📍 当前远程 URL: ${CURRENT_REMOTE:0:50}..."
+            
+            # 如果提供了 GITHUB_TOKEN，更新远程 URL
+            if [ -n "${GITHUB_TOKEN}" ]; then
+                echo "🔑 配置 GitHub Token 认证..."
                 
-                # 检查 URL 中是否已经包含正确格式的 token
-                if [[ "$REPO_URL" == *"x-access-token:"*"${GITHUB_TOKEN}"* ]] || [[ "$REPO_URL" == *"${GITHUB_TOKEN}@"* ]]; then
-                    echo "✅ GitHub Token 已配置，跳过"
-                else
-                    # 清理 URL 中可能存在的旧 token
-                    CLEAN_URL="$REPO_URL"
-                    # 移除 URL 中的所有认证信息
-                    CLEAN_URL=$(echo "$CLEAN_URL" | sed 's|https://[^@]*@|https://|g')
-                    
-                    # 提取仓库路径
-                    if [[ "$CLEAN_URL" == https://github.com/* ]]; then
-                        REPO_PATH=${CLEAN_URL#https://github.com/}
-                        REPO_PATH=${REPO_PATH%.git}
-                        
-                        # 配置带 token 的 URL (使用 GitHub 推荐的格式)
-                        NEW_URL="https://x-access-token:${GITHUB_TOKEN}@github.com/${REPO_PATH}.git"
-                        git remote set-url origin "$NEW_URL"
-                        echo "✅ GitHub Token 配置成功"
-                    elif [[ "$CLEAN_URL" == git@github.com:* ]]; then
-                        # SSH URL 转换为 HTTPS
-                        REPO_PATH=${CLEAN_URL#git@github.com:}
-                        REPO_PATH=${REPO_PATH%.git}
-                        NEW_URL="https://x-access-token:${GITHUB_TOKEN}@github.com/${REPO_PATH}.git"
-                        git remote set-url origin "$NEW_URL"
-                        echo "✅ 已转换为 HTTPS 并配置 Token"
-                    else
-                        echo "⚠️ 未知的 URL 格式，跳过配置"
-                    fi
+                # 清理 URL 中的旧认证信息
+                CLEAN_URL=$(echo "$CURRENT_REMOTE" | sed 's|https://[^@]*@|https://|g')
+                
+                # 提取仓库路径
+                if [[ "$CLEAN_URL" == https://github.com/* ]]; then
+                    REPO_PATH=${CLEAN_URL#https://github.com/}
+                    REPO_PATH=${REPO_PATH%.git}
+                    NEW_URL="https://x-access-token:${GITHUB_TOKEN}@github.com/${REPO_PATH}.git"
+                    git remote set-url origin "$NEW_URL"
+                    echo "✅ GitHub Token 配置成功"
+                elif [[ "$CLEAN_URL" == git@github.com:* ]]; then
+                    REPO_PATH=${CLEAN_URL#git@github.com:}
+                    REPO_PATH=${REPO_PATH%.git}
+                    NEW_URL="https://x-access-token:${GITHUB_TOKEN}@github.com/${REPO_PATH}.git"
+                    git remote set-url origin "$NEW_URL"
+                    echo "✅ 已转换为 HTTPS 并配置 Token"
                 fi
             fi
         fi
@@ -74,28 +90,43 @@ if [ "${AUTO_UPDATE}" = "true" ]; then
         CURRENT_VERSION=$(git rev-parse HEAD 2>/dev/null || echo "unknown")
         echo "📌 当前版本: ${CURRENT_VERSION:0:8}"
         
-        # 配置 Git 用户信息（避免拉取时的警告）
-        git config --global user.email "bot@aw98tang.local"
-        git config --global user.name "AW98tang Bot"
-        
-        # 从远程仓库同步代码（强制覆盖，保持与远程一致）
+        # 尝试获取远程更新
         echo "⬇️ 正在从远程仓库同步代码..."
         
-        # 步骤1: 获取远程更新
-        FETCH_ERROR=$(git fetch origin main 2>&1)
-        if [ $? -ne 0 ]; then
+        # 使用 2>&1 捕获所有输出
+        FETCH_OUTPUT=$(git fetch origin main 2>&1)
+        FETCH_STATUS=$?
+        
+        if [ $FETCH_STATUS -ne 0 ]; then
             echo "❌ 获取远程更新失败！"
-            echo "错误信息: $FETCH_ERROR"
+            echo "错误信息: $FETCH_OUTPUT"
+            
+            # 检查是否是认证问题
+            if echo "$FETCH_OUTPUT" | grep -q "Authentication failed\|Invalid username or token\|Permission denied"; then
+                echo "⚠️ 认证失败，可能原因："
+                echo "   1. 仓库是私有的，需要设置 GITHUB_TOKEN 环境变量"
+                echo "   2. GITHUB_TOKEN 已过期或无效"
+                echo "   3. Token 没有足够的权限"
+                echo ""
+                echo "💡 解决方案："
+                echo "   - 在 docker-compose.yml 中设置 GITHUB_TOKEN 环境变量"
+                echo "   - 或者设置 SKIP_GIT=true 跳过自动更新"
+                echo "   - 或者设置 AUTO_UPDATE=false 禁用自动更新"
+            fi
+            
             echo "⚠️ 使用当前版本继续运行"
+            echo ""
         else
             echo "✅ 远程更新获取成功"
             
-            # 步骤2: 强制重置到远程版本（保持与远程完全一致）
+            # 强制同步到远程版本
             echo "🔄 强制同步到远程版本..."
-            RESET_ERROR=$(git reset --hard origin/main 2>&1)
-            if [ $? -ne 0 ]; then
+            RESET_OUTPUT=$(git reset --hard origin/main 2>&1)
+            RESET_STATUS=$?
+            
+            if [ $RESET_STATUS -ne 0 ]; then
                 echo "❌ 代码同步失败！"
-                echo "错误信息: $RESET_ERROR"
+                echo "错误信息: $RESET_OUTPUT"
                 echo "⚠️ 使用当前版本继续运行"
             else
                 NEW_VERSION=$(git rev-parse HEAD)
@@ -115,11 +146,12 @@ if [ "${AUTO_UPDATE}" = "true" ]; then
                 fi
             fi
         fi
-    else
-        echo "ℹ️ 未检测到 Git 仓库，跳过更新检查"
     fi
 else
-    echo "ℹ️ 自动更新已禁用 (设置 AUTO_UPDATE=true 启用)"
+    echo "ℹ️ 自动更新已禁用"
+    echo "   - 设置 AUTO_UPDATE=true 启用自动更新"
+    echo "   - 设置 GITHUB_TOKEN=你的token 进行认证（私有仓库）"
+    echo "   - 设置 SKIP_GIT=true 完全跳过 Git 操作"
 fi
 
 echo "================================"
