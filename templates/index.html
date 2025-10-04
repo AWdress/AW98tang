@@ -885,17 +885,17 @@
                 </div>
             </div>
 
-            <!-- 7天统计 -->
+            <!-- 运行日志预览 -->
             <div class="stat-card">
                 <h3 style="margin-bottom: 16px; display: flex; align-items: center; gap: 10px;">
-                    <span style="font-size: 1.3rem;">📈</span>
-                    <span>7天回复统计</span>
+                    <span style="font-size: 1.3rem;">📋</span>
+                    <span>运行日志</span>
+                    <a href="#" onclick="showPage('logs'); return false;" style="margin-left: auto; font-size: 0.85rem; color: var(--primary); text-decoration: none;">查看完整日志 →</a>
                 </h3>
-                <div id="weeklyStats" style="display: grid; gap: 10px;">
-                    <div class="empty-state" style="padding: 30px 20px;">
-                        <div style="font-size: 2.5rem; margin-bottom: 10px; opacity: 0.3;">📊</div>
-                        <p style="font-size: 0.95rem; color: #94a3b8; margin-bottom: 8px;">还没有统计数据</p>
-                        <p style="font-size: 0.85rem; color: #64748b;">运行机器人后会自动生成统计</p>
+                <div id="dashboardLogs" style="background: rgba(0,0,0,0.3); border-radius: 8px; padding: 12px; max-height: 300px; overflow-y: auto; font-family: 'Consolas', 'Monaco', monospace; font-size: 0.85rem;">
+                    <div class="log-entry" style="padding: 6px; color: #94a3b8;">
+                        <span style="color: #64748b;">--:--:--</span>
+                        <span>等待连接...</span>
                     </div>
                 </div>
             </div>
@@ -1157,71 +1157,13 @@
                 .catch(err => console.error('获取最近回复失败:', err));
         }
 
-        // 更新7天统计
-        function updateWeeklyStats() {
-            fetch('/api/stats')
-                .then(res => res.json())
-                .then(data => {
-                    const history = data.history || [];
-                    const today = data.today || {};
-                    const container = document.getElementById('weeklyStats');
-
-                    // 合并今日和历史数据
-                    const allDays = [];
-                    
-                    // 添加今日数据
-                    if (today.date) {
-                        allDays.push({
-                            date: today.date,
-                            reply_count: today.reply_count || 0,
-                            checkin_success: today.checkin_success
-                        });
-                    }
-                    
-                    // 添加历史数据
-                    history.forEach(day => {
-                        allDays.push({
-                            date: day.date,
-                            reply_count: day.reply_count || 0,
-                            checkin_success: day.checkin_success
-                        });
-                    });
-
-                    if (allDays.length === 0) {
-                        container.innerHTML = `
-                            <div class="empty-state" style="padding: 30px 20px;">
-                                <div style="font-size: 2.5rem; margin-bottom: 10px; opacity: 0.3;">📊</div>
-                                <p style="font-size: 0.95rem; color: #94a3b8; margin-bottom: 8px;">还没有统计数据</p>
-                                <p style="font-size: 0.85rem; color: #64748b;">运行机器人后会自动生成统计</p>
-                            </div>
-                        `;
-                        return;
-                    }
-
-                    // 只显示最近7天
-                    const last7Days = allDays.slice(0, 7);
-                    container.innerHTML = last7Days.map((day, index) => {
-                        const isToday = index === 0 && day.date === today.date;
-                        return `
-                            <div class="stat-row">
-                                <div class="stat-row-date">
-                                    ${isToday ? '📅 今日' : '📅'} ${day.date}
-                                    ${day.checkin_success ? ' ✅' : ''}
-                                </div>
-                                <div class="stat-row-count">${day.reply_count} 条回复</div>
-                            </div>
-                        `;
-                    }).join('');
-                })
-                .catch(err => console.error('获取统计数据失败:', err));
-        }
-
         // 更新日志
         let autoScroll = true;
         function updateLogs() {
             fetch('/api/logs')
                 .then(res => res.json())
                 .then(data => {
+                    // 更新完整日志页面
                     const container = document.getElementById('logContainer');
                     const isAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 50;
 
@@ -1229,21 +1171,56 @@
 
                     if (data.logs.length === 0) {
                         container.innerHTML = '<div class="log-entry log-INFO"><span class="log-time">--:--:--</span><span>暂无日志</span></div>';
-                        return;
+                    } else {
+                        data.logs.forEach(log => {
+                            const entry = document.createElement('div');
+                            entry.className = `log-entry log-${log.level}`;
+                            entry.innerHTML = `
+                                <span class="log-time">${log.time}</span>
+                                <span>${log.message}</span>
+                            `;
+                            container.appendChild(entry);
+                        });
+
+                        if (isAtBottom && autoScroll) {
+                            container.scrollTop = container.scrollHeight;
+                        }
                     }
 
-                    data.logs.forEach(log => {
-                        const entry = document.createElement('div');
-                        entry.className = `log-entry log-${log.level}`;
-                        entry.innerHTML = `
-                            <span class="log-time">${log.time}</span>
-                            <span>${log.message}</span>
-                        `;
-                        container.appendChild(entry);
-                    });
-
-                    if (isAtBottom && autoScroll) {
-                        container.scrollTop = container.scrollHeight;
+                    // 更新仪表盘日志预览（最新10条）
+                    const dashboardLogs = document.getElementById('dashboardLogs');
+                    if (dashboardLogs) {
+                        dashboardLogs.innerHTML = '';
+                        
+                        if (data.logs.length === 0) {
+                            dashboardLogs.innerHTML = '<div class="log-entry" style="padding: 6px; color: #94a3b8;"><span style="color: #64748b;">--:--:--</span><span>暂无日志</span></div>';
+                        } else {
+                            // 只显示最新的10条日志
+                            const recentLogs = data.logs.slice(-10);
+                            recentLogs.forEach(log => {
+                                const entry = document.createElement('div');
+                                entry.className = 'log-entry';
+                                entry.style.padding = '6px';
+                                entry.style.lineHeight = '1.5';
+                                
+                                // 根据日志级别设置颜色
+                                let color = '#cbd5e1';
+                                if (log.level === 'ERROR') color = '#ef4444';
+                                else if (log.level === 'WARNING') color = '#f59e0b';
+                                else if (log.level === 'SUCCESS') color = '#10b981';
+                                else if (log.level === 'INFO') color = '#3b82f6';
+                                
+                                entry.style.color = color;
+                                entry.innerHTML = `
+                                    <span style="color: #64748b; margin-right: 8px;">${log.time}</span>
+                                    <span>${log.message}</span>
+                                `;
+                                dashboardLogs.appendChild(entry);
+                            });
+                            
+                            // 自动滚动到底部
+                            dashboardLogs.scrollTop = dashboardLogs.scrollHeight;
+                        }
                     }
                 })
                 .catch(err => console.error('获取日志失败:', err));
@@ -1363,7 +1340,6 @@
         updateLogs();
         updateReplies();
         updateRecentReplies();
-        updateWeeklyStats();
         loadConfig();
 
         // 定时更新
@@ -1371,7 +1347,6 @@
         setInterval(updateLogs, 2000);
         setInterval(updateReplies, 5000);
         setInterval(updateRecentReplies, 5000);
-        setInterval(updateWeeklyStats, 10000);
 
         // 点击外部关闭侧边栏（移动端）
         document.addEventListener('click', function(event) {
