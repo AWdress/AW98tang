@@ -278,6 +278,43 @@ def manage_config():
         except Exception as e:
             return jsonify({'success': False, 'message': str(e)}), 500
 
+@app.route('/api/test_ai', methods=['POST'])
+@login_required
+def test_ai():
+    """测试AI接口连接"""
+    try:
+        from ai_reply_service import AIReplyService
+        
+        config = load_config()
+        ai_service = AIReplyService(config)
+        
+        if not ai_service.is_enabled():
+            return jsonify({
+                'success': False,
+                'message': 'AI回复未启用或API Key未配置'
+            })
+        
+        # 测试生成回复
+        test_reply = ai_service.generate_reply("测试帖子：分享一些有趣的内容", "这是测试内容")
+        
+        if test_reply:
+            return jsonify({
+                'success': True,
+                'message': f'AI接口连接成功！测试回复: {test_reply}'
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'message': 'AI接口调用失败，请检查配置（API URL、API Key、模型名称）'
+            })
+            
+    except Exception as e:
+        logging.error(f"AI测试失败: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': f'测试失败: {str(e)}'
+        })
+
 @app.route('/api/start', methods=['POST'])
 @login_required
 def start_bot():

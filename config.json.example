@@ -105,6 +105,38 @@
   
   "_说明_reply_templates": "仅在 enable_smart_reply=false 时使用，智能回复模式下系统会自动生成内容",
   
+  "_comment_AI智能回复": "AI接口配置（可选，启用后使用AI生成回复）",
+  "enable_ai_reply": false,
+  "ai_api_type": "openai",
+  "ai_api_url": "https://api.openai.com/v1/chat/completions",
+  "ai_api_key": "",
+  "ai_model": "gpt-3.5-turbo",
+  "ai_temperature": 0.8,
+  "ai_max_tokens": 200,
+  "ai_timeout": 10,
+  "ai_system_prompt": "你是一个论坛用户，需要根据帖子标题和内容生成简短的回复。回复要自然、友好、简洁，不超过50字。不要使用敏感词汇，保持礼貌和正能量。",
+  
+  "_说明_AI配置": {
+    "enable_ai_reply": "是否启用AI回复（启用后将优先使用AI生成回复）",
+    "ai_api_type": "API类型：openai（OpenAI及兼容接口）、claude（Claude）、custom（自定义）",
+    "ai_api_url": "API接口地址（留空使用默认地址）",
+    "ai_api_key": "API密钥（必填）",
+    "ai_model": "模型名称，如 gpt-3.5-turbo, gpt-4, claude-3-haiku-20240307",
+    "ai_temperature": "生成温度（0-1，越大越随机）",
+    "ai_max_tokens": "最大生成长度",
+    "ai_timeout": "请求超时时间（秒）",
+    "ai_system_prompt": "系统提示词（定义AI回复风格）"
+  },
+  
+  "_comment_国产AI接口": "支持的国产AI接口",
+  "_支持的国产AI": {
+    "智谱AI": "https://open.bigmodel.cn/api/paas/v4/chat/completions (兼容OpenAI格式)",
+    "通义千问": "https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation",
+    "文心一言": "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/completions",
+    "DeepSeek": "https://api.deepseek.com/v1/chat/completions (兼容OpenAI格式)",
+    "月之暗面": "https://api.moonshot.cn/v1/chat/completions (兼容OpenAI格式)"
+  },
+  
   "_comment_其他配置": "杂项配置",
   "enable_random_delay": true,
   "log_level": "INFO"

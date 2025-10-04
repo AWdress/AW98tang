@@ -20,6 +20,7 @@ from selenium.webdriver.support.ui import Select
 from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from stats_manager import StatsManager
+from ai_reply_service import AIReplyService
 
 # 设置日志
 logging.basicConfig(
@@ -39,6 +40,7 @@ class SeleniumAutoBot:
         self.wait = None
         self.stop_flag = lambda: False  # 停止标志检查函数
         self.stats = StatsManager()  # 初始化统计管理器
+        self.ai_service = AIReplyService(self.config)  # 初始化AI服务
         
         # 配置信息
         self.base_url = self.config.get('base_url', 'https://sehuatang.org/')
@@ -958,6 +960,17 @@ class SeleniumAutoBot:
         if not self.enable_smart_reply:
             return random.choice(self.reply_templates)
         
+        # 优先尝试使用AI生成回复
+        if self.ai_service.is_enabled():
+            logging.info("🤖 尝试使用AI生成回复...")
+            ai_reply = self.ai_service.generate_reply(title, content)
+            if ai_reply:
+                logging.info(f"✅ AI回复成功: {ai_reply}")
+                return ai_reply
+            else:
+                logging.warning("⚠️ AI回复失败，降级使用规则回复")
+        
+        # AI未启用或失败时，使用规则生成回复
         # 合并标题和内容
         full_text = title + " " + content
         import re
