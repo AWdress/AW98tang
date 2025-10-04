@@ -225,6 +225,7 @@ def get_status():
         'config': {
             'max_replies_per_day': config.get('max_replies_per_day', 0),
             'target_forums': config.get('target_forums', []),
+            'forum_names': config.get('forum_names', {}),
             'enable_daily_checkin': config.get('enable_daily_checkin', False),
             'reply_interval': config.get('reply_interval', [60, 180])
         },

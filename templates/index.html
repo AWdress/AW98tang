@@ -1075,7 +1075,12 @@
                     document.getElementById('checkinTime').textContent = stats.checkin_time || '-';
 
                     // 配置信息
-                    document.getElementById('targetForums').textContent = config.target_forums.join(', ') || '-';
+                    const forumNames = config.forum_names || {};
+                    const forumDisplay = config.target_forums.map(fid => {
+                        return forumNames[fid] || fid;
+                    }).join(', ') || '-';
+                    document.getElementById('targetForums').textContent = forumDisplay;
+                    
                     const interval = config.reply_interval;
                     document.getElementById('replyInterval').textContent = 
                         Array.isArray(interval) ? `${interval[0]}-${interval[1]}秒` : `${interval}秒`;
