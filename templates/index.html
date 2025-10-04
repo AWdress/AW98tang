@@ -432,6 +432,67 @@
             line-height: 1.6;
         }
 
+        /* 小型回复卡片 */
+        .mini-reply-card {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .mini-reply-card:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(236, 72, 153, 0.3);
+            transform: translateX(3px);
+        }
+
+        .mini-reply-time {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-bottom: 6px;
+        }
+
+        .mini-reply-title {
+            font-size: 0.9rem;
+            color: #f1f5f9;
+            margin-bottom: 6px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .mini-reply-content {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* 统计条目 */
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .stat-row-date {
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        .stat-row-count {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
         .empty-state {
             text-align: center;
             padding: 60px 20px;
@@ -805,6 +866,33 @@
                     ⚙️ 系统配置
                 </button>
             </div>
+
+            <!-- 最近回复预览 -->
+            <div class="stat-card" style="margin-bottom: 20px;">
+                <h3 style="margin-bottom: 16px; display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.3rem;">💬</span>
+                    <span>最近回复</span>
+                    <a href="#" onclick="showPage('replies'); return false;" style="margin-left: auto; font-size: 0.85rem; color: var(--primary); text-decoration: none;">查看全部 →</a>
+                </h3>
+                <div id="recentReplies" style="display: grid; gap: 12px;">
+                    <div class="empty-state" style="padding: 30px;">
+                        <p style="font-size: 0.9rem;">暂无回复记录</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 7天统计 -->
+            <div class="stat-card">
+                <h3 style="margin-bottom: 16px; display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.3rem;">📈</span>
+                    <span>7天回复统计</span>
+                </h3>
+                <div id="weeklyStats" style="display: grid; gap: 10px;">
+                    <div class="empty-state" style="padding: 30px;">
+                        <p style="font-size: 0.9rem;">暂无统计数据</p>
+                    </div>
+                </div>
+            </div>
         </section>
 
         <!-- 回复记录页面 -->
@@ -1026,6 +1114,93 @@
                 .catch(err => console.error('获取回复失败:', err));
         }
 
+        // 更新最近回复预览（仪表盘）
+        function updateRecentReplies() {
+            fetch('/api/stats')
+                .then(res => res.json())
+                .then(data => {
+                    const replies = data.all_replies || [];
+                    const container = document.getElementById('recentReplies');
+
+                    if (replies.length === 0) {
+                        container.innerHTML = `
+                            <div class="empty-state" style="padding: 30px;">
+                                <p style="font-size: 0.9rem;">暂无回复记录</p>
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    // 只显示最近3条
+                    const recent = replies.slice(0, 3);
+                    container.innerHTML = recent.map(reply => `
+                        <div class="mini-reply-card" onclick="window.open('${reply.url}', '_blank')">
+                            <div class="mini-reply-time">🕐 ${reply.time}</div>
+                            <div class="mini-reply-title" title="${reply.title}">📌 ${reply.title}</div>
+                            <div class="mini-reply-content" title="${reply.content}">💬 ${reply.content}</div>
+                        </div>
+                    `).join('');
+                })
+                .catch(err => console.error('获取最近回复失败:', err));
+        }
+
+        // 更新7天统计
+        function updateWeeklyStats() {
+            fetch('/api/stats')
+                .then(res => res.json())
+                .then(data => {
+                    const history = data.history || [];
+                    const today = data.today || {};
+                    const container = document.getElementById('weeklyStats');
+
+                    // 合并今日和历史数据
+                    const allDays = [];
+                    
+                    // 添加今日数据
+                    if (today.date) {
+                        allDays.push({
+                            date: today.date,
+                            reply_count: today.reply_count || 0,
+                            checkin_success: today.checkin_success
+                        });
+                    }
+                    
+                    // 添加历史数据
+                    history.forEach(day => {
+                        allDays.push({
+                            date: day.date,
+                            reply_count: day.reply_count || 0,
+                            checkin_success: day.checkin_success
+                        });
+                    });
+
+                    if (allDays.length === 0) {
+                        container.innerHTML = `
+                            <div class="empty-state" style="padding: 30px;">
+                                <p style="font-size: 0.9rem;">暂无统计数据</p>
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    // 只显示最近7天
+                    const last7Days = allDays.slice(0, 7);
+                    container.innerHTML = last7Days.map((day, index) => {
+                        const isToday = index === 0 && day.date === today.date;
+                        return `
+                            <div class="stat-row">
+                                <div class="stat-row-date">
+                                    ${isToday ? '📅 今日' : '📅'} ${day.date}
+                                    ${day.checkin_success ? ' ✅' : ''}
+                                </div>
+                                <div class="stat-row-count">${day.reply_count} 条回复</div>
+                            </div>
+                        `;
+                    }).join('');
+                })
+                .catch(err => console.error('获取统计数据失败:', err));
+        }
+
         // 更新日志
         let autoScroll = true;
         function updateLogs() {
@@ -1172,12 +1347,16 @@
         updateStatus();
         updateLogs();
         updateReplies();
+        updateRecentReplies();
+        updateWeeklyStats();
         loadConfig();
 
         // 定时更新
         setInterval(updateStatus, 3000);
         setInterval(updateLogs, 2000);
         setInterval(updateReplies, 5000);
+        setInterval(updateRecentReplies, 5000);
+        setInterval(updateWeeklyStats, 10000);
 
         // 点击外部关闭侧边栏（移动端）
         document.addEventListener('click', function(event) {
