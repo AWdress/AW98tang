@@ -62,27 +62,36 @@ if [ "${AUTO_UPDATE}" = "true" ]; then
         else
             echo "📍 当前远程 URL: ${CURRENT_REMOTE:0:50}..."
             
-            # 如果提供了 GITHUB_TOKEN，更新远程 URL
-            if [ -n "${GITHUB_TOKEN}" ]; then
-                echo "🔑 配置 GitHub Token 认证..."
+        # 如果提供了 GITHUB_TOKEN，更新远程 URL
+        if [ -n "${GITHUB_TOKEN}" ]; then
+            echo "🔑 配置 GitHub Token 认证..."
+            
+            # 去除 Token 中可能存在的空格和换行符
+            CLEAN_TOKEN=$(echo "$GITHUB_TOKEN" | tr -d '[:space:]')
+            
+            # 清理 URL 中的旧认证信息
+            CLEAN_URL=$(echo "$CURRENT_REMOTE" | sed 's|https://[^@]*@|https://|g')
+            
+            # 提取仓库路径
+            if [[ "$CLEAN_URL" == https://github.com/* ]]; then
+                REPO_PATH=${CLEAN_URL#https://github.com/}
+                REPO_PATH=${REPO_PATH%.git}
                 
-                # 清理 URL 中的旧认证信息
-                CLEAN_URL=$(echo "$CURRENT_REMOTE" | sed 's|https://[^@]*@|https://|g')
+                # 尝试多种认证格式
+                # 格式1: x-access-token (推荐)
+                NEW_URL="https://x-access-token:${CLEAN_TOKEN}@github.com/${REPO_PATH}.git"
+                git remote set-url origin "$NEW_URL"
+                echo "✅ GitHub Token 配置成功 (格式: x-access-token)"
                 
-                # 提取仓库路径
-                if [[ "$CLEAN_URL" == https://github.com/* ]]; then
-                    REPO_PATH=${CLEAN_URL#https://github.com/}
-                    REPO_PATH=${REPO_PATH%.git}
-                    NEW_URL="https://x-access-token:${GITHUB_TOKEN}@github.com/${REPO_PATH}.git"
-                    git remote set-url origin "$NEW_URL"
-                    echo "✅ GitHub Token 配置成功"
-                elif [[ "$CLEAN_URL" == git@github.com:* ]]; then
-                    REPO_PATH=${CLEAN_URL#git@github.com:}
-                    REPO_PATH=${REPO_PATH%.git}
-                    NEW_URL="https://x-access-token:${GITHUB_TOKEN}@github.com/${REPO_PATH}.git"
-                    git remote set-url origin "$NEW_URL"
-                    echo "✅ 已转换为 HTTPS 并配置 Token"
-                fi
+                # 备用格式2: 直接使用token作为用户名
+                # NEW_URL="https://${CLEAN_TOKEN}@github.com/${REPO_PATH}.git"
+                
+            elif [[ "$CLEAN_URL" == git@github.com:* ]]; then
+                REPO_PATH=${CLEAN_URL#git@github.com:}
+                REPO_PATH=${REPO_PATH%.git}
+                NEW_URL="https://x-access-token:${CLEAN_TOKEN}@github.com/${REPO_PATH}.git"
+                git remote set-url origin "$NEW_URL"
+                echo "✅ 已转换为 HTTPS 并配置 Token"
             fi
         fi
         
