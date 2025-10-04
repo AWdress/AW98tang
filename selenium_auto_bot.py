@@ -475,24 +475,60 @@ class SeleniumAutoBot:
     def check_login_status(self):
         """检查当前是否已登录"""
         try:
-            # 访问个人中心页面，如果能访问则说明已登录
-            current_url = self.driver.current_url
+            # 先检查当前页面
             page_source = self.driver.page_source
             
-            # 多种已登录的判断条件
-            login_indicators = [
-                "退出" in page_source,
-                "个人资料" in page_source,
-                "我的帖子" in page_source,
+            # 首页快速检查（避免额外跳转）
+            quick_indicators = [
                 "member.php?mod=logging&action=logout" in page_source,
-                self.username in page_source  # 页面中包含用户名
+                "space-username" in page_source,  # 论坛常见的用户名class
+                f'>{self.username}<' in page_source  # 用户名标签
             ]
             
-            if any(login_indicators):
-                logging.info("✅ 检测到已登录状态")
+            if any(quick_indicators):
+                logging.info(f"✅ 快速检测到已登录状态（用户: {self.username}）")
                 return True
-            else:
-                logging.info("ℹ️ 未检测到登录状态")
+            
+            # 如果快速检查未通过，访问个人中心确认
+            logging.info("🔍 快速检查未通过，访问个人中心确认登录状态...")
+            try:
+                # 访问个人中心页面
+                profile_url = f"{self.base_url}home.php?mod=space&do=profile"
+                self.driver.get(profile_url)
+                time.sleep(2)
+                
+                page_source = self.driver.page_source
+                current_url = self.driver.current_url
+                
+                # 详细检查登录标识
+                login_indicators = [
+                    "退出" in page_source,
+                    "个人资料" in page_source,
+                    "我的帖子" in page_source,
+                    "member.php?mod=logging&action=logout" in page_source,
+                    self.username in page_source,
+                    "space-username" in page_source
+                ]
+                
+                # 如果跳转到登录页面，说明未登录
+                if "member.php?mod=logging" in current_url and "action=login" in current_url:
+                    logging.info("ℹ️ 已跳转到登录页面，登录状态已过期")
+                    return False
+                
+                if any(login_indicators):
+                    logging.info(f"✅ 确认已登录状态（用户: {self.username}）")
+                    return True
+                else:
+                    logging.info("ℹ️ 未检测到登录状态")
+                    return False
+                    
+            except Exception as e:
+                logging.warning(f"⚠️ 访问个人中心失败: {e}，尝试其他方式检查")
+                # 降级：只要没有跳转到登录页面，就认为已登录
+                current_url = self.driver.current_url
+                if "member.php?mod=logging" not in current_url:
+                    logging.info("✅ 未跳转到登录页面，认为已登录")
+                    return True
                 return False
                 
         except Exception as e:
@@ -1588,23 +1624,41 @@ class SeleniumAutoBot:
             # 尝试使用已保存的登录状态
             logged_in = False
             if os.path.exists(self.cookies_file):
-                logging.info("🔍 发现已保存的登录状态，尝试恢复...")
+                logging.info("=" * 60)
+                logging.info("🔍 发现已保存的登录状态文件！")
+                logging.info(f"📂 文件位置: {self.cookies_file}")
+                logging.info("🔄 尝试恢复登录状态...")
+                logging.info("=" * 60)
+                
                 if self.load_cookies():
+                    logging.info("📝 Cookies已加载，正在验证登录状态...")
                     if self.check_login_status():
-                        logging.info("🎉 使用已保存的登录状态成功！")
+                        logging.info("=" * 60)
+                        logging.info("🎉 登录状态验证成功！")
+                        logging.info("✅ 无需重新登录，直接使用已保存的登录状态")
+                        logging.info("=" * 60)
                         logged_in = True
                     else:
-                        logging.info("⚠️ 登录状态已过期，需要重新登录")
+                        logging.info("=" * 60)
+                        logging.warning("⚠️ 登录状态已过期或失效")
+                        logging.info("🗑️ 正在删除过期的登录状态文件...")
                         # 删除过期的cookies文件
                         try:
                             os.remove(self.cookies_file)
-                            logging.info("🗑️ 已删除过期的登录状态文件")
-                        except:
-                            pass
+                            logging.info("✅ 已删除过期文件，准备重新登录")
+                        except Exception as e:
+                            logging.warning(f"删除文件失败: {e}")
+                        logging.info("=" * 60)
+                else:
+                    logging.warning("⚠️ 加载Cookies失败，将尝试重新登录")
+            else:
+                logging.info("ℹ️ 未找到已保存的登录状态，将执行首次登录")
             
             # 如果没有登录成功，执行正常登录流程
             if not logged_in:
-                logging.info("🔐 开始登录流程...")
+                logging.info("=" * 60)
+                logging.info("🔐 开始账号密码登录流程...")
+                logging.info("=" * 60)
                 if not self.login():
                     return False
             
