@@ -186,7 +186,7 @@ echo "================================"
 if [ "$SKIP_GIT" = "true" ]; then
     echo "ℹ️ SKIP_GIT=true，跳过所有 Git 操作"
 else
-    echo "🔄 开始 Git 代码同步流程..."
+    echo "🔄 开始 Git 代码同步流程（已优先尝试ZIP回退）..."
     
     # 设置默认分支
     if [ -z "$GIT_BRANCH" ]; then
@@ -264,32 +264,29 @@ else
         # 清理工作目录
         git reset --hard HEAD 2>/dev/null
         
-        if git fetch origin "$GIT_BRANCH" 2>/dev/null; then
-            echo "✅ 成功获取远程更新"
-            
-            # 检查本地与远程的差异
-            LOCAL_HASH=$(git rev-parse HEAD 2>/dev/null || echo "local")
-            REMOTE_HASH=$(git rev-parse origin/"$GIT_BRANCH" 2>/dev/null || echo "remote")
-            
-            if [ "$LOCAL_HASH" != "$REMOTE_HASH" ]; then
-                echo "[Git] 发现新版本，准备更新..."
-                if gitpull; then
-                    echo "✅ 代码更新成功"
-                    echo "📌 更新后版本:"
-                    git log -1 --oneline
+        # 先尝试ZIP更新（更稳健，无需交互）
+        if zip_fallback_update; then
+            echo "✅ ZIP回退优先更新成功"
+        else
+            echo "⚠️ ZIP回退失败，尝试Git同步..."
+            if git fetch origin "$GIT_BRANCH" 2>/dev/null; then
+                echo "✅ 成功获取远程更新"
+                LOCAL_HASH=$(git rev-parse HEAD 2>/dev/null || echo "local")
+                REMOTE_HASH=$(git rev-parse origin/"$GIT_BRANCH" 2>/dev/null || echo "remote")
+                if [ "$LOCAL_HASH" != "$REMOTE_HASH" ]; then
+                    echo "[Git] 发现新版本，准备更新..."
+                    if gitpull; then
+                        echo "✅ 代码更新成功"
+                        echo "📌 更新后版本:"
+                        git log -1 --oneline
+                    else
+                        echo "⚠️ 更新失败，使用当前版本继续"
+                    fi
                 else
-                    echo "⚠️ 更新失败，使用当前版本继续"
+                    echo "✅ 已是最新版本"
                 fi
             else
-                echo "✅ 已是最新版本"
-            fi
-        else
-            echo "❌ 无法连接到远程仓库（Git）"
-            echo "[Zip] 尝试使用ZIP回退更新..."
-            if zip_fallback_update; then
-                echo "✅ ZIP回退更新成功"
-            else
-                echo "⚠️ Zip回退更新失败，使用当前版本继续运行"
+                echo "❌ Git 同步失败，使用当前版本继续运行"
             fi
         fi
     fi

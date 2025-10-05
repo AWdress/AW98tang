@@ -191,133 +191,25 @@ class UpdateManager:
     def do_update(self):
         """执行更新"""
         try:
-            # 1. 检查是否为Git仓库
-            if not self.is_git_repo():
-                if not self.init_git_repo():
-                    return {
-                        'success': False,
-                        'message': '初始化Git仓库失败，请检查网络或GitHub访问权限'
-                    }
-            
-            # 2. 备份配置文件
+            # 备份配置文件
             if not self.backup_config():
                 return {
                     'success': False,
                     'message': '备份配置文件失败'
                 }
-            
-            # 3. 保存当前分支
-            result = subprocess.run(
-                ['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
-                capture_output=True,
-                text=True
-            )
-            current_branch = result.stdout.strip() if result.returncode == 0 else self.branch
-            
-            # 4. 配置Git
-            subprocess.run(['git', 'config', '--global', 'user.email', 'bot@aw98tang.local'])
-            subprocess.run(['git', 'config', '--global', 'user.name', 'AW98tang Bot'])
-            
-            # 完全禁用Git凭据管理器和交互式提示
-            subprocess.run(['git', 'config', '--global', '--unset', 'credential.helper'], capture_output=True)
-            subprocess.run(['git', 'config', '--system', '--unset', 'credential.helper'], capture_output=True)
-            subprocess.run(['git', 'config', '--global', 'credential.helper', ''], capture_output=True)
-            
-            # 5. 更新远程仓库URL
-            github_token = os.getenv('GITHUB_TOKEN', '')
-            if github_token:
-                logging.info("检测到GITHUB_TOKEN，使用Token认证")
-                remote_url = f"https://{github_token}@github.com/{self.repo_owner}/{self.repo_name}.git"
+            # 直接走 ZIP 镜像/API 更新（不再使用 git）
+            logging.info("正在通过ZIP方式获取最新代码...")
+            fb = self._fallback_update_via_zip()
+            if fb.get('success'):
+                # 与前端对齐：返回通用成功信息，不暴露回退来源
+                fb['message'] = '更新成功'
+                fb.pop('from', None)
+                return fb
             else:
-                logging.info("未设置GITHUB_TOKEN，使用公开访问模式")
-                # 对于公开仓库，使用不带认证的HTTPS URL
-                remote_url = f"https://github.com/{self.repo_owner}/{self.repo_name}.git"
-            
-            # 更新远程仓库URL
-            subprocess.run(['git', 'remote', 'set-url', 'origin', remote_url], capture_output=True)
-            logging.info(f"远程仓库URL已设置: {remote_url}")
-            
-            # 6. 暂存本地修改
-            subprocess.run(['git', 'stash', 'save', 'auto-update-backup'], capture_output=True)
-            
-            # 7. 拉取最新代码（禁用所有认证提示）
-            logging.info("正在拉取最新代码...")
-            
-            result = subprocess.run(
-                ['git', 'pull', 'origin', current_branch],
-                capture_output=True,
-                text=True,
-                stdin=subprocess.DEVNULL  # 禁用标准输入，Git无法提示用户输入
-            )
-            
-            if result.returncode != 0:
-                # 尝试恢复
-                subprocess.run(['git', 'stash', 'pop'], capture_output=True)
-                self.restore_config()
-                
-                error_msg = result.stderr
-                if 'Authentication failed' in error_msg or 'Invalid username or token' in error_msg:
-                    # 可能是Git配置有问题，尝试重新初始化
-                    logging.warning("认证失败，尝试清理Git配置并重试...")
-                    
-                    # 清理Git凭据配置
-                    subprocess.run(['git', 'config', '--global', '--unset', 'credential.helper'], capture_output=True)
-                    subprocess.run(['git', 'config', '--system', '--unset', 'credential.helper'], capture_output=True)
-                    
-                    return {
-                        'success': False,
-                        'message': 'GitHub认证失败！\n\n' +
-                                 '已尝试清理Git配置，请重试更新。\n\n' +
-                                 '如果仍然失败，请配置GitHub Token：\n' +
-                                 '1. 访问 https://github.com/settings/tokens\n' +
-                                 '2. 生成新Token，勾选 repo 权限\n' +
-                                 '3. 在docker-compose.yml中添加：\n' +
-                                 '   - GITHUB_TOKEN=ghp_你的Token\n' +
-                                 '4. 重启容器：docker-compose restart'
-                    }
-
-                # 网络连不上 GitHub 的场景：尝试 ZIP 镜像回退
-                network_keywords = [
-                    'Could not resolve host',
-                    'Failed to connect',
-                    'timed out',
-                    'Connection timed out',
-                    'Temporary failure in name resolution',
-                    'SSL'
-                ]
-                if any(k.lower() in error_msg.lower() for k in network_keywords):
-                    logging.warning("检测到GitHub网络连接失败，尝试使用镜像ZIP回退更新...")
-                    fb = self._fallback_update_via_zip()
-                    if fb.get('success'):
-                        return fb
-                    else:
-                        return fb
-                
                 return {
                     'success': False,
-                    'message': f'Git拉取失败: {error_msg}'
+                    'message': fb.get('message', '更新失败')
                 }
-            
-            # 8. 恢复配置文件（防止被覆盖）
-            self.restore_config()
-            
-            # 9. 恢复本地修改
-            subprocess.run(['git', 'stash', 'pop'], capture_output=True)
-            
-            # 10. 获取更新信息
-            new_version = self.get_current_version_from_readme()
-            new_commit = self.get_local_commit_hash()
-            
-            logging.info(f"更新成功！新版本: {new_version}, Commit: {new_commit}")
-            
-            return {
-                'success': True,
-                'message': '更新成功（来源：Git）',
-                'new_version': new_version,
-                'new_commit': new_commit,
-                'need_restart': True,
-                'from': 'git'
-            }
             
         except Exception as e:
             logging.error(f"更新失败: {e}")
