@@ -186,7 +186,16 @@ echo "================================"
 if [ "$SKIP_GIT" = "true" ]; then
     echo "ℹ️ SKIP_GIT=true，跳过所有 Git 操作"
 else
-    echo "🔄 开始 Git 代码同步流程（已优先尝试ZIP回退）..."
+    echo "🔄 开始启动时自动更新检查..."
+
+    # 新增总开关：STARTUP_AUTO_UPDATE=true 才会在启动时尝试更新
+    if [ "$STARTUP_AUTO_UPDATE" != "true" ]; then
+        echo "ℹ️ 跳过启动时更新（设置 STARTUP_AUTO_UPDATE=true 可启用）"
+        echo "📌 当前版本:"
+        git log -1 --oneline 2>/dev/null || echo "  (无法获取版本信息)"
+        # 直接跳出更新逻辑，继续启动服务
+    else
+        echo "🔄 开始 Git/ZIP 代码同步流程（ZIP优先）..."
     
     # 设置默认分支
     if [ -z "$GIT_BRANCH" ]; then
@@ -289,6 +298,7 @@ else
                 echo "❌ Git 同步失败，使用当前版本继续运行"
             fi
         fi
+    fi
     fi
 fi
 
