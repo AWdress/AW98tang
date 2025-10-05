@@ -226,12 +226,50 @@ class UpdateManager:
             }
     
     def _fallback_update_via_zip(self):
-        """无法连GitHub时，使用镜像源下载ZIP并覆盖更新（保留配置与数据）。"""
+        """使用ZIP下载+覆盖方式更新（支持公开镜像与私有仓库zipball）。"""
         try:
+            def download_with_requests(url: str, out_path: str, headers: dict | None = None) -> bool:
+                try:
+                    resp = requests.get(url, timeout=60, stream=True, headers=headers or {})
+                    if resp.status_code == 200:
+                        with open(out_path, 'wb') as f:
+                            for chunk in resp.iter_content(chunk_size=1024 * 256):
+                                if chunk:
+                                    f.write(chunk)
+                        return True
+                    logging.warning(f"requests 下载失败: {url} -> HTTP {resp.status_code}")
+                except Exception as e:
+                    logging.warning(f"requests 异常: {e}")
+                return False
+
+            def download_with_curl(url: str, out_path: str, headers: dict | None = None) -> bool:
+                try:
+                    cmd = ['curl', '-L', '-sS', '--fail', '-o', out_path]
+                    if headers:
+                        for k, v in headers.items():
+                            cmd.extend(['-H', f"{k}: {v}"])
+                    cmd.append(url)
+                    r = subprocess.run(cmd, capture_output=True, text=True)
+                    if r.returncode == 0 and os.path.exists(out_path) and os.path.getsize(out_path) > 0:
+                        return True
+                    logging.warning(f"curl 下载失败: {url} -> {r.stderr.strip()}")
+                except Exception as ce:
+                    logging.warning(f"curl 异常: {ce}")
+                return False
+
+            # 1) 私有仓库：优先 GitHub API zipball
+            github_token = os.getenv('GITHUB_TOKEN')
+            if github_token:
+                api_url = f"https://api.github.com/repos/{self.repo_owner}/{self.repo_name}/zipball/{self.branch}"
+                headers = {'Authorization': f'token {github_token}', 'Accept': 'application/vnd.github+json'}
+                with tempfile.TemporaryDirectory() as td:
+                    zip_path = os.path.join(td, 'repo.zip')
+                    if download_with_requests(api_url, zip_path, headers) or download_with_curl(api_url, zip_path, headers):
+                        return self._extract_and_overlay(zip_path)
+
+            # 2) 公开镜像
             mirrors = [
-                # codeload 走 ghproxy 镜像
                 f"https://mirror.ghproxy.com/https://codeload.github.com/{self.repo_owner}/{self.repo_name}/zip/refs/heads/{self.branch}",
-                # 常见国内镜像（可用性因地区而异）
                 f"https://kgithub.com/{self.repo_owner}/{self.repo_name}/archive/refs/heads/{self.branch}.zip",
                 f"https://hub.fgit.cf/{self.repo_owner}/{self.repo_name}/archive/refs/heads/{self.branch}.zip"
             ]
@@ -239,82 +277,69 @@ class UpdateManager:
             last_error = None
             for url in mirrors:
                 try:
-                    logging.info(f"尝试镜像下载: {url}")
-                    resp = requests.get(url, timeout=60, stream=True)
-                    if resp.status_code != 200:
-                        last_error = f"HTTP {resp.status_code}"
-                        continue
-
                     with tempfile.TemporaryDirectory() as td:
                         zip_path = os.path.join(td, 'repo.zip')
-                        with open(zip_path, 'wb') as f:
-                            for chunk in resp.iter_content(chunk_size=1024 * 256):
-                                if chunk:
-                                    f.write(chunk)
-
-                        with zipfile.ZipFile(zip_path) as zf:
-                            zf.extractall(td)
-
-                        # 找到解压后的根目录
-                        entries = [p for p in os.listdir(td) if os.path.isdir(os.path.join(td, p))]
-                        src_root = None
-                        for p in entries:
-                            if p.lower().startswith(self.repo_name.lower()):
-                                src_root = os.path.join(td, p)
-                                break
-                        if not src_root:
-                            last_error = 'ZIP内容解析失败'
+                        ok = download_with_requests(url, zip_path) or download_with_curl(url, zip_path)
+                        if not ok:
+                            last_error = '下载失败'
                             continue
-
-                        # 拷贝到当前目录，保留以下本地内容
-                        keep_files = {'config.json'}
-                        keep_dirs = {'logs', 'debug', 'data', '.git'}
-
-                        for root, dirs, files in os.walk(src_root):
-                            rel = os.path.relpath(root, src_root)
-                            if rel == '.':
-                                rel = ''
-
-                            # 跳过需保留的目录
-                            parts = rel.split(os.sep) if rel else []
-                            if parts and parts[0] in keep_dirs:
-                                continue
-
-                            dest_dir = os.path.join('.', rel) if rel else '.'
-                            os.makedirs(dest_dir, exist_ok=True)
-
-                            # 复制文件（跳过需保留的文件）
-                            for filename in files:
-                                if filename in keep_files:
-                                    continue
-                                src_file = os.path.join(root, filename)
-                                dst_file = os.path.join(dest_dir, filename)
-                                shutil.copy2(src_file, dst_file)
-
-                        logging.info("镜像ZIP回退更新完成")
-                        new_version = self.get_current_version_from_readme()
-                        new_commit = self.get_local_commit_hash() or 'zip'
-                        return {
-                            'success': True,
-                            'message': '已通过镜像ZIP完成更新',
-                            'new_version': new_version,
-                            'new_commit': new_commit,
-                            'need_restart': True,
-                            'from': 'zip_mirror'
-                        }
+                        return self._extract_and_overlay(zip_path)
                 except Exception as e:
                     last_error = str(e)
                     continue
 
-            return {
-                'success': False,
-                'message': f'镜像ZIP更新失败: {last_error or "未知错误"}'
-            }
+            return {'success': False, 'message': f'镜像ZIP更新失败: {last_error or "未知错误"}'}
         except Exception as e:
             logging.error(f"ZIP回退更新异常: {e}")
+            return {'success': False, 'message': f'ZIP回退更新异常: {str(e)}'}
+
+    def _extract_and_overlay(self, zip_path: str) -> dict:
+        with tempfile.TemporaryDirectory() as td:
+            with zipfile.ZipFile(zip_path) as zf:
+                zf.extractall(td)
+
+            # 找到解压后的根目录
+            entries = [p for p in os.listdir(td) if os.path.isdir(os.path.join(td, p))]
+            src_root = None
+            for p in entries:
+                if p.lower().startswith(self.repo_name.lower()):
+                    src_root = os.path.join(td, p)
+                    break
+            if not src_root and entries:
+                src_root = os.path.join(td, entries[0])
+            if not src_root:
+                return {'success': False, 'message': 'ZIP内容解析失败'}
+
+            keep_files = {'config.json'}
+            keep_dirs = {'logs', 'debug', 'data', '.git'}
+
+            for root, dirs, files in os.walk(src_root):
+                rel = os.path.relpath(root, src_root)
+                if rel == '.':
+                    rel = ''
+                parts = rel.split(os.sep) if rel else []
+                if parts and parts[0] in keep_dirs:
+                    continue
+
+                dest_dir = os.path.join('.', rel) if rel else '.'
+                os.makedirs(dest_dir, exist_ok=True)
+
+                for filename in files:
+                    if filename in keep_files:
+                        continue
+                    src_file = os.path.join(root, filename)
+                    dst_file = os.path.join(dest_dir, filename)
+                    shutil.copy2(src_file, dst_file)
+
+            logging.info("ZIP更新完成")
+            new_version = self.get_current_version_from_readme()
+            new_commit = self.get_local_commit_hash() or 'zip'
             return {
-                'success': False,
-                'message': f'ZIP回退更新异常: {str(e)}'
+                'success': True,
+                'message': '更新成功',
+                'new_version': new_version,
+                'new_commit': new_commit,
+                'need_restart': True
             }
 
     def get_update_log(self, limit=10):
