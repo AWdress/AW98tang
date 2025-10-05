@@ -13,6 +13,7 @@ from datetime import datetime
 from flask import Flask, render_template, jsonify, request, redirect, url_for, session, flash
 from stats_manager import StatsManager
 from selenium_auto_bot import SeleniumAutoBot
+from update_manager import UpdateManager
 import logging
 from functools import wraps
 
@@ -32,6 +33,7 @@ bot_instance = None
 bot_thread = None
 bot_stop_flag = False  # 停止标志
 stats_manager = StatsManager()  # 统计管理器
+update_manager = UpdateManager()  # 更新管理器
 bot_status = {
     'running': False,
     'last_start': None,
@@ -373,6 +375,82 @@ def stop_bot():
         return jsonify({'success': True, 'message': '机器人已停止'})
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/version')
+@login_required
+def get_version():
+    """获取版本信息"""
+    try:
+        current_version = update_manager.get_current_version()
+        current_commit = update_manager.get_local_commit_hash()
+        
+        return jsonify({
+            'success': True,
+            'current_version': current_version,
+            'current_commit': current_commit or '未知'
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': str(e)
+        }), 500
+
+@app.route('/api/check_update')
+@login_required
+def check_update():
+    """检查更新"""
+    try:
+        result = update_manager.check_update()
+        return jsonify(result)
+    except Exception as e:
+        logging.error(f"检查更新失败: {e}")
+        return jsonify({
+            'success': False,
+            'message': str(e)
+        }), 500
+
+@app.route('/api/do_update', methods=['POST'])
+@login_required
+def do_update():
+    """执行更新"""
+    try:
+        # 检查机器人是否在运行
+        if bot_status['running']:
+            return jsonify({
+                'success': False,
+                'message': '机器人正在运行，请先停止后再更新'
+            })
+        
+        logging.info("开始执行系统更新...")
+        result = update_manager.do_update()
+        
+        if result['success']:
+            logging.info("系统更新成功")
+        else:
+            logging.error(f"系统更新失败: {result.get('message')}")
+        
+        return jsonify(result)
+    except Exception as e:
+        logging.error(f"更新失败: {e}")
+        return jsonify({
+            'success': False,
+            'message': f'更新失败: {str(e)}'
+        }), 500
+
+@app.route('/api/update_logs')
+@login_required
+def get_update_logs():
+    """获取更新日志"""
+    try:
+        limit = request.args.get('limit', 10, type=int)
+        result = update_manager.get_update_log(limit)
+        return jsonify(result)
+    except Exception as e:
+        logging.error(f"获取更新日志失败: {e}")
+        return jsonify({
+            'success': False,
+            'message': str(e)
+        }), 500
 
 def calculate_uptime():
     """计算运行时间"""
