@@ -36,11 +36,11 @@ class UpdateManager:
         return "v3.3"  # 默认版本
     
     def get_current_version(self):
-        """获取当前版本"""
-        return self.current_version
+        """获取当前版本（实时从README读取，避免缓存导致不更新）"""
+        return self.get_current_version_from_readme()
     
     def get_local_commit_hash(self):
-        """获取本地commit hash"""
+        """获取本地commit hash；若非git更新，读取data/last_update.json中的标记。"""
         try:
             result = subprocess.run(
                 ['git', 'rev-parse', 'HEAD'],
@@ -52,6 +52,19 @@ class UpdateManager:
                 return result.stdout.strip()[:7]
         except Exception as e:
             logging.error(f"获取本地commit失败: {e}")
+
+        # 非git场景
+        try:
+            os.makedirs('data', exist_ok=True)
+            state_path = os.path.join('data', 'last_update.json')
+            if os.path.exists(state_path):
+                with open(state_path, 'r', encoding='utf-8') as f:
+                    info = json.load(f)
+                    commit = info.get('commit')
+                    if commit:
+                        return commit[:7]
+        except Exception as e:
+            logging.warning(f"读取上次更新记录失败: {e}")
         return None
     
     def get_latest_commit_info(self):
@@ -332,8 +345,20 @@ class UpdateManager:
                     shutil.copy2(src_file, dst_file)
 
             logging.info("ZIP更新完成")
+            # 记录本次更新来源与时间，便于非git环境显示版本信息
+            try:
+                os.makedirs('data', exist_ok=True)
+                with open(os.path.join('data', 'last_update.json'), 'w', encoding='utf-8') as f:
+                    json.dump({
+                        'time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                        'source': 'zip',
+                        'commit': 'zip'
+                    }, f, ensure_ascii=False)
+            except Exception:
+                pass
+
             new_version = self.get_current_version_from_readme()
-            new_commit = self.get_local_commit_hash() or 'zip'
+            new_commit = 'zip'
             return {
                 'success': True,
                 'message': '更新成功',
