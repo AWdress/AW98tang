@@ -210,15 +210,23 @@ class UpdateManager:
             subprocess.run(['git', 'config', '--global', 'user.email', 'bot@aw98tang.local'])
             subprocess.run(['git', 'config', '--global', 'user.name', 'AW98tang Bot'])
             
-            # 5. 更新远程仓库URL（如果有Token）
+            # 清理可能存在的Git凭据配置（防止干扰）
+            subprocess.run(['git', 'config', '--global', '--unset', 'credential.helper'], capture_output=True)
+            subprocess.run(['git', 'config', '--system', '--unset', 'credential.helper'], capture_output=True)
+            
+            # 5. 更新远程仓库URL
             github_token = os.getenv('GITHUB_TOKEN', '')
             if github_token:
                 logging.info("检测到GITHUB_TOKEN，使用Token认证")
                 remote_url = f"https://{github_token}@github.com/{self.repo_owner}/{self.repo_name}.git"
-                subprocess.run(['git', 'remote', 'set-url', 'origin', remote_url], capture_output=True)
             else:
-                logging.warning("未设置GITHUB_TOKEN，使用公开访问（可能失败）")
-                logging.warning("请在docker-compose.yml中设置环境变量: GITHUB_TOKEN=ghp_xxx")
+                logging.info("未设置GITHUB_TOKEN，使用公开访问模式")
+                # 对于公开仓库，使用不带认证的HTTPS URL
+                remote_url = f"https://github.com/{self.repo_owner}/{self.repo_name}.git"
+            
+            # 更新远程仓库URL
+            subprocess.run(['git', 'remote', 'set-url', 'origin', remote_url], capture_output=True)
+            logging.info(f"远程仓库URL已设置: {remote_url}")
             
             # 6. 暂存本地修改
             subprocess.run(['git', 'stash', 'save', 'auto-update-backup'], capture_output=True)
@@ -238,9 +246,18 @@ class UpdateManager:
                 
                 error_msg = result.stderr
                 if 'Authentication failed' in error_msg or 'Invalid username or token' in error_msg:
+                    # 可能是Git配置有问题，尝试重新初始化
+                    logging.warning("认证失败，尝试清理Git配置并重试...")
+                    
+                    # 清理Git凭据配置
+                    subprocess.run(['git', 'config', '--global', '--unset', 'credential.helper'], capture_output=True)
+                    subprocess.run(['git', 'config', '--system', '--unset', 'credential.helper'], capture_output=True)
+                    
                     return {
                         'success': False,
-                        'message': 'GitHub认证失败！\n\n请按以下步骤配置Token：\n' +
+                        'message': 'GitHub认证失败！\n\n' +
+                                 '已尝试清理Git配置，请重试更新。\n\n' +
+                                 '如果仍然失败，请配置GitHub Token：\n' +
                                  '1. 访问 https://github.com/settings/tokens\n' +
                                  '2. 生成新Token，勾选 repo 权限\n' +
                                  '3. 在docker-compose.yml中添加：\n' +
