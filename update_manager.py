@@ -161,18 +161,29 @@ class UpdateManager:
         try:
             if not self.is_git_repo():
                 logging.info("初始化Git仓库...")
-                subprocess.run(['git', 'init'], check=True)
+                
+                # 配置环境变量禁用Git交互式提示
+                env = os.environ.copy()
+                env['GIT_TERMINAL_PROMPT'] = '0'
+                env['GIT_ASKPASS'] = 'echo'
+                
+                subprocess.run(['git', 'init'], check=True, env=env)
+                
+                # 配置Git禁用凭据
+                subprocess.run(['git', 'config', 'credential.helper', ''], check=True, env=env)
                 
                 # 添加远程仓库
                 github_token = os.getenv('GITHUB_TOKEN', '')
                 if github_token:
+                    logging.info("使用GitHub Token进行认证")
                     remote_url = f"https://{github_token}@github.com/{self.repo_owner}/{self.repo_name}.git"
                 else:
+                    logging.info("使用公开访问模式（无认证）")
                     remote_url = f"https://github.com/{self.repo_owner}/{self.repo_name}.git"
                 
-                subprocess.run(['git', 'remote', 'add', 'origin', remote_url], check=True)
-                subprocess.run(['git', 'fetch', 'origin'], check=True)
-                subprocess.run(['git', 'checkout', '-b', self.branch, f'origin/{self.branch}'], check=True)
+                subprocess.run(['git', 'remote', 'add', 'origin', remote_url], check=True, env=env)
+                subprocess.run(['git', 'fetch', 'origin'], check=True, env=env)
+                subprocess.run(['git', 'checkout', '-b', self.branch, f'origin/{self.branch}'], check=True, env=env)
                 
                 logging.info("Git仓库初始化完成")
                 return True
@@ -210,9 +221,10 @@ class UpdateManager:
             subprocess.run(['git', 'config', '--global', 'user.email', 'bot@aw98tang.local'])
             subprocess.run(['git', 'config', '--global', 'user.name', 'AW98tang Bot'])
             
-            # 清理可能存在的Git凭据配置（防止干扰）
+            # 完全禁用Git凭据管理器和交互式提示
             subprocess.run(['git', 'config', '--global', '--unset', 'credential.helper'], capture_output=True)
             subprocess.run(['git', 'config', '--system', '--unset', 'credential.helper'], capture_output=True)
+            subprocess.run(['git', 'config', '--global', 'credential.helper', ''], capture_output=True)
             
             # 5. 更新远程仓库URL
             github_token = os.getenv('GITHUB_TOKEN', '')
@@ -231,12 +243,20 @@ class UpdateManager:
             # 6. 暂存本地修改
             subprocess.run(['git', 'stash', 'save', 'auto-update-backup'], capture_output=True)
             
-            # 7. 拉取最新代码
+            # 7. 拉取最新代码（禁用所有认证提示）
             logging.info("正在拉取最新代码...")
+            
+            # 设置环境变量禁用Git交互式提示
+            env = os.environ.copy()
+            env['GIT_TERMINAL_PROMPT'] = '0'  # 禁用终端提示
+            env['GIT_ASKPASS'] = 'echo'        # 禁用密码询问
+            env['GIT_SSH_COMMAND'] = 'ssh -o StrictHostKeyChecking=no'  # 禁用SSH提示
+            
             result = subprocess.run(
                 ['git', 'pull', 'origin', current_branch],
                 capture_output=True,
-                text=True
+                text=True,
+                env=env
             )
             
             if result.returncode != 0:
