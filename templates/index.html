@@ -1420,10 +1420,10 @@
                     </button>
                 </h3>
                 
-                <div id="update-logs-container" style="max-height: 400px; overflow-y: auto;">
+                <div id="update-logs-container" style="max-height: 500px; overflow-y: auto;">
                     <div style="text-align: center; padding: 40px; color: #64748b;">
-                        <div style="font-size: 3rem; margin-bottom: 10px;">📋</div>
-                        <div>点击"刷新日志"查看更新历史</div>
+                        <div style="font-size: 3rem; margin-bottom: 10px;">⏳</div>
+                        <div>加载更新日志中...</div>
                     </div>
                 </div>
             </div>
@@ -1470,6 +1470,11 @@
             // 关闭移动端菜单
             if (window.innerWidth <= 768) {
                 document.getElementById('sidebar').classList.remove('show');
+            }
+
+            // 切换到更新页面时自动加载日志
+            if (pageName === 'update') {
+                loadUpdateLogs();
             }
         }
 
@@ -2074,7 +2079,7 @@
             container.innerHTML = '<div style="text-align: center; padding: 40px; color: #64748b;"><div style="font-size: 3rem;">⏳</div><div>加载中...</div></div>';
             
             try {
-                const response = await fetch('/api/update_logs?limit=20');
+                const response = await fetch('/api/update_logs?limit=50');
                 const data = await response.json();
                 
                 if (!data.success || data.logs.length === 0) {
