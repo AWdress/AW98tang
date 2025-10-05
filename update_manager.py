@@ -210,10 +210,20 @@ class UpdateManager:
             subprocess.run(['git', 'config', '--global', 'user.email', 'bot@aw98tang.local'])
             subprocess.run(['git', 'config', '--global', 'user.name', 'AW98tang Bot'])
             
-            # 5. 暂存本地修改
-            subprocess.run(['git', 'stash', 'save', 'auto-update-backup'])
+            # 5. 更新远程仓库URL（如果有Token）
+            github_token = os.getenv('GITHUB_TOKEN', '')
+            if github_token:
+                logging.info("检测到GITHUB_TOKEN，使用Token认证")
+                remote_url = f"https://{github_token}@github.com/{self.repo_owner}/{self.repo_name}.git"
+                subprocess.run(['git', 'remote', 'set-url', 'origin', remote_url], capture_output=True)
+            else:
+                logging.warning("未设置GITHUB_TOKEN，使用公开访问（可能失败）")
+                logging.warning("请在docker-compose.yml中设置环境变量: GITHUB_TOKEN=ghp_xxx")
             
-            # 6. 拉取最新代码
+            # 6. 暂存本地修改
+            subprocess.run(['git', 'stash', 'save', 'auto-update-backup'], capture_output=True)
+            
+            # 7. 拉取最新代码
             logging.info("正在拉取最新代码...")
             result = subprocess.run(
                 ['git', 'pull', 'origin', current_branch],
@@ -223,20 +233,33 @@ class UpdateManager:
             
             if result.returncode != 0:
                 # 尝试恢复
-                subprocess.run(['git', 'stash', 'pop'])
+                subprocess.run(['git', 'stash', 'pop'], capture_output=True)
                 self.restore_config()
+                
+                error_msg = result.stderr
+                if 'Authentication failed' in error_msg or 'Invalid username or token' in error_msg:
+                    return {
+                        'success': False,
+                        'message': 'GitHub认证失败！\n\n请按以下步骤配置Token：\n' +
+                                 '1. 访问 https://github.com/settings/tokens\n' +
+                                 '2. 生成新Token，勾选 repo 权限\n' +
+                                 '3. 在docker-compose.yml中添加：\n' +
+                                 '   - GITHUB_TOKEN=ghp_你的Token\n' +
+                                 '4. 重启容器：docker-compose restart'
+                    }
+                
                 return {
                     'success': False,
-                    'message': f'Git拉取失败: {result.stderr}'
+                    'message': f'Git拉取失败: {error_msg}'
                 }
             
-            # 7. 恢复配置文件（防止被覆盖）
+            # 8. 恢复配置文件（防止被覆盖）
             self.restore_config()
             
-            # 8. 恢复本地修改
+            # 9. 恢复本地修改
             subprocess.run(['git', 'stash', 'pop'], capture_output=True)
             
-            # 9. 获取更新信息
+            # 10. 获取更新信息
             new_version = self.get_current_version_from_readme()
             new_commit = self.get_local_commit_hash()
             
