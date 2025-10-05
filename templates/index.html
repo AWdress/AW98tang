@@ -958,56 +958,263 @@
             </div>
 
             <form class="config-form" id="configForm" onsubmit="saveConfig(event)">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>每日回复上限</label>
-                        <input type="number" id="config_max_replies" min="1" max="100" required>
+                <!-- 基础配置区域 -->
+                <div class="stat-card" style="margin-bottom: 30px;">
+                    <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: #f1f5f9;">
+                        <span style="font-size: 1.5rem;">🔐</span>
+                        <span>基础配置</span>
+                    </h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>论坛地址</label>
+                            <input type="url" id="config_base_url" placeholder="https://sehuatang.org/" required>
+                        </div>
+                        <div class="form-group">
+                            <label>用户名</label>
+                            <input type="text" id="config_username" placeholder="你的用户名" required>
+                        </div>
+                        <div class="form-group">
+                            <label>密码</label>
+                            <input type="password" id="config_password" placeholder="你的密码" required>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label>回复间隔-最小值（秒）</label>
-                        <input type="number" id="config_interval_min" min="30" required>
-                    </div>
-                    <div class="form-group">
-                        <label>回复间隔-最大值（秒）</label>
-                        <input type="number" id="config_interval_max" min="60" required>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>安全问题</label>
+                            <select id="config_security_question">
+                                <option value="0">不设置安全提问</option>
+                                <option value="1">母亲的名字</option>
+                                <option value="2">爷爷的名字</option>
+                                <option value="3">父亲出生的城市</option>
+                                <option value="4">您其中一位老师的名字</option>
+                                <option value="5">您个人计算机的型号</option>
+                                <option value="6">您喜欢的餐馆名称</option>
+                                <option value="7">驾驶执照最后四位数字</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>安全问题答案</label>
+                            <input type="text" id="config_security_answer" placeholder="你的答案">
+                        </div>
                     </div>
                 </div>
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>启用自动回复</label>
-                        <select id="config_auto_reply">
-                            <option value="true">是</option>
-                            <option value="false">否</option>
-                        </select>
+                <!-- 回复功能配置 -->
+                <div class="stat-card" style="margin-bottom: 30px;">
+                    <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: #f1f5f9;">
+                        <span style="font-size: 1.5rem;">💬</span>
+                        <span>回复功能配置</span>
+                    </h3>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>每日回复上限</label>
+                            <input type="number" id="config_max_replies" min="1" max="100" required>
+                        </div>
+                        <div class="form-group">
+                            <label>回复间隔-最小值（秒）</label>
+                            <input type="number" id="config_interval_min" min="30" required>
+                        </div>
+                        <div class="form-group">
+                            <label>回复间隔-最大值（秒）</label>
+                            <input type="number" id="config_interval_max" min="60" required>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label>启用每日签到</label>
-                        <select id="config_checkin">
-                            <option value="true">是</option>
-                            <option value="false">否</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>启用定时任务</label>
-                        <select id="config_scheduler">
-                            <option value="false">否</option>
-                            <option value="true">是</option>
-                        </select>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>启用自动回复</label>
+                            <select id="config_auto_reply">
+                                <option value="true">是</option>
+                                <option value="false">否</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>启用智能回复</label>
+                            <select id="config_smart_reply">
+                                <option value="true">是（根据内容生成）</option>
+                                <option value="false">否（使用模板）</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>启用随机延迟</label>
+                            <select id="config_random_delay">
+                                <option value="true">是（更自然）</option>
+                                <option value="false">否</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>定时运行时间</label>
-                        <input type="time" id="config_schedule_time">
+                <!-- 签到和定时任务配置 -->
+                <div class="stat-card" style="margin-bottom: 30px;">
+                    <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: #f1f5f9;">
+                        <span style="font-size: 1.5rem;">⏰</span>
+                        <span>签到与定时任务</span>
+                    </h3>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>启用每日签到</label>
+                            <select id="config_checkin">
+                                <option value="true">是</option>
+                                <option value="false">否</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>启用定时任务</label>
+                            <select id="config_scheduler">
+                                <option value="false">否</option>
+                                <option value="true">是</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>定时运行时间</label>
+                            <input type="time" id="config_schedule_time">
+                        </div>
                     </div>
+                </div>
+
+                <!-- 测试模式配置 -->
+                <div class="stat-card" style="margin-bottom: 30px;">
+                    <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: #f1f5f9;">
+                        <span style="font-size: 1.5rem;">🧪</span>
+                        <span>测试模式</span>
+                    </h3>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>全局测试模式</label>
+                            <select id="config_test_mode">
+                                <option value="false">否</option>
+                                <option value="true">是（所有功能）</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>测试回复功能</label>
+                            <select id="config_test_reply">
+                                <option value="false">否</option>
+                                <option value="true">是（不发送回复）</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>测试签到功能</label>
+                            <select id="config_test_checkin">
+                                <option value="false">否</option>
+                                <option value="true">是（不点击签到）</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 15px; padding: 12px; background: rgba(245, 158, 11, 0.1); border-left: 3px solid #f59e0b; border-radius: 4px; font-size: 0.85rem; color: #cbd5e1;">
+                        <strong>⚠️ 测试模式说明：</strong>
+                        <ul style="margin: 8px 0 0 20px; line-height: 1.8;">
+                            <li><strong>全局测试模式：</strong>启用后所有功能都不实际提交</li>
+                            <li><strong>测试回复：</strong>只测试回复，输入内容但不发送</li>
+                            <li><strong>测试签到：</strong>只测试签到，找到按钮但不点击</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 目标论坛配置 -->
+                <div class="stat-card" style="margin-bottom: 30px;">
+                    <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: #f1f5f9;">
+                        <span style="font-size: 1.5rem;">📍</span>
+                        <span>目标论坛</span>
+                    </h3>
+
                     <div class="form-group">
-                        <label>测试模式（全部）</label>
-                        <select id="config_test_mode">
-                            <option value="false">否</option>
-                            <option value="true">是</option>
-                        </select>
+                        <label>论坛ID列表（每行一个，格式：fid=141）</label>
+                        <textarea id="config_target_forums" rows="3" style="width: 100%; padding: 12px; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; background: rgba(255,255,255,0.05); color: #f1f5f9; font-size: 0.95rem; resize: vertical; font-family: monospace;" placeholder="fid=141&#10;fid=2&#10;fid=36"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>论坛名称映射（格式：fid=141|网友原创区，每行一个）</label>
+                        <textarea id="config_forum_names" rows="4" style="width: 100%; padding: 12px; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; background: rgba(255,255,255,0.05); color: #f1f5f9; font-size: 0.95rem; resize: vertical; font-family: monospace;" placeholder="fid=141|网友原创区&#10;fid=2|亚洲无码原创区&#10;fid=36|亚洲有码原创区"></textarea>
+                    </div>
+
+                    <div style="margin-top: 15px; padding: 12px; background: rgba(59, 130, 246, 0.1); border-left: 3px solid #3b82f6; border-radius: 4px; font-size: 0.85rem; color: #cbd5e1;">
+                        <strong>💡 论坛配置说明：</strong>
+                        <ul style="margin: 8px 0 0 20px; line-height: 1.8;">
+                            <li>论坛ID可以从论坛URL中获取，如 forum.php?mod=forumdisplay&fid=141</li>
+                            <li>名称映射用于在Web界面显示友好名称</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 过滤规则配置 -->
+                <div class="stat-card" style="margin-bottom: 30px;">
+                    <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: #f1f5f9;">
+                        <span style="font-size: 1.5rem;">🚫</span>
+                        <span>过滤规则</span>
+                    </h3>
+
+                    <div class="form-group">
+                        <label>跳过的关键词（每行一个）</label>
+                        <textarea id="config_skip_keywords" rows="5" style="width: 100%; padding: 12px; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; background: rgba(255,255,255,0.05); color: #f1f5f9; font-size: 0.95rem; resize: vertical; font-family: monospace;" placeholder="公告&#10;通知&#10;规则&#10;版规"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>跳过的标题前缀（每行一个）</label>
+                        <textarea id="config_skip_prefixes" rows="4" style="width: 100%; padding: 12px; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; background: rgba(255,255,255,0.05); color: #f1f5f9; font-size: 0.95rem; resize: vertical; font-family: monospace;" placeholder="【公告】&#10;【通知】&#10;公告:"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>跳过的管理员用户名（每行一个）</label>
+                        <textarea id="config_admin_usernames" rows="3" style="width: 100%; padding: 12px; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; background: rgba(255,255,255,0.05); color: #f1f5f9; font-size: 0.95rem; resize: vertical; font-family: monospace;" placeholder="admin&#10;管理员&#10;版主"></textarea>
+                    </div>
+
+                    <div style="margin-top: 15px; padding: 12px; background: rgba(59, 130, 246, 0.1); border-left: 3px solid #3b82f6; border-radius: 4px; font-size: 0.85rem; color: #cbd5e1;">
+                        <strong>💡 过滤规则说明：</strong>
+                        <ul style="margin: 8px 0 0 20px; line-height: 1.8;">
+                            <li>包含关键词的帖子会被跳过</li>
+                            <li>以指定前缀开头的帖子会被跳过</li>
+                            <li>管理员发布的帖子会被跳过</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 回复模板配置 -->
+                <div class="stat-card" style="margin-bottom: 30px;">
+                    <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: #f1f5f9;">
+                        <span style="font-size: 1.5rem;">📝</span>
+                        <span>回复模板</span>
+                    </h3>
+
+                    <div class="form-group">
+                        <label>备用回复模板（每行一个，智能回复关闭时使用）</label>
+                        <textarea id="config_reply_templates" rows="8" style="width: 100%; padding: 12px; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; background: rgba(255,255,255,0.05); color: #f1f5f9; font-size: 0.95rem; resize: vertical; font-family: monospace;" placeholder="谢谢楼主分享！&#10;感谢分享，收藏了！&#10;好资源，支持一下！"></textarea>
+                    </div>
+
+                    <div style="margin-top: 15px; padding: 12px; background: rgba(59, 130, 246, 0.1); border-left: 3px solid #3b82f6; border-radius: 4px; font-size: 0.85rem; color: #cbd5e1;">
+                        <strong>💡 回复模板说明：</strong>
+                        <ul style="margin: 8px 0 0 20px; line-height: 1.8;">
+                            <li>仅在"启用智能回复"和"启用AI回复"都关闭时使用</li>
+                            <li>系统会随机选择一条作为回复内容</li>
+                            <li>建议添加多条不同的模板，增加多样性</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 其他配置 -->
+                <div class="stat-card" style="margin-bottom: 30px;">
+                    <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: #f1f5f9;">
+                        <span style="font-size: 1.5rem;">⚙️</span>
+                        <span>其他配置</span>
+                    </h3>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>日志级别</label>
+                            <select id="config_log_level">
+                                <option value="DEBUG">DEBUG（调试）</option>
+                                <option value="INFO">INFO（信息）</option>
+                                <option value="WARNING">WARNING（警告）</option>
+                                <option value="ERROR">ERROR（错误）</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 
@@ -1403,6 +1610,14 @@
             fetch('/api/config')
                 .then(res => res.json())
                 .then(config => {
+                    // 基础配置
+                    document.getElementById('config_base_url').value = config.base_url || 'https://sehuatang.org/';
+                    document.getElementById('config_username').value = config.username || '';
+                    document.getElementById('config_password').value = config.password || '';
+                    document.getElementById('config_security_question').value = config.security_question_id || '0';
+                    document.getElementById('config_security_answer').value = config.security_answer || '';
+                    
+                    // 回复功能配置
                     document.getElementById('config_max_replies').value = config.max_replies_per_day || 30;
                     
                     const interval = config.reply_interval || [60, 180];
@@ -1412,10 +1627,44 @@
                     }
                     
                     document.getElementById('config_auto_reply').value = config.enable_auto_reply !== false ? 'true' : 'false';
+                    document.getElementById('config_smart_reply').value = config.enable_smart_reply !== false ? 'true' : 'false';
+                    document.getElementById('config_random_delay').value = config.enable_random_delay !== false ? 'true' : 'false';
+                    
+                    // 签到和定时任务
                     document.getElementById('config_checkin').value = config.enable_daily_checkin ? 'true' : 'false';
                     document.getElementById('config_scheduler').value = config.enable_scheduler ? 'true' : 'false';
                     document.getElementById('config_schedule_time').value = config.schedule_time || '03:00';
+                    
+                    // 测试模式
                     document.getElementById('config_test_mode').value = config.enable_test_mode ? 'true' : 'false';
+                    document.getElementById('config_test_reply').value = config.enable_test_reply ? 'true' : 'false';
+                    document.getElementById('config_test_checkin').value = config.enable_test_checkin ? 'true' : 'false';
+                    
+                    // 目标论坛
+                    const targetForums = config.target_forums || ['fid=141'];
+                    document.getElementById('config_target_forums').value = targetForums.join('\n');
+                    
+                    // 论坛名称映射
+                    const forumNames = config.forum_names || {};
+                    const forumNamesText = Object.entries(forumNames).map(([key, val]) => `${key}|${val}`).join('\n');
+                    document.getElementById('config_forum_names').value = forumNamesText;
+                    
+                    // 过滤规则
+                    const skipKeywords = config.skip_keywords || [];
+                    document.getElementById('config_skip_keywords').value = skipKeywords.join('\n');
+                    
+                    const skipPrefixes = config.skip_prefixes || [];
+                    document.getElementById('config_skip_prefixes').value = skipPrefixes.join('\n');
+                    
+                    const adminUsernames = config.admin_usernames || [];
+                    document.getElementById('config_admin_usernames').value = adminUsernames.join('\n');
+                    
+                    // 回复模板
+                    const replyTemplates = config.reply_templates || [];
+                    document.getElementById('config_reply_templates').value = replyTemplates.join('\n');
+                    
+                    // 其他配置
+                    document.getElementById('config_log_level').value = config.log_level || 'INFO';
                     
                     // 加载代理配置
                     const proxy = config.proxy || {};
@@ -1447,16 +1696,65 @@
             fetch('/api/config')
                 .then(res => res.json())
                 .then(currentConfig => {
+                    // 基础配置
+                    currentConfig.base_url = document.getElementById('config_base_url').value;
+                    currentConfig.username = document.getElementById('config_username').value;
+                    currentConfig.password = document.getElementById('config_password').value;
+                    currentConfig.security_question_id = document.getElementById('config_security_question').value;
+                    currentConfig.security_answer = document.getElementById('config_security_answer').value;
+                    
+                    // 回复功能配置
                     currentConfig.max_replies_per_day = parseInt(document.getElementById('config_max_replies').value);
                     currentConfig.reply_interval = [
                         parseInt(document.getElementById('config_interval_min').value),
                         parseInt(document.getElementById('config_interval_max').value)
                     ];
                     currentConfig.enable_auto_reply = document.getElementById('config_auto_reply').value === 'true';
+                    currentConfig.enable_smart_reply = document.getElementById('config_smart_reply').value === 'true';
+                    currentConfig.enable_random_delay = document.getElementById('config_random_delay').value === 'true';
+                    
+                    // 签到和定时任务
                     currentConfig.enable_daily_checkin = document.getElementById('config_checkin').value === 'true';
                     currentConfig.enable_scheduler = document.getElementById('config_scheduler').value === 'true';
                     currentConfig.schedule_time = document.getElementById('config_schedule_time').value;
+                    
+                    // 测试模式
                     currentConfig.enable_test_mode = document.getElementById('config_test_mode').value === 'true';
+                    currentConfig.enable_test_reply = document.getElementById('config_test_reply').value === 'true';
+                    currentConfig.enable_test_checkin = document.getElementById('config_test_checkin').value === 'true';
+                    
+                    // 目标论坛
+                    const targetForumsText = document.getElementById('config_target_forums').value.trim();
+                    currentConfig.target_forums = targetForumsText ? targetForumsText.split('\n').filter(line => line.trim()) : [];
+                    
+                    // 论坛名称映射
+                    const forumNamesText = document.getElementById('config_forum_names').value.trim();
+                    currentConfig.forum_names = {};
+                    if (forumNamesText) {
+                        forumNamesText.split('\n').forEach(line => {
+                            const parts = line.trim().split('|');
+                            if (parts.length === 2) {
+                                currentConfig.forum_names[parts[0].trim()] = parts[1].trim();
+                            }
+                        });
+                    }
+                    
+                    // 过滤规则
+                    const skipKeywordsText = document.getElementById('config_skip_keywords').value.trim();
+                    currentConfig.skip_keywords = skipKeywordsText ? skipKeywordsText.split('\n').filter(line => line.trim()) : [];
+                    
+                    const skipPrefixesText = document.getElementById('config_skip_prefixes').value.trim();
+                    currentConfig.skip_prefixes = skipPrefixesText ? skipPrefixesText.split('\n').filter(line => line.trim()) : [];
+                    
+                    const adminUsernamesText = document.getElementById('config_admin_usernames').value.trim();
+                    currentConfig.admin_usernames = adminUsernamesText ? adminUsernamesText.split('\n').filter(line => line.trim()) : [];
+                    
+                    // 回复模板
+                    const replyTemplatesText = document.getElementById('config_reply_templates').value.trim();
+                    currentConfig.reply_templates = replyTemplatesText ? replyTemplatesText.split('\n').filter(line => line.trim()) : [];
+                    
+                    // 其他配置
+                    currentConfig.log_level = document.getElementById('config_log_level').value;
                     
                     // 保存代理配置
                     currentConfig.proxy = {
