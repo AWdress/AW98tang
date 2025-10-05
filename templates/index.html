@@ -1997,6 +1997,11 @@
                     }
                     
                     if (data.auto_restart) {
+                        if (data.from === 'zip_mirror') {
+                            message += '\n(已通过镜像ZIP完成更新)\n';
+                        } else if (data.from === 'git') {
+                            message += '\n(已通过Git完成更新)\n';
+                        }
                         message += '\n容器将在3秒后自动重启...\n';
                         message += '重启完成后页面将自动刷新';
                         

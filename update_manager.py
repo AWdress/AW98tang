@@ -312,10 +312,11 @@ class UpdateManager:
             
             return {
                 'success': True,
-                'message': '更新成功！请重启服务以应用更新',
+                'message': '更新成功（来源：Git）',
                 'new_version': new_version,
                 'new_commit': new_commit,
-                'need_restart': True
+                'need_restart': True,
+                'from': 'git'
             }
             
         except Exception as e:
