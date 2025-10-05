@@ -2145,11 +2145,24 @@
             }
         }
 
-        // 页面加载时自动获取版本信息 + 静默检查最新版本
+        // 页面加载时自动获取版本信息 + 静默检查最新版本 + 定时轮询
+        const AUTO_CHECK_INTERVAL_MIN = 10; // 默认每10分钟静默检查一次
+        let autoCheckTimer = null;
+
         document.addEventListener('DOMContentLoaded', function() {
             refreshVersion();
             autoCheckUpdateAtStartup();
+            scheduleAutoUpdateCheck(AUTO_CHECK_INTERVAL_MIN);
         });
+
+        // 允许在运行时调整检查间隔（分钟）
+        function scheduleAutoUpdateCheck(minutes) {
+            try { if (autoCheckTimer) clearInterval(autoCheckTimer); } catch (e) {}
+            const ms = Math.max(1, parseInt(minutes || AUTO_CHECK_INTERVAL_MIN, 10)) * 60 * 1000;
+            autoCheckTimer = setInterval(() => {
+                autoCheckUpdateAtStartup();
+            }, ms);
+        }
 
         // 启动时自动检查一次版本（静默），并将结果展示在侧边栏与系统更新页
         async function autoCheckUpdateAtStartup() {
