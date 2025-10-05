@@ -1438,9 +1438,11 @@
                     <li>✅ 点击"检查更新"查询GitHub最新版本</li>
                     <li>✅ 如有新版本，点击"立即更新"自动拉取代码</li>
                     <li>⚠️ 更新前请先停止机器人运行</li>
-                    <li>⚠️ 更新成功后需要重启服务（Docker用户执行：<code style="background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px; color: #fbbf24;">docker-compose restart</code>）</li>
+                    <li>🎉 更新成功后容器将<strong style="color: #10b981;">自动重启</strong>，无需手动操作</li>
+                    <li>🔄 重启完成后页面会自动刷新到最新版本</li>
                     <li>⚠️ 配置文件会自动保留，不会被覆盖</li>
-                    <li>📌 如需使用私有仓库，请设置环境变量 <code style="background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px; color: #fbbf24;">GITHUB_TOKEN</code></li>
+                    <li>📌 私有仓库需要设置环境变量 <code style="background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px; color: #fbbf24;">GITHUB_TOKEN</code></li>
+                    <li>💡 公开仓库无需配置Token即可更新</li>
                 </ul>
             </div>
         </section>
@@ -1959,7 +1961,7 @@
 
         // 执行更新
         async function doUpdate() {
-            if (!confirm('确定要更新系统吗？\n\n更新前请确保：\n1. 已停止机器人运行\n2. 更新后需要重启服务\n\n是否继续？')) {
+            if (!confirm('确定要更新系统吗？\n\n更新前请确保：\n1. 已停止机器人运行\n2. 更新成功后容器将自动重启\n\n是否继续？')) {
                 return;
             }
             
@@ -1988,30 +1990,81 @@
                     if (data.new_version) {
                         message += '新版本: ' + data.new_version + '\n';
                     }
-                    message += '\n请重启服务以应用更新：\n';
-                    message += 'docker-compose restart';
                     
-                    showToast(true, message);
-                    
-                    // 刷新版本信息
-                    setTimeout(() => {
-                        refreshVersion();
-                    }, 2000);
+                    if (data.auto_restart) {
+                        message += '\n容器将在3秒后自动重启...\n';
+                        message += '重启完成后页面将自动刷新';
+                        
+                        showToast(true, message);
+                        
+                        // 显示重启中状态
+                        setTimeout(() => {
+                            statusEl.innerHTML = '<span style="font-size: 1.5rem;">🔄</span><span style="margin-left: 8px;">正在重启...</span>';
+                        }, 3000);
+                        
+                        // 等待容器重启，然后自动刷新页面
+                        waitForContainerRestart();
+                    } else {
+                        message += '\n请手动重启服务：\n';
+                        message += 'docker-compose restart';
+                        
+                        showToast(true, message);
+                        
+                        // 刷新版本信息
+                        setTimeout(() => {
+                            refreshVersion();
+                        }, 2000);
+                    }
                     
                     btn.style.display = 'none';
                 } else {
                     statusEl.innerHTML = '<span style="font-size: 1.5rem;">❌</span><span style="margin-left: 8px;">更新失败</span>';
                     showToast(false, '更新失败: ' + data.message);
+                    btn.disabled = false;
+                    checkBtn.disabled = false;
+                    btn.innerHTML = '⬇️ 立即更新';
                 }
                 
             } catch (err) {
                 statusEl.innerHTML = '<span style="font-size: 1.5rem;">❌</span><span style="margin-left: 8px;">更新失败</span>';
                 showToast(false, '更新失败: ' + err);
-            } finally {
                 btn.disabled = false;
                 checkBtn.disabled = false;
                 btn.innerHTML = '⬇️ 立即更新';
             }
+        }
+        
+        // 等待容器重启完成
+        async function waitForContainerRestart() {
+            let attempts = 0;
+            const maxAttempts = 30; // 最多等待30秒
+            
+            const checkServer = async () => {
+                try {
+                    const response = await fetch('/api/version', {
+                        method: 'GET',
+                        cache: 'no-cache'
+                    });
+                    
+                    if (response.ok) {
+                        // 服务器恢复，刷新页面
+                        console.log('容器重启成功，刷新页面...');
+                        window.location.reload();
+                    }
+                } catch (err) {
+                    // 服务器还未恢复，继续等待
+                    attempts++;
+                    if (attempts < maxAttempts) {
+                        setTimeout(checkServer, 1000); // 1秒后重试
+                    } else {
+                        // 超时，提示用户手动刷新
+                        alert('容器重启时间较长，请手动刷新页面');
+                    }
+                }
+            };
+            
+            // 等待5秒后开始检查（给容器足够时间完全关闭）
+            setTimeout(checkServer, 5000);
         }
 
         // 加载更新日志

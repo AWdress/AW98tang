@@ -425,7 +425,19 @@ def do_update():
         result = update_manager.do_update()
         
         if result['success']:
-            logging.info("系统更新成功")
+            logging.info("系统更新成功，3秒后自动重启容器...")
+            
+            # 在后台线程中延迟退出进程，让Docker自动重启
+            def restart_container():
+                time.sleep(3)  # 给前端足够时间接收响应
+                logging.info("正在重启容器...")
+                os._exit(0)  # 退出进程，Docker会自动重启
+            
+            restart_thread = threading.Thread(target=restart_container, daemon=True)
+            restart_thread.start()
+            
+            result['auto_restart'] = True
+            result['message'] = result.get('message', '更新成功') + '\n\n容器将在3秒后自动重启...'
         else:
             logging.error(f"系统更新失败: {result.get('message')}")
         
