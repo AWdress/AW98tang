@@ -103,6 +103,80 @@ gitpull() {
     git pull origin "$GIT_BRANCH"
 }
 
+# 使用ZIP回退更新（支持公开/私有仓库）
+zip_fallback_update() {
+    echo "[Zip] 尝试使用ZIP回退方式更新代码..."
+
+    # 解析 owner/repo
+    OWNER="AWdress"
+    REPO="AW98tamg"
+    if [ -n "$GIT_REMOTE" ]; then
+        # 提取像 https://github.com/owner/repo.git 的 owner 与 repo
+        OWNER_TMP=$(echo "$GIT_REMOTE" | sed -E 's#.*github.com/([^/]+)/([^/.]+).*#\1#')
+        REPO_TMP=$(echo "$GIT_REMOTE" | sed -E 's#.*github.com/([^/]+)/([^/.]+).*#\2#')
+        if [ -n "$OWNER_TMP" ] && [ -n "$REPO_TMP" ]; then
+            OWNER="$OWNER_TMP"; REPO="$REPO_TMP"
+        fi
+    fi
+
+    [ -z "$GIT_BRANCH" ] && GIT_BRANCH="main"
+
+    TMP_DIR="/tmp/zip_update"
+    rm -rf "$TMP_DIR" && mkdir -p "$TMP_DIR"
+    ZIP_PATH="$TMP_DIR/repo.zip"
+
+    DOWNLOAD_OK=false
+
+    if [ -n "$GITHUB_TOKEN" ]; then
+        echo "[Zip] 使用 GitHub API（私有仓库支持）下载 zipball..."
+        curl -L -H "Authorization: token $GITHUB_TOKEN" \
+             -H "Accept: application/vnd.github+json" \
+             -o "$ZIP_PATH" \
+             "https://api.github.com/repos/$OWNER/$REPO/zipball/$GIT_BRANCH" && DOWNLOAD_OK=true
+    else
+        echo "[Zip] 使用公开镜像下载 zip..."
+        for URL in \
+            "https://mirror.ghproxy.com/https://codeload.github.com/$OWNER/$REPO/zip/refs/heads/$GIT_BRANCH" \
+            "https://codeload.github.com/$OWNER/$REPO/zip/refs/heads/$GIT_BRANCH" \
+            "https://kgithub.com/$OWNER/$REPO/archive/refs/heads/$GIT_BRANCH.zip" \
+            "https://hub.fgit.cf/$OWNER/$REPO/archive/refs/heads/$GIT_BRANCH.zip"; do
+            echo "[Zip] 尝试: $URL"
+            curl -L -o "$ZIP_PATH" "$URL" && DOWNLOAD_OK=true && break
+        done
+    fi
+
+    if [ "$DOWNLOAD_OK" != true ]; then
+        echo "[Zip] ZIP下载失败，回退更新无法完成"
+        return 1
+    fi
+
+    unzip -q "$ZIP_PATH" -d "$TMP_DIR" || { echo "[Zip] 解压失败"; return 1; }
+    SRC_ROOT=$(find "$TMP_DIR" -maxdepth 1 -type d -name "$REPO-*" | head -n1)
+    if [ -z "$SRC_ROOT" ]; then
+        SRC_ROOT=$(find "$TMP_DIR" -maxdepth 1 -type d ! -path "$TMP_DIR" | head -n1)
+    fi
+    if [ -z "$SRC_ROOT" ]; then
+        echo "[Zip] 未找到解压目录"
+        return 1
+    fi
+
+    echo "[Zip] 覆盖更新代码（保留 config.json / logs / debug / data / .git）..."
+    # 同步文件（尽量不依赖rsync）
+    (cd "$SRC_ROOT" && \
+        find . -mindepth 1 -maxdepth 1 \
+          ! -name 'config.json' \
+          ! -name 'logs' \
+          ! -name 'debug' \
+          ! -name 'data' \
+          ! -name '.git' \
+          -print0 | xargs -0 -I {} bash -c 'SRC="{}"; DST="/app/${SRC#./}"; \
+              if [ -d "$SRC" ]; then mkdir -p "$DST" && cp -r "$SRC"/* "$DST" 2>/dev/null || true; \
+              else mkdir -p "$(dirname "$DST")" && cp -f "$SRC" "$DST"; fi')
+
+    echo "[Zip] 回退更新完成"
+    return 0
+}
+
 # 设置代理配置
 echo "🌐 配置网络代理..."
 setup_proxy
@@ -210,8 +284,13 @@ else
                 echo "✅ 已是最新版本"
             fi
         else
-            echo "❌ 无法连接到远程仓库"
-            echo "⚠️ Git 同步失败，使用当前版本继续运行"
+            echo "❌ 无法连接到远程仓库（Git）"
+            echo "[Zip] 尝试使用ZIP回退更新..."
+            if zip_fallback_update; then
+                echo "✅ ZIP回退更新成功"
+            else
+                echo "⚠️ Zip回退更新失败，使用当前版本继续运行"
+            fi
         fi
     fi
 fi
