@@ -10,6 +10,8 @@ import requests
 import logging
 from datetime import datetime
 import shutil
+import zipfile
+import tempfile
 
 class UpdateManager:
     def __init__(self):
@@ -273,6 +275,23 @@ class UpdateManager:
                                  '   - GITHUB_TOKEN=ghp_你的Token\n' +
                                  '4. 重启容器：docker-compose restart'
                     }
+
+                # 网络连不上 GitHub 的场景：尝试 ZIP 镜像回退
+                network_keywords = [
+                    'Could not resolve host',
+                    'Failed to connect',
+                    'timed out',
+                    'Connection timed out',
+                    'Temporary failure in name resolution',
+                    'SSL'
+                ]
+                if any(k.lower() in error_msg.lower() for k in network_keywords):
+                    logging.warning("检测到GitHub网络连接失败，尝试使用镜像ZIP回退更新...")
+                    fb = self._fallback_update_via_zip()
+                    if fb.get('success'):
+                        return fb
+                    else:
+                        return fb
                 
                 return {
                     'success': False,
@@ -313,6 +332,98 @@ class UpdateManager:
                 'message': f'更新失败: {str(e)}'
             }
     
+    def _fallback_update_via_zip(self):
+        """无法连GitHub时，使用镜像源下载ZIP并覆盖更新（保留配置与数据）。"""
+        try:
+            mirrors = [
+                # codeload 走 ghproxy 镜像
+                f"https://mirror.ghproxy.com/https://codeload.github.com/{self.repo_owner}/{self.repo_name}/zip/refs/heads/{self.branch}",
+                # 常见国内镜像（可用性因地区而异）
+                f"https://kgithub.com/{self.repo_owner}/{self.repo_name}/archive/refs/heads/{self.branch}.zip",
+                f"https://hub.fgit.cf/{self.repo_owner}/{self.repo_name}/archive/refs/heads/{self.branch}.zip"
+            ]
+
+            last_error = None
+            for url in mirrors:
+                try:
+                    logging.info(f"尝试镜像下载: {url}")
+                    resp = requests.get(url, timeout=60, stream=True)
+                    if resp.status_code != 200:
+                        last_error = f"HTTP {resp.status_code}"
+                        continue
+
+                    with tempfile.TemporaryDirectory() as td:
+                        zip_path = os.path.join(td, 'repo.zip')
+                        with open(zip_path, 'wb') as f:
+                            for chunk in resp.iter_content(chunk_size=1024 * 256):
+                                if chunk:
+                                    f.write(chunk)
+
+                        with zipfile.ZipFile(zip_path) as zf:
+                            zf.extractall(td)
+
+                        # 找到解压后的根目录
+                        entries = [p for p in os.listdir(td) if os.path.isdir(os.path.join(td, p))]
+                        src_root = None
+                        for p in entries:
+                            if p.lower().startswith(self.repo_name.lower()):
+                                src_root = os.path.join(td, p)
+                                break
+                        if not src_root:
+                            last_error = 'ZIP内容解析失败'
+                            continue
+
+                        # 拷贝到当前目录，保留以下本地内容
+                        keep_files = {'config.json'}
+                        keep_dirs = {'logs', 'debug', 'data', '.git'}
+
+                        for root, dirs, files in os.walk(src_root):
+                            rel = os.path.relpath(root, src_root)
+                            if rel == '.':
+                                rel = ''
+
+                            # 跳过需保留的目录
+                            parts = rel.split(os.sep) if rel else []
+                            if parts and parts[0] in keep_dirs:
+                                continue
+
+                            dest_dir = os.path.join('.', rel) if rel else '.'
+                            os.makedirs(dest_dir, exist_ok=True)
+
+                            # 复制文件（跳过需保留的文件）
+                            for filename in files:
+                                if filename in keep_files:
+                                    continue
+                                src_file = os.path.join(root, filename)
+                                dst_file = os.path.join(dest_dir, filename)
+                                shutil.copy2(src_file, dst_file)
+
+                        logging.info("镜像ZIP回退更新完成")
+                        new_version = self.get_current_version_from_readme()
+                        new_commit = self.get_local_commit_hash() or 'zip'
+                        return {
+                            'success': True,
+                            'message': '已通过镜像ZIP完成更新',
+                            'new_version': new_version,
+                            'new_commit': new_commit,
+                            'need_restart': True,
+                            'from': 'zip_mirror'
+                        }
+                except Exception as e:
+                    last_error = str(e)
+                    continue
+
+            return {
+                'success': False,
+                'message': f'镜像ZIP更新失败: {last_error or "未知错误"}'
+            }
+        except Exception as e:
+            logging.error(f"ZIP回退更新异常: {e}")
+            return {
+                'success': False,
+                'message': f'ZIP回退更新异常: {str(e)}'
+            }
+
     def get_update_log(self, limit=10):
         """获取更新日志"""
         try:
