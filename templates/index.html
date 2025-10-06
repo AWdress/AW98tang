@@ -893,7 +893,7 @@
                             <h3>今日签到</h3>
                         </div>
                     </div>
-                    <div class="stat-value" id="checkinStatus">❌</div>
+                    <div class="stat-value" id="checkinStatus">-</div>
                     <div class="stat-label" id="checkinLabel">未签到</div>
                     <div style="margin-top: 8px; font-size: 0.85rem; color: #64748b;">
                         时间: <span id="checkinTime">-</span>
@@ -908,7 +908,7 @@
                         </div>
                     </div>
                     <div style="font-size: 0.9rem; color: #cbd5e1; line-height: 1.8;">
-                        <div>版块: <span id="targetForums">-</span></div>
+                         <div>版块: <span id="targetForums">-</span></div>
                         <div>间隔: <span id="replyInterval">-</span></div>
                         <div>签到: <span id="checkinEnabled">-</span></div>
                     </div>
@@ -1558,7 +1558,8 @@
                     document.getElementById('maxReplies').textContent = config.max_replies_per_day || 30;
 
                     // 签到状态
-                    document.getElementById('checkinStatus').textContent = stats.checkin_success ? '✅' : '❌';
+                    // 使用单色符号避免某些环境下emoji渲染为色块
+                    document.getElementById('checkinStatus').textContent = stats.checkin_success ? '✔' : '✘';
                     document.getElementById('checkinLabel').textContent = stats.checkin_success ? '已签到' : '未签到';
                     document.getElementById('checkinTime').textContent = stats.checkin_time || '-';
 
