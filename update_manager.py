@@ -40,7 +40,22 @@ class UpdateManager:
         return self.get_current_version_from_readme()
     
     def get_local_commit_hash(self):
-        """获取本地commit hash；若非git更新，读取data/last_update.json中的标记。"""
+        """获取当前代码对应的commit标识。
+        优先读取 data/last_update.json（ZIP更新会写入准确commit），否则回退到 .git HEAD。
+        """
+        # 1) 优先 last_update.json（ZIP路径会写真实commit）
+        try:
+            state_path = os.path.join('data', 'last_update.json')
+            if os.path.exists(state_path):
+                with open(state_path, 'r', encoding='utf-8') as f:
+                    info = json.load(f)
+                    commit = info.get('commit')
+                    if commit:
+                        return commit[:7]
+        except Exception as e:
+            logging.warning(f"读取上次更新记录失败: {e}")
+
+        # 2) 回退到git HEAD
         try:
             result = subprocess.run(
                 ['git', 'rev-parse', 'HEAD'],
@@ -52,19 +67,6 @@ class UpdateManager:
                 return result.stdout.strip()[:7]
         except Exception as e:
             logging.error(f"获取本地commit失败: {e}")
-
-        # 非git场景
-        try:
-            os.makedirs('data', exist_ok=True)
-            state_path = os.path.join('data', 'last_update.json')
-            if os.path.exists(state_path):
-                with open(state_path, 'r', encoding='utf-8') as f:
-                    info = json.load(f)
-                    commit = info.get('commit')
-                    if commit:
-                        return commit[:7]
-        except Exception as e:
-            logging.warning(f"读取上次更新记录失败: {e}")
         return None
     
     def get_latest_commit_info(self):
@@ -116,6 +118,8 @@ class UpdateManager:
     def check_update(self):
         """检查是否有更新"""
         try:
+            # 动态读取当前版本与commit，避免缓存
+            current_version = self.get_current_version()
             local_hash = self.get_local_commit_hash()
             remote_info = self.get_latest_commit_info()
             release_info = self.get_latest_release()
@@ -126,12 +130,16 @@ class UpdateManager:
                     'message': '无法连接到GitHub，请检查网络'
                 }
             
-            has_update = local_hash != remote_info['sha'] if local_hash else True
+            # 如果 Release 标记版本存在且与当前版本一致，则视为无更新
+            if release_info and release_info.get('version') and self.get_current_version() == release_info.get('version'):
+                has_update = False
+            else:
+                has_update = local_hash != remote_info['sha'] if local_hash else True
             
             return {
                 'success': True,
                 'has_update': has_update,
-                'current_version': self.current_version,
+                'current_version': current_version,
                 'current_commit': local_hash or '未知',
                 'latest_commit': remote_info['sha'],
                 'latest_message': remote_info['message'],
@@ -323,6 +331,17 @@ class UpdateManager:
             if not src_root:
                 return {'success': False, 'message': 'ZIP内容解析失败'}
 
+            # 从解压目录名尝试解析commit（zipball/codeload 通常包含短/长sha）
+            parsed_commit = None
+            try:
+                import re
+                base = os.path.basename(src_root)
+                m = re.search(r'-([0-9a-fA-F]{7,40})$', base)
+                if m:
+                    parsed_commit = m.group(1)[:7]
+            except Exception:
+                pass
+
             keep_files = {'config.json'}
             keep_dirs = {'logs', 'debug', 'data', '.git'}
 
@@ -352,13 +371,13 @@ class UpdateManager:
                     json.dump({
                         'time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                         'source': 'zip',
-                        'commit': 'zip'
+                        'commit': parsed_commit or 'zip'
                     }, f, ensure_ascii=False)
             except Exception:
                 pass
 
             new_version = self.get_current_version_from_readme()
-            new_commit = 'zip'
+            new_commit = parsed_commit or 'zip'
             return {
                 'success': True,
                 'message': '更新成功',
