@@ -2131,7 +2131,7 @@
             container.innerHTML = '<div style="text-align: center; padding: 40px; color: #64748b;"><div style="font-size: 3rem;">⏳</div><div>加载中...</div></div>';
             
             try {
-                const response = await fetch('/api/update_logs?limit=50');
+                const response = await fetch('/api/update_logs?limit=5');
                 const data = await response.json();
                 
                 if (!data.success || data.logs.length === 0) {
@@ -2141,6 +2141,7 @@
                 
                 let html = '';
                 data.logs.forEach((log, index) => {
+                    const msg = (log.message || '').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
                     html += `
                         <div style="padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); ${index === 0 ? 'background: rgba(139, 92, 246, 0.05);' : ''}">
                             <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
@@ -2150,8 +2151,8 @@
                                 <span style="color: #94a3b8; font-size: 0.85rem;">${log.date}</span>
                                 <span style="color: #64748b; font-size: 0.85rem;">by ${log.author}</span>
                             </div>
-                            <div style="color: #e2e8f0; line-height: 1.6;">
-                                ${log.message}
+                            <div style="color: #e2e8f0; line-height: 1.7; white-space: normal;">
+                                ${msg}
                             </div>
                         </div>
                     `;

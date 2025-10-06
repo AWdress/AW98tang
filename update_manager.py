@@ -403,30 +403,35 @@ class UpdateManager:
             }
 
     def get_update_log(self, limit=10):
-        """获取更新日志"""
+        """获取更新日志（包含完整提交内容）"""
         try:
+            # 使用不可见分隔符，避免正文换行影响解析
+            record_sep = '\x1e'  # 记录分隔
+            field_sep = '\x1f'   # 字段分隔
+            pretty = f"%h%x1f%an%x1f%ar%x1f%B%x1e"
             result = subprocess.run(
-                ['git', 'log', f'-{limit}', '--pretty=format:%h|%s|%an|%ar'],
+                ['git', 'log', f'-{limit}', f'--pretty=format:{pretty}'],
                 capture_output=True,
                 text=True
             )
-            
             if result.returncode == 0:
+                raw = result.stdout
                 logs = []
-                for line in result.stdout.strip().split('\n'):
-                    if line:
-                        parts = line.split('|')
-                        if len(parts) == 4:
-                            logs.append({
-                                'hash': parts[0],
-                                'message': parts[1],
-                                'author': parts[2],
-                                'date': parts[3]
-                            })
+                for rec in raw.split(record_sep):
+                    if not rec.strip():
+                        continue
+                    fields = rec.split(field_sep)
+                    if len(fields) >= 4:
+                        commit_hash, author, rel_date, message = fields[0], fields[1], fields[2], field_sep.join(fields[3:])
+                        logs.append({
+                            'hash': commit_hash.strip(),
+                            'author': author.strip(),
+                            'date': rel_date.strip(),
+                            'message': message.strip()
+                        })
                 return {'success': True, 'logs': logs}
         except Exception as e:
             logging.error(f"获取更新日志失败: {e}")
-        
         return {'success': False, 'logs': []}
 
 
