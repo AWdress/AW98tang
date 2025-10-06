@@ -60,16 +60,18 @@
 
         .logo {
             display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 10px;
+            flex-direction: column; /* 上下布局：LOGO在上，文字在下 */
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 12px;
         }
 
         /* 固定宽高比容器，避免图片比例失真 */
         .logo-img-wrap {
-            width: 40px;
-            height: 40px;
-            border-radius: 8px;
+            width: 100%;                /* 宽度尽量贴合文字区域 */
+            max-width: 180px;           /* 避免过宽，接近文字宽度 */
+            aspect-ratio: 1 / 1;        /* 保持正方形，比例不变形 */
+            border-radius: 12px;
             overflow: hidden;
             background: rgba(255,255,255,0.06);
             display: flex;
