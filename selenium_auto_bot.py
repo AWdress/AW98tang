@@ -72,6 +72,7 @@ class SeleniumAutoBot:
         self.enable_smart_reply = self.config.get('enable_smart_reply', True)
         self.skip_keywords = self.config.get('skip_keywords', [])
         self.skip_prefixes = self.config.get('skip_prefixes', [])
+        self.forum_names = self.config.get('forum_names', {})
         
         # 智能回复模板
         self.smart_reply_templates = self.config.get('smart_reply_templates', {})
@@ -751,7 +752,8 @@ class SeleniumAutoBot:
     def get_forum_posts(self, forum_id="fid=141", max_posts=20):
         """获取论坛帖子列表"""
         try:
-            logging.info(f"📋 获取论坛帖子: {forum_id}")
+            forum_display = self.forum_names.get(forum_id, forum_id)
+            logging.info(f"📋 获取论坛帖子: {forum_id} - {forum_display}")
             
             # 访问论坛页面
             forum_url = f"{self.base_url}forum.php?mod=forumdisplay&{forum_id}"
