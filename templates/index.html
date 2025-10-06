@@ -65,12 +65,22 @@
             margin-bottom: 10px;
         }
 
-        .logo-img {
+        /* 固定宽高比容器，避免图片比例失真 */
+        .logo-img-wrap {
+            width: 40px;
             height: 40px;
-            width: auto;
-            max-width: 100px;
             border-radius: 8px;
-            object-fit: contain;
+            overflow: hidden;
+            background: rgba(255,255,255,0.06);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* 保持比例，完整显示 */
         }
 
         .logo-text h1 {
@@ -755,7 +765,9 @@
     <nav class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <div class="logo">
-                <img src="https://www.sehuatang.net/static/image/common/logo.png" alt="Logo" class="logo-img">
+                <div class="logo-img-wrap">
+                    <img src="https://www.sehuatang.net/static/image/common/logo.png" alt="Logo" class="logo-img">
+                </div>
                 <div class="logo-text">
                     <h1>色花堂助手</h1>
                     <p>智能自动化系统</p>
