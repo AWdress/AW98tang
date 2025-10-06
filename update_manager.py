@@ -116,26 +116,36 @@ class UpdateManager:
         return None
     
     def check_update(self):
-        """检查是否有更新"""
+        """检查是否有更新（优先使用 Release 版本对比；无 Release 再回退到 commit 对比）"""
         try:
-            # 动态读取当前版本与commit，避免缓存
             current_version = self.get_current_version()
             local_hash = self.get_local_commit_hash()
-            remote_info = self.get_latest_commit_info()
+
+            # 优先获取 Release 信息
             release_info = self.get_latest_release()
-            
+            if release_info and release_info.get('version'):
+                has_update = (current_version != release_info['version'])
+                # 同时也返回最近一次提交信息用于参考
+                remote_info = self.get_latest_commit_info() or {}
+                return {
+                    'success': True,
+                    'has_update': has_update,
+                    'current_version': current_version,
+                    'current_commit': local_hash or '未知',
+                    'latest_commit': remote_info.get('sha'),
+                    'latest_message': remote_info.get('message'),
+                    'latest_date': remote_info.get('date'),
+                    'latest_release': release_info
+                }
+
+            # 无 Release 时回退到 commit 对比
+            remote_info = self.get_latest_commit_info()
             if not remote_info:
                 return {
                     'success': False,
                     'message': '无法连接到GitHub，请检查网络'
                 }
-            
-            # 如果 Release 标记版本存在且与当前版本一致，则视为无更新
-            if release_info and release_info.get('version') and self.get_current_version() == release_info.get('version'):
-                has_update = False
-            else:
-                has_update = local_hash != remote_info['sha'] if local_hash else True
-            
+            has_update = local_hash != remote_info['sha'] if local_hash else True
             return {
                 'success': True,
                 'has_update': has_update,
@@ -144,7 +154,7 @@ class UpdateManager:
                 'latest_commit': remote_info['sha'],
                 'latest_message': remote_info['message'],
                 'latest_date': remote_info['date'],
-                'latest_release': release_info
+                'latest_release': None
             }
         except Exception as e:
             logging.error(f"检查更新失败: {e}")
