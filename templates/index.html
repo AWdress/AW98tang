@@ -68,8 +68,8 @@
 
         /* 固定宽高比容器，避免图片比例失真 */
         .logo-img-wrap {
-            width: 120px;              /* 缩小LOGO，和文字更协调 */
-            max-width: 150px;
+            width: 120px;              /* LOGO 固定宽度，便于与文字对齐 */
+            max-width: 120px;
             /* 去掉背景正方形与圆角，仅保留内容本身 */
             background: transparent;
             border-radius: 0;
@@ -87,7 +87,7 @@
             display: block;
         }
 
-        .logo-text { text-align: center; }
+        .logo-text { text-align: center; width: 120px; margin: 0 auto; }
 
         .logo-text h1 {
             font-size: 1.2rem;
