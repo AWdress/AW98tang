@@ -404,12 +404,39 @@ class UpdateManager:
 
     def get_update_log(self, limit=10):
         """获取更新日志（包含完整提交内容）。
-        优先从本地 git 读取；若本地库未更新或不可用，回退到 GitHub API。
+        逻辑：优先本地 git；如本地最新提交与远端不一致，改用 GitHub API；本地不可用也用 API。
         """
-        # 1) 优先 git log（适用于本地仓库最新且存在 .git）
+        def _from_github_api(n: int):
+            try:
+                headers = {'User-Agent': 'aw98tang-update-client'}
+                github_token = os.getenv('GITHUB_TOKEN')
+                if github_token:
+                    headers['Authorization'] = f'token {github_token}'
+                url = f"{self.github_api}/commits?sha={self.branch}&per_page={max(1,int(n))}"
+                resp = requests.get(url, headers=headers, timeout=10)
+                if resp.status_code == 200:
+                    logs = []
+                    for item in resp.json():
+                        logs.append({
+                            'hash': item.get('sha','')[:7],
+                            'author': (item.get('commit',{}).get('author',{}) or {}).get('name',''),
+                            'date': (item.get('commit',{}).get('author',{}) or {}).get('date',''),
+                            'message': (item.get('commit',{}) or {}).get('message','')
+                        })
+                    return {'success': True, 'logs': logs}
+                logging.error(f"GitHub API 获取日志失败: HTTP {resp.status_code}")
+            except Exception as e:
+                logging.error(f"GitHub API 获取日志异常: {e}")
+            return {'success': False, 'logs': []}
+
+        # 远端最新提交SHA
+        remote_info = self.get_latest_commit_info() or {}
+        remote_sha = remote_info.get('sha')
+
+        # 1) 读取本地 git 日志
         try:
-            record_sep = '\x1e'  # 记录分隔
-            field_sep = '\x1f'   # 字段分隔
+            record_sep = '\x1e'
+            field_sep = '\x1f'
             pretty = f"%h%x1f%an%x1f%ar%x1f%B%x1e"
             result = subprocess.run(
                 ['git', 'log', f'-{limit}', f'--pretty=format:{pretty}'],
@@ -431,33 +458,17 @@ class UpdateManager:
                             'date': rel_date.strip(),
                             'message': message.strip()
                         })
+                # 如果本地最新与远端不同，则改用远端
+                if logs and remote_sha and logs[0]['hash'] != remote_sha:
+                    api_logs = _from_github_api(limit)
+                    if api_logs['success']:
+                        return api_logs
                 if logs:
                     return {'success': True, 'logs': logs}
         except Exception as e:
             logging.warning(f"本地git日志不可用: {e}")
 
-        # 2) 回退 GitHub API（保证即使ZIP更新也能拿到最新）
-        try:
-            headers = {}
-            github_token = os.getenv('GITHUB_TOKEN')
-            if github_token:
-                headers['Authorization'] = f'token {github_token}'
-            url = f"{self.github_api}/commits?sha={self.branch}&per_page={max(1,int(limit))}"
-            resp = requests.get(url, headers=headers, timeout=10)
-            if resp.status_code == 200:
-                logs = []
-                for item in resp.json():
-                    logs.append({
-                        'hash': item.get('sha','')[:7],
-                        'author': (item.get('commit',{}).get('author',{}) or {}).get('name',''),
-                        'date': (item.get('commit',{}).get('author',{}) or {}).get('date',''),
-                        'message': (item.get('commit',{}) or {}).get('message','')
-                    })
-                return {'success': True, 'logs': logs}
-            else:
-                logging.error(f"GitHub API 获取日志失败: HTTP {resp.status_code}")
-        except Exception as e:
-            logging.error(f"GitHub API 获取日志异常: {e}")
-        return {'success': False, 'logs': []}
+        # 2) 直接用远端
+        return _from_github_api(limit)
 
 
