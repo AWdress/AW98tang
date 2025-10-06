@@ -61,19 +61,19 @@
         .logo {
             display: flex;
             flex-direction: column; /* 上下布局：LOGO在上，文字在下 */
-            align-items: flex-start;
+            align-items: center;      /* 居中对齐整体更美观 */
             gap: 10px;
             margin-bottom: 12px;
         }
 
         /* 固定宽高比容器，避免图片比例失真 */
         .logo-img-wrap {
-            width: 100%;                /* 宽度尽量贴合文字区域 */
-            max-width: 180px;           /* 避免过宽，接近文字宽度 */
-            aspect-ratio: 1 / 1;        /* 保持正方形，比例不变形 */
-            border-radius: 12px;
-            overflow: hidden;
-            background: rgba(255,255,255,0.06);
+            width: 160px;              /* LOGO 宽度与文字视觉接近 */
+            max-width: 180px;
+            /* 去掉背景正方形与圆角，仅保留内容本身 */
+            background: transparent;
+            border-radius: 0;
+            overflow: visible;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -81,9 +81,12 @@
 
         .logo-img {
             width: 100%;
-            height: 100%;
-            object-fit: contain; /* 保持比例，完整显示 */
+            height: auto;             /* 等比缩放，高度自适应 */
+            object-fit: contain;
+            display: block;
         }
+
+        .logo-text { text-align: center; }
 
         .logo-text h1 {
             font-size: 1.2rem;
