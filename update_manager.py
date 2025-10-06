@@ -403,9 +403,11 @@ class UpdateManager:
             }
 
     def get_update_log(self, limit=10):
-        """获取更新日志（包含完整提交内容）"""
+        """获取更新日志（包含完整提交内容）。
+        优先从本地 git 读取；若本地库未更新或不可用，回退到 GitHub API。
+        """
+        # 1) 优先 git log（适用于本地仓库最新且存在 .git）
         try:
-            # 使用不可见分隔符，避免正文换行影响解析
             record_sep = '\x1e'  # 记录分隔
             field_sep = '\x1f'   # 字段分隔
             pretty = f"%h%x1f%an%x1f%ar%x1f%B%x1e"
@@ -414,7 +416,7 @@ class UpdateManager:
                 capture_output=True,
                 text=True
             )
-            if result.returncode == 0:
+            if result.returncode == 0 and result.stdout.strip():
                 raw = result.stdout
                 logs = []
                 for rec in raw.split(record_sep):
@@ -429,9 +431,33 @@ class UpdateManager:
                             'date': rel_date.strip(),
                             'message': message.strip()
                         })
-                return {'success': True, 'logs': logs}
+                if logs:
+                    return {'success': True, 'logs': logs}
         except Exception as e:
-            logging.error(f"获取更新日志失败: {e}")
+            logging.warning(f"本地git日志不可用: {e}")
+
+        # 2) 回退 GitHub API（保证即使ZIP更新也能拿到最新）
+        try:
+            headers = {}
+            github_token = os.getenv('GITHUB_TOKEN')
+            if github_token:
+                headers['Authorization'] = f'token {github_token}'
+            url = f"{self.github_api}/commits?sha={self.branch}&per_page={max(1,int(limit))}"
+            resp = requests.get(url, headers=headers, timeout=10)
+            if resp.status_code == 200:
+                logs = []
+                for item in resp.json():
+                    logs.append({
+                        'hash': item.get('sha','')[:7],
+                        'author': (item.get('commit',{}).get('author',{}) or {}).get('name',''),
+                        'date': (item.get('commit',{}).get('author',{}) or {}).get('date',''),
+                        'message': (item.get('commit',{}) or {}).get('message','')
+                    })
+                return {'success': True, 'logs': logs}
+            else:
+                logging.error(f"GitHub API 获取日志失败: HTTP {resp.status_code}")
+        except Exception as e:
+            logging.error(f"GitHub API 获取日志异常: {e}")
         return {'success': False, 'logs': []}
 
 
