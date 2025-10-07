@@ -210,7 +210,7 @@
             padding: 8px;
         }
 
-        .mobile-logo { display:flex; align-items:center; gap:8px; font-size: 1.1rem; font-weight:700; background: linear-gradient(135deg, var(--primary), var(--secondary)); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+        .mobile-logo { display:flex; align-items:center; gap:8px; }
         .mobile-logo img { width:24px; height:24px; border-radius:6px; object-fit:contain; }
 
         /* 主内容区 */
@@ -767,7 +767,7 @@
             padding: 0 16px;
             z-index: 900;
         }
-        .header-left { display:flex; align-items:center; gap:10px; }
+        .header-left { display:none; }
         .app-logo { width: 28px; height: 28px; border-radius:6px; object-fit: contain; }
         .header-right { display:flex; align-items:center; gap:12px; }
         .user-chip { display:flex; align-items:center; gap:10px; padding:8px 12px; background: rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); border-radius:10px; }
@@ -784,7 +784,7 @@
     <!-- 移动端顶部栏 -->
     <div class="mobile-header">
         <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
-        <div class="mobile-logo"><img src="{{ url_for('static', filename='img/logo.png') }}" alt="logo"/> <span>色花堂助手</span></div>
+        <div class="mobile-logo"><img src="{{ url_for('static', filename='img/logo.png') }}" alt="logo"/></div>
         <div></div>
     </div>
 
