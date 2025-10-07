@@ -211,7 +211,7 @@
         }
 
         .mobile-logo { display:flex; align-items:center; gap:8px; }
-        .mobile-logo img { width:24px; height:24px; border-radius:6px; object-fit:contain; }
+        .mobile-logo img { width:36px; height:36px; border-radius:6px; object-fit:contain; }
 
         /* 主内容区 */
         .main-content {
@@ -773,6 +773,23 @@
         .user-chip { display:flex; align-items:center; gap:10px; padding:8px 12px; background: rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); border-radius:10px; }
         .user-avatar { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; background: rgba(99,102,241,0.25); }
         .user-subtitle { font-size:12px; color:#94a3b8; }
+        /* 用户菜单（右上角） */
+        .user-menu { position: relative; }
+        .user-menu-btn {
+            display:flex; align-items:center; gap:8px; padding:8px 12px;
+            background: rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08);
+            border-radius:10px; cursor:pointer; color:#e2e8f0;
+        }
+        .user-menu-btn .avatar { width:28px; height:28px; border-radius:50%; background: rgba(99,102,241,0.25); display:flex; align-items:center; justify-content:center; }
+        .dropdown-menu {
+            position:absolute; right:0; top:44px; min-width:160px; padding:8px; border-radius:10px;
+            background: rgba(15,23,42,0.95); border: 1px solid rgba(255,255,255,0.06);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.35); display:none; z-index:1002;
+        }
+        .dropdown-menu.show { display:block; }
+        .dropdown-item { display:flex; align-items:center; gap:8px; padding:8px 10px; color:#cbd5e1; border-radius:8px; cursor:pointer; }
+        .dropdown-item:hover { background: rgba(255,255,255,0.06); color:#ffffff; }
+        .dropdown-sep { height:1px; margin:6px 0; background: rgba(255,255,255,0.06); }
         @media (max-width: 768px) {
             .header-bar { left: 0; height: 56px; padding: 0 12px; }
             .user-subtitle { display:none; }
@@ -785,7 +802,19 @@
     <div class="mobile-header">
         <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
         <div class="mobile-logo"><img src="{{ url_for('static', filename='img/logo.png') }}" alt="logo"/></div>
-        <div></div>
+        <div class="user-menu">
+            <div class="user-menu-btn" onclick="toggleUserMenu('mobileUserMenu')">
+                <div class="avatar">👤</div>
+            </div>
+            <div class="dropdown-menu" id="mobileUserMenu">
+                <div class="dropdown-item" onclick="startBot()">▶️ 启动机器人</div>
+                <div class="dropdown-item" onclick="stopBot()">⏹ 停止机器人</div>
+                <div class="dropdown-item" onclick="restartBot()">🔄 重启机器人</div>
+                <div class="dropdown-sep"></div>
+                <div class="dropdown-item" onclick="showPage('logs')">📋 查看日志</div>
+                <div class="dropdown-item" onclick="logout()">🚪 退出登录</div>
+            </div>
+        </div>
     </div>
 
     <!-- 侧边栏 -->
@@ -862,14 +891,20 @@
             <div style="font-size:14px; color:#e2e8f0; font-weight:600;">色花堂助手</div>
         </div>
         <div class="header-right">
-            <div class="user-chip">
-                <div class="user-avatar">👤</div>
-                <div>
+            <div class="user-menu">
+                <div class="user-menu-btn" onclick="toggleUserMenu('desktopUserMenu')">
+                    <div class="avatar">👤</div>
                     <div style="font-weight:600;">{{ username }}</div>
-                    <div class="user-subtitle">管理员</div>
+                </div>
+                <div class="dropdown-menu" id="desktopUserMenu">
+                    <div class="dropdown-item" onclick="startBot()">▶️ 启动机器人</div>
+                    <div class="dropdown-item" onclick="stopBot()">⏹ 停止机器人</div>
+                    <div class="dropdown-item" onclick="restartBot()">🔄 重启机器人</div>
+                    <div class="dropdown-sep"></div>
+                    <div class="dropdown-item" onclick="showPage('logs')">📋 查看日志</div>
+                    <div class="dropdown-item" onclick="logout()">🚪 退出登录</div>
                 </div>
             </div>
-            <button class="logout-btn" onclick="logout()" style="padding:8px 12px; border:none; border-radius:10px; background: linear-gradient(135deg, #ef4444, #dc2626); color:#fff;">退出登录</button>
         </div>
     </header>
 
@@ -2339,6 +2374,21 @@
         setInterval(updateLogs, 2000);
         setInterval(updateReplies, 5000);
         setInterval(updateRecentReplies, 5000);
+
+        // 切换右上角用户菜单
+        function toggleUserMenu(id) {
+            const menu = document.getElementById(id);
+            if (!menu) return;
+            const isShow = menu.classList.contains('show');
+            document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
+            if (!isShow) menu.classList.add('show');
+        }
+
+        // 重启机器人（先停后启）
+        function restartBot() {
+            stopBot();
+            setTimeout(() => startBot(), 800);
+        }
 
         // 点击外部关闭侧边栏（移动端）
         document.addEventListener('click', function(event) {
