@@ -211,7 +211,7 @@
         }
 
         .mobile-logo { display:flex; align-items:center; gap:8px; }
-        .mobile-logo img { width:36px; height:36px; border-radius:6px; object-fit:contain; }
+        .mobile-logo img { width:200px; height:36px; border-radius:6px; object-fit:contain; }
 
         /* 主内容区 */
         .main-content {
@@ -763,13 +763,13 @@
             border-bottom: 1px solid rgba(255,255,255,0.06);
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: flex-end; /* PC 顶部用户名靠右 */
             padding: 0 16px;
             z-index: 900;
         }
         .header-left { display:none; }
         .app-logo { width: 28px; height: 28px; border-radius:6px; object-fit: contain; }
-        .header-right { display:flex; align-items:center; gap:12px; }
+        .header-right { display:flex; align-items:center; gap:12px; margin-left:auto; }
         .user-chip { display:flex; align-items:center; gap:10px; padding:8px 12px; background: rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); border-radius:10px; }
         .user-avatar { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; background: rgba(99,102,241,0.25); }
         .user-subtitle { font-size:12px; color:#94a3b8; }
