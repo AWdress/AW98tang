@@ -221,7 +221,9 @@ def index():
 def get_status():
     """获取机器人状态"""
     config = load_config()
-    today_stats = stats_manager.get_today_stats()
+    # 读取最新统计（避免与机器人线程各自内存不同步）
+    fresh_stats_manager = StatsManager()
+    today_stats = fresh_stats_manager.get_today_stats()
     response = jsonify({
         'status': bot_status,
         'config': {
@@ -247,7 +249,8 @@ def get_status():
 @login_required
 def get_stats():
     """获取详细统计信息"""
-    response = jsonify(stats_manager.get_all_stats())
+    # 每次请求从磁盘读取最新统计，确保实时性
+    response = jsonify(StatsManager().get_all_stats())
     # 禁用缓存，确保每次都获取最新数据
     response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
     response.headers['Pragma'] = 'no-cache'
