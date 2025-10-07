@@ -757,6 +757,33 @@
         ::-webkit-scrollbar-thumb:hover {
             background: rgba(236, 72, 153, 0.7);
         }
+
+        .header-bar {
+            position: fixed;
+            left: var(--sidebar-width);
+            right: 0;
+            top: 0;
+            height: 60px;
+            background: rgba(15,23,42,0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            z-index: 900;
+        }
+        .header-left { display:flex; align-items:center; gap:10px; }
+        .app-logo { width: 28px; height: 28px; border-radius:6px; object-fit: contain; }
+        .header-right { display:flex; align-items:center; gap:12px; }
+        .user-chip { display:flex; align-items:center; gap:10px; padding:8px 12px; background: rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); border-radius:10px; }
+        .user-avatar { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; background: rgba(99,102,241,0.25); }
+        .user-subtitle { font-size:12px; color:#94a3b8; }
+        @media (max-width: 768px) {
+            .header-bar { left: 0; height: 56px; padding: 0 12px; }
+            .user-subtitle { display:none; }
+            .main-content { padding-top: 76px !important; }
+        }
     </style>
 </head>
 <body>
@@ -835,13 +862,17 @@
     </nav>
 
     <!-- 顶部栏（右上角登录信息） -->
-    <header style="position:fixed; left: var(--sidebar-width); right:0; top:0; height:60px; background: rgba(15,23,42,0.8); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.06); display:flex; align-items:center; justify-content:flex-end; padding:0 16px; z-index:900;">
-        <div style="display:flex; align-items:center; gap:12px;">
-            <div style="display:flex; align-items:center; gap:10px; padding:8px 12px; background: rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); border-radius:10px;">
-                <div style="width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; background: rgba(99,102,241,0.25);">👤</div>
+    <header class="header-bar">
+        <div class="header-left">
+            <img class="app-logo" src="/static/img/logo.png" alt="logo">
+            <div style="font-size:14px; color:#e2e8f0; font-weight:600;">色花堂助手</div>
+        </div>
+        <div class="header-right">
+            <div class="user-chip">
+                <div class="user-avatar">👤</div>
                 <div>
                     <div style="font-weight:600;">{{ username }}</div>
-                    <div style="font-size:12px; color:#94a3b8;">管理员</div>
+                    <div class="user-subtitle">管理员</div>
                 </div>
             </div>
             <button class="logout-btn" onclick="logout()" style="padding:8px 12px; border:none; border-radius:10px; background: linear-gradient(135deg, #ef4444, #dc2626); color:#fff;">退出登录</button>
