@@ -98,7 +98,7 @@ docker-compose logs -f AW98tang
 2. 找到你的Token，点击编辑
 3. **Repository access** 选择:
    - ✅ **"Only select repositories"**
-   - 选择 **"AWdress/AW98tamg"** ← 重要！
+   - 选择 **"AWdress/AW98tang"** ← 重要！
 4. **Repository permissions** 设置:
    ```
    ✅ Contents: Read and write
@@ -148,10 +148,10 @@ docker-compose exec AW98tang bash
 curl -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/user
 
 # 测试仓库访问
-curl -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/repos/AWdress/AW98tamg
+curl -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/repos/AWdress/AW98tang
 
 # 测试Git操作
-git ls-remote https://x-access-token:${GITHUB_TOKEN}@github.com/AWdress/AW98tamg.git HEAD
+git ls-remote https://x-access-token:${GITHUB_TOKEN}@github.com/AWdress/AW98tang.git HEAD
 ```
 
 ### 预期结果
@@ -192,7 +192,7 @@ git ls-remote https://x-access-token:${GITHUB_TOKEN}@github.com/AWdress/AW98tamg
 
 **解决:** 
 - 方案A: 改用Classic Token（推荐）
-- 方案B: 在Token设置中明确授权 AWdress/AW98tamg 仓库
+- 方案B: 在Token设置中明确授权 AWdress/AW98tang 仓库
 
 ### Q3: Token包含特殊字符？
 
@@ -213,7 +213,7 @@ echo "Token内容: ${GITHUB_TOKEN}"
 **检查:**
 ```bash
 # 访问仓库看是否需要登录
-curl -I https://github.com/AWdress/AW98tamg
+curl -I https://github.com/AWdress/AW98tang
 ```
 
 如果返回404或需要认证，说明是私有仓库，必须使用Token
@@ -258,7 +258,7 @@ environment:
 cat > test_token.sh << 'EOF'
 #!/bin/bash
 TOKEN="你的token"
-curl -H "Authorization: token $TOKEN" https://api.github.com/repos/AWdress/AW98tamg
+curl -H "Authorization: token $TOKEN" https://api.github.com/repos/AWdress/AW98tang
 EOF
 
 chmod +x test_token.sh

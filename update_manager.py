@@ -17,7 +17,7 @@ class UpdateManager:
     def __init__(self):
         self.current_version = self.get_current_version_from_readme()
         self.repo_owner = "AWdress"
-        self.repo_name = "AW98tamg"
+        self.repo_name = "AW98tang"
         self.github_api = f"https://api.github.com/repos/{self.repo_owner}/{self.repo_name}"
         self.branch = "main"
         

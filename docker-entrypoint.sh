@@ -109,7 +109,7 @@ zip_fallback_update() {
 
     # 解析 owner/repo
     OWNER="AWdress"
-    REPO="AW98tamg"
+    REPO="AW98tang"
     if [ -n "$GIT_REMOTE" ]; then
         # 提取像 https://github.com/owner/repo.git 的 owner 与 repo
         OWNER_TMP=$(echo "$GIT_REMOTE" | sed -E 's#.*github.com/([^/]+)/([^/.]+).*#\1#')
