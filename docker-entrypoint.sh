@@ -205,14 +205,14 @@ else
     
     # 设置默认仓库地址
     if [ -z "$GIT_REMOTE" ]; then
-        echo "[Git] GIT_REMOTE 未设置，使用默认仓库 AW98tamg"
+        echo "[Git] GIT_REMOTE 未设置，使用默认仓库 AW98tang"
         if [ -n "$GITHUB_TOKEN" ]; then
             # 去除 Token 中可能的空格和换行符
             CLEAN_TOKEN=$(echo "$GITHUB_TOKEN" | tr -d '[:space:]')
-            GIT_REMOTE="https://${CLEAN_TOKEN}@github.com/AWdress/AW98tamg.git"
+            GIT_REMOTE="https://${CLEAN_TOKEN}@github.com/AWdress/AW98tang.git"
             echo "[Git] 使用 GitHub Token 进行认证"
         else
-            GIT_REMOTE="https://github.com/AWdress/AW98tamg.git"
+            GIT_REMOTE="https://github.com/AWdress/AW98tang.git"
             echo "[Git] 未设置 GITHUB_TOKEN，使用公开访问"
         fi
     fi

@@ -36,7 +36,7 @@ services:
       
       # Git 自动更新配置（可选）
       - SKIP_GIT=true                                # 跳过Docker启动时的Git操作（推荐）
-      # - GIT_REMOTE=https://github.com/AWdress/AW98tamg.git  # 自定义仓库地址（默认AW98tamg）
+      # - GIT_REMOTE=https://github.com/AWdress/AW98tang.git  # 自定义仓库地址（默认AW98tang）
       # - GIT_BRANCH=main                              # 自定义分支（默认main）
       
       # GitHub Token配置（Web界面更新必需！）
