@@ -258,8 +258,39 @@
     </div>
 
     <script>
-        // 自动聚焦到用户名输入框
-        document.getElementById('username').focus();
+        // 页面加载时，检查是否保存了用户名
+        window.addEventListener('DOMContentLoaded', function() {
+            const savedUsername = localStorage.getItem('remembered_username');
+            const rememberCheckbox = document.getElementById('remember');
+            
+            if (savedUsername) {
+                document.getElementById('username').value = savedUsername;
+                rememberCheckbox.checked = true;
+            }
+        });
+
+        // 表单提交时，处理"记住我"功能
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const username = document.getElementById('username').value;
+            const rememberCheckbox = document.getElementById('remember');
+            
+            if (rememberCheckbox.checked) {
+                // 保存用户名到localStorage
+                localStorage.setItem('remembered_username', username);
+            } else {
+                // 清除保存的用户名
+                localStorage.removeItem('remembered_username');
+            }
+        });
+
+        // 自动聚焦到用户名输入框（如果为空）或密码框（如果用户名已填充）
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        if (usernameInput.value) {
+            passwordInput.focus();
+        } else {
+            usernameInput.focus();
+        }
 
         // 回车键提交
         document.addEventListener('keypress', function(e) {
@@ -269,7 +300,6 @@
         });
 
         // 显示密码切换（可选）
-        const passwordInput = document.getElementById('password');
         passwordInput.addEventListener('dblclick', function() {
             this.type = this.type === 'password' ? 'text' : 'password';
         });

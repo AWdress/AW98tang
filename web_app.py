@@ -9,7 +9,7 @@ import os
 import threading
 import time
 import schedule
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask import Flask, render_template, jsonify, request, redirect, url_for, session, flash
 from stats_manager import StatsManager
 from selenium_auto_bot import SeleniumAutoBot
@@ -186,11 +186,21 @@ def login():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
+        remember = request.form.get('remember')  # 获取"记住我"选项
         
         if username in TEST_USERS and TEST_USERS[username] == password:
             session['logged_in'] = True
             session['username'] = username
-            logging.info(f"用户 {username} 登录成功")
+            
+            # 如果勾选了"记住我"，设置session永久有效（7天）
+            if remember:
+                session.permanent = True
+                app.permanent_session_lifetime = timedelta(days=7)
+                logging.info(f"用户 {username} 登录成功（已记住7天）")
+            else:
+                session.permanent = False
+                logging.info(f"用户 {username} 登录成功")
+            
             return redirect(url_for('index'))
         else:
             logging.warning(f"登录失败: {username}")
