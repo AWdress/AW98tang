@@ -639,15 +639,48 @@
         }
 
         .form-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
 
         .form-group {
             display: flex;
             flex-direction: column;
             gap: 8px;
+        }
+
+        /* 配置卡片网格布局 */
+        .config-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 24px;
+            margin-bottom: 20px;
+        }
+
+        .config-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s;
+        }
+
+        .config-card:hover {
+            border-color: rgba(236, 72, 153, 0.3);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .config-card h3 {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #f1f5f9;
+            font-size: 1.1rem;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .form-group label {
@@ -1069,8 +1102,9 @@
             </div>
 
             <form class="config-form" id="configForm" onsubmit="saveConfig(event)">
-                <!-- 基础配置区域 -->
-                <div class="stat-card" style="margin-bottom: 30px;">
+                <div class="config-grid">
+                    <!-- 基础配置区域 -->
+                    <div class="config-card">
                     <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: #f1f5f9;">
                         <span style="font-size: 1.5rem;">🔐</span>
                         <span>基础配置</span>
@@ -1112,12 +1146,12 @@
                     </div>
                 </div>
 
-                <!-- 回复功能配置 -->
-                <div class="stat-card" style="margin-bottom: 30px;">
-                    <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: #f1f5f9;">
-                        <span style="font-size: 1.5rem;">💬</span>
-                        <span>回复功能配置</span>
-                    </h3>
+                    <!-- 回复功能配置 -->
+                    <div class="config-card">
+                        <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: #f1f5f9;">
+                            <span style="font-size: 1.5rem;">💬</span>
+                            <span>回复功能配置</span>
+                        </h3>
 
                     <div class="form-row">
                         <div class="form-group">
@@ -1159,12 +1193,12 @@
                     </div>
                 </div>
 
-                <!-- 签到和定时任务配置 -->
-                <div class="stat-card" style="margin-bottom: 30px;">
-                    <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: #f1f5f9;">
-                        <span style="font-size: 1.5rem;">⏰</span>
-                        <span>签到与定时任务</span>
-                    </h3>
+                    <!-- 签到和定时任务配置 -->
+                    <div class="config-card">
+                        <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: #f1f5f9;">
+                            <span style="font-size: 1.5rem;">⏰</span>
+                            <span>签到与定时任务</span>
+                        </h3>
 
                     <div class="form-row">
                         <div class="form-group">
@@ -1220,12 +1254,12 @@
                     </div>
                 </div>
 
-                <!-- 测试模式配置 -->
-                <div class="stat-card" style="margin-bottom: 30px;">
-                    <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: #f1f5f9;">
-                        <span style="font-size: 1.5rem;">🧪</span>
-                        <span>测试模式</span>
-                    </h3>
+                    <!-- 测试模式配置 -->
+                    <div class="config-card">
+                        <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: #f1f5f9;">
+                            <span style="font-size: 1.5rem;">🧪</span>
+                            <span>测试模式</span>
+                        </h3>
 
                     <div class="form-row">
                         <div class="form-group">
@@ -1261,12 +1295,12 @@
                     </div>
                 </div>
 
-                <!-- 目标论坛配置 -->
-                <div class="stat-card" style="margin-bottom: 30px;">
-                    <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: #f1f5f9;">
-                        <span style="font-size: 1.5rem;">📍</span>
-                        <span>目标论坛</span>
-                    </h3>
+                    <!-- 目标论坛配置 -->
+                    <div class="config-card">
+                        <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: #f1f5f9;">
+                            <span style="font-size: 1.5rem;">📍</span>
+                            <span>目标论坛</span>
+                        </h3>
 
                     <div class="form-group">
                         <label>论坛ID列表（每行一个，格式：fid=141）</label>
@@ -1287,12 +1321,12 @@
                     </div>
                 </div>
 
-                <!-- 过滤规则配置 -->
-                <div class="stat-card" style="margin-bottom: 30px;">
-                    <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: #f1f5f9;">
-                        <span style="font-size: 1.5rem;">🚫</span>
-                        <span>过滤规则</span>
-                    </h3>
+                    <!-- 过滤规则配置 -->
+                    <div class="config-card">
+                        <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: #f1f5f9;">
+                            <span style="font-size: 1.5rem;">🚫</span>
+                            <span>过滤规则</span>
+                        </h3>
 
                     <div class="form-group">
                         <label>跳过的关键词（每行一个）</label>
@@ -1319,10 +1353,10 @@
                     </div>
                 </div>
 
-                <!-- 回复模板配置 -->
-                <div class="stat-card" style="margin-bottom: 30px;">
-                    <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: #f1f5f9;">
-                        <span style="font-size: 1.5rem;">📝</span>
+                    <!-- 回复模板配置 -->
+                    <div class="config-card">
+                        <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: #f1f5f9;">
+                            <span style="font-size: 1.5rem;">📝</span>
                         <span>回复模板</span>
                     </h3>
 
@@ -1341,10 +1375,10 @@
                     </div>
                 </div>
 
-                <!-- 其他配置 -->
-                <div class="stat-card" style="margin-bottom: 30px;">
-                    <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: #f1f5f9;">
-                        <span style="font-size: 1.5rem;">⚙️</span>
+                    <!-- 其他配置 -->
+                    <div class="config-card">
+                        <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: #f1f5f9;">
+                            <span style="font-size: 1.5rem;">⚙️</span>
                         <span>其他配置</span>
                     </h3>
 
@@ -1361,10 +1395,10 @@
                     </div>
                 </div>
 
-                <!-- 代理配置区域 -->
-                <div class="stat-card" style="margin-top: 30px;">
-                    <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: #f1f5f9;">
-                        <span style="font-size: 1.5rem;">🌐</span>
+                    <!-- 代理配置区域 -->
+                    <div class="config-card">
+                        <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: #f1f5f9;">
+                            <span style="font-size: 1.5rem;">🌐</span>
                         <span>网络代理配置</span>
                     </h3>
                     
@@ -1418,10 +1452,10 @@
                     </div>
                 </div>
 
-                <!-- AI配置区域 -->
-                <div class="stat-card" style="margin-top: 30px;">
-                    <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: #f1f5f9;">
-                        <span style="font-size: 1.5rem;">🤖</span>
+                    <!-- AI配置区域 -->
+                    <div class="config-card">
+                        <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: #f1f5f9;">
+                            <span style="font-size: 1.5rem;">🤖</span>
                         <span>AI智能回复配置</span>
                     </h3>
                     
@@ -1492,6 +1526,7 @@
                         </ul>
                     </div>
                 </div>
+                </div> <!-- 关闭 config-grid -->
 
                 <div class="action-buttons" style="margin-top: 30px;">
                     <button type="submit" class="btn btn-primary">💾 保存配置</button>
