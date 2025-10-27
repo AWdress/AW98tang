@@ -650,21 +650,13 @@
             gap: 6px;
         }
 
-        /* 配置卡片网格布局 - 瀑布流效果 */
+        /* 配置卡片网格布局 - 固定3列 */
         .config-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            grid-auto-rows: auto;
+            grid-template-columns: repeat(3, 1fr);
             gap: 14px;
             margin-bottom: 16px;
             align-items: start;
-        }
-        
-        /* 响应式：大屏幕下显示更多列 */
-        @media (min-width: 1400px) {
-            .config-grid {
-                grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            }
         }
 
         .config-card {
@@ -675,6 +667,38 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
             transition: all 0.3s;
             height: fit-content;
+        }
+        
+        /* 内容多的卡片 - 占据2列（横向宽） */
+        .config-card.card-large {
+            grid-column: span 2;
+        }
+        
+        /* 内容特别多的卡片 - 占据整行 */
+        .config-card.card-full {
+            grid-column: span 3;
+        }
+        
+        /* 响应式：中等屏幕2列 */
+        @media (max-width: 1400px) {
+            .config-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .config-card.card-large,
+            .config-card.card-full {
+                grid-column: span 2;
+            }
+        }
+        
+        /* 响应式：小屏幕1列 */
+        @media (max-width: 900px) {
+            .config-grid {
+                grid-template-columns: 1fr;
+            }
+            .config-card.card-large,
+            .config-card.card-full {
+                grid-column: span 1;
+            }
         }
 
         .config-card:hover {
@@ -1114,7 +1138,7 @@
             <form class="config-form" id="configForm" onsubmit="saveConfig(event)">
                 <div class="config-grid">
                     <!-- 基础配置区域 -->
-                    <div class="config-card">
+                    <div class="config-card card-large">
                     <h3>
                         <span style="font-size: 1.5rem;">🔐</span>
                         <span>基础配置</span>
@@ -1157,7 +1181,7 @@
                 </div>
 
                     <!-- 回复功能配置 -->
-                    <div class="config-card">
+                    <div class="config-card card-large">
                         <h3>
                             <span style="font-size: 1.5rem;">💬</span>
                             <span>回复功能配置</span>
@@ -1406,7 +1430,7 @@
                 </div>
 
                     <!-- 代理配置区域 -->
-                    <div class="config-card">
+                    <div class="config-card card-large">
                         <h3>
                             <span style="font-size: 1.5rem;">🌐</span>
                         <span>网络代理配置</span>
@@ -1463,7 +1487,7 @@
                 </div>
 
                     <!-- AI配置区域 -->
-                    <div class="config-card">
+                    <div class="config-card card-large">
                         <h3>
                             <span style="font-size: 1.5rem;">🤖</span>
                         <span>AI智能回复配置</span>
