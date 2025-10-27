@@ -862,19 +862,13 @@
                 <span>版本信息</span>
             </div>
             <div style="font-size:0.85rem; color:#94a3b8; display:flex; align-items:center; justify-content:space-between;">
-                <span>当前</span>
+                <span>当前版本</span>
                 <span id="sidebar-current-version" style="color:#e2e8f0; font-weight:600;">-</span>
-            </div>
-            <div style="font-size:0.75rem; color:#64748b; margin-top:2px;">
-                <span id="sidebar-current-commit">Commit: -</span>
             </div>
             <div style="height:8px;"></div>
             <div style="font-size:0.85rem; color:#94a3b8; display:flex; align-items:center; justify-content:space-between;">
-                <span>最新</span>
+                <span>最新版本</span>
                 <span id="sidebar-latest-version" style="color:#e2e8f0; font-weight:600;">-</span>
-            </div>
-            <div style="font-size:0.75rem; color:#64748b; margin-top:2px;">
-                <span id="sidebar-latest-commit">Commit: -</span>
             </div>
             <div style="height:10px;"></div>
             <div id="sidebar-update-status" style="font-size:0.85rem; color:#94a3b8; display:flex; align-items:center; gap:6px;">
@@ -1486,13 +1480,11 @@
                     <div class="stat-item" style="flex: 1; background: rgba(139, 92, 246, 0.1); padding: 20px; border-radius: 12px; border: 1px solid rgba(139, 92, 246, 0.2);">
                         <div style="font-size: 0.85rem; color: #a78bfa; margin-bottom: 8px;">当前版本</div>
                         <div style="font-size: 1.5rem; font-weight: 700; color: #fff;" id="current-version">加载中...</div>
-                        <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 8px;" id="current-commit">Commit: 未知</div>
                     </div>
                     
                     <div class="stat-item" style="flex: 1; background: rgba(16, 185, 129, 0.1); padding: 20px; border-radius: 12px; border: 1px solid rgba(16, 185, 129, 0.2);">
                         <div style="font-size: 0.85rem; color: #6ee7b7; margin-bottom: 8px;">最新版本</div>
                         <div style="font-size: 1.5rem; font-weight: 700; color: #fff;" id="latest-version">-</div>
-                        <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 8px;" id="latest-commit">Commit: -</div>
                     </div>
                     
                     <div class="stat-item" style="flex: 1; background: rgba(59, 130, 246, 0.1); padding: 20px; border-radius: 12px; border: 1px solid rgba(59, 130, 246, 0.2);">
@@ -2011,7 +2003,6 @@
                 
                 if (data.success) {
                     document.getElementById('current-version').textContent = data.current_version;
-                    document.getElementById('current-commit').textContent = 'Commit: ' + data.current_commit;
                 } else {
                     showToast(false, '获取版本信息失败: ' + data.message);
                 }
@@ -2042,9 +2033,7 @@
                 
                 // 更新版本信息
                 document.getElementById('current-version').textContent = data.current_version;
-                document.getElementById('current-commit').textContent = 'Commit: ' + data.current_commit;
-                document.getElementById('latest-version').textContent = data.latest_release ? data.latest_release.version : data.current_version;
-                document.getElementById('latest-commit').textContent = 'Commit: ' + data.latest_commit;
+                document.getElementById('latest-version').textContent = data.latest_commit || data.current_version;
                 
                 if (data.has_update) {
                     statusEl.innerHTML = '<span style="font-size: 1.5rem;">🎉</span><span style="margin-left: 8px;">发现新版本</span>';
@@ -2252,19 +2241,13 @@
                 const data = await resp.json();
 
                 if (data.success) {
-                    const latestVersion = data.latest_release ? data.latest_release.version : (data.current_version || '-');
-                    const latestCommit = data.latest_commit || '-';
-
+                    const latestVersion = data.latest_commit || data.current_version || '-';
                     // 更新侧边栏版本区域
                     const scv = document.getElementById('sidebar-current-version');
-                    const scc = document.getElementById('sidebar-current-commit');
                     const slv = document.getElementById('sidebar-latest-version');
-                    const slc = document.getElementById('sidebar-latest-commit');
                     const sus = document.getElementById('sidebar-update-status');
                     if (scv) scv.textContent = data.current_version || '-';
-                    if (scc) scc.textContent = 'Commit: ' + (data.current_commit || '-');
                     if (slv) slv.textContent = latestVersion;
-                    if (slc) slc.textContent = 'Commit: ' + latestCommit;
 
                     if (sus) {
                         if (data.has_update) {
@@ -2276,9 +2259,7 @@
 
                     // 同步系统更新页面右侧卡片
                     const latestVersionEl = document.getElementById('latest-version');
-                    const latestCommitEl = document.getElementById('latest-commit');
                     if (latestVersionEl) latestVersionEl.textContent = latestVersion;
-                    if (latestCommitEl) latestCommitEl.textContent = 'Commit: ' + latestCommit;
                     const updateBtn = document.getElementById('do-update-btn');
                     if (updateBtn && data.has_update) updateBtn.style.display = 'inline-block';
                 } else {

@@ -1,3 +1,0 @@
-warning: in the working copy of 'docker-entrypoint.sh', LF will be replaced by CRLF the next time Git touches it
-docker-compose.yml
-docker-entrypoint.sh

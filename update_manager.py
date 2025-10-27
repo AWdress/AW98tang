@@ -36,14 +36,9 @@ class UpdateManager:
         return "v3.3"  # 默认版本
     
     def get_current_version(self):
-        """获取当前版本：优先使用 Release 版本；无 Release 再读取 README。"""
-        try:
-            rel = self.get_latest_release()
-            if rel and rel.get('version'):
-                return rel['version']
-        except Exception:
-            pass
-        return self.get_current_version_from_readme()
+        """获取当前版本：直接返回commit hash"""
+        commit_hash = self.get_local_commit_hash()
+        return commit_hash if commit_hash else "未知"
     
     def get_local_commit_hash(self):
         """获取当前代码对应的commit标识。
