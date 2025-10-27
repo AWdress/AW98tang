@@ -22,23 +22,28 @@ class UpdateManager:
         self.branch = "main"
         
     def get_current_version_from_readme(self):
-        """从README.md读取当前版本"""
+        """从README.md读取当前版本（从 ## 🔥 最新更新 标题提取）"""
         try:
             with open('README.md', 'r', encoding='utf-8') as f:
                 content = f.read()
-                # 查找版本信息行：**版本**：v3.3
+                # 匹配格式：## 🔥 最新更新（v3.7）或 ## 🔥 最新更新（v3.7.1）
                 import re
-                match = re.search(r'\*\*版本\*\*[：:]\s*(v[\d.]+)', content)
+                match = re.search(r'##\s*🔥\s*最新更新[（(](v[\d.]+)[）)]', content)
                 if match:
                     return match.group(1)
         except Exception as e:
             logging.warning(f"无法从README读取版本: {e}")
-        return "v3.3"  # 默认版本
+        return "v3.7"  # 默认版本
     
     def get_current_version(self):
-        """获取当前版本：直接返回commit hash"""
+        """获取当前版本：格式 v3.7 (commit)"""
+        version = self.get_current_version_from_readme()  # v3.7 或 v3.7.1
         commit_hash = self.get_local_commit_hash()
-        return commit_hash if commit_hash else "未知"
+        
+        if commit_hash:
+            return f"{version} ({commit_hash})"
+        else:
+            return version
     
     def get_local_commit_hash(self):
         """获取当前代码对应的commit标识。
@@ -387,7 +392,8 @@ class UpdateManager:
             except Exception:
                 pass
 
-            new_version = self.get_current_version_from_readme()
+            # 获取完整版本号：v3.7.1 (commit)
+            new_version = self.get_current_version()
             new_commit = parsed_commit or 'zip'
             return {
                 'success': True,
