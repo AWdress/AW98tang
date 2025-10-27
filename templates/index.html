@@ -1995,6 +1995,17 @@
 
         // ========== 系统更新相关函数 ==========
         
+        // 格式化版本号：让括号内容变小
+        function formatVersion(version) {
+            if (!version || version === '-') return version;
+            // 匹配格式：v3.7.1 (0269359)
+            const match = version.match(/^(v[\d.]+)\s*\(([^)]+)\)$/);
+            if (match) {
+                return `${match[1]} <span style="font-size:0.75em;opacity:0.7;">(${match[2]})</span>`;
+            }
+            return version;
+        }
+        
         // 刷新版本信息
         async function refreshVersion() {
             try {
@@ -2002,7 +2013,8 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    document.getElementById('current-version').textContent = data.current_version;
+                    const el = document.getElementById('current-version');
+                    if (el) el.innerHTML = formatVersion(data.current_version);
                 } else {
                     showToast(false, '获取版本信息失败: ' + data.message);
                 }
@@ -2032,8 +2044,10 @@
                 }
                 
                 // 更新版本信息
-                document.getElementById('current-version').textContent = data.current_version;
-                document.getElementById('latest-version').textContent = data.latest_commit || data.current_version;
+                const cvEl = document.getElementById('current-version');
+                const lvEl = document.getElementById('latest-version');
+                if (cvEl) cvEl.innerHTML = formatVersion(data.current_version);
+                if (lvEl) lvEl.innerHTML = formatVersion(data.latest_version || data.current_version);
                 
                 if (data.has_update) {
                     statusEl.innerHTML = '<span style="font-size: 1.5rem;">🎉</span><span style="margin-left: 8px;">发现新版本</span>';
@@ -2241,13 +2255,13 @@
                 const data = await resp.json();
 
                 if (data.success) {
-                    const latestVersion = data.latest_commit || data.current_version || '-';
+                    const latestVersion = data.latest_version || data.current_version || '-';
                     // 更新侧边栏版本区域
                     const scv = document.getElementById('sidebar-current-version');
                     const slv = document.getElementById('sidebar-latest-version');
                     const sus = document.getElementById('sidebar-update-status');
-                    if (scv) scv.textContent = data.current_version || '-';
-                    if (slv) slv.textContent = latestVersion;
+                    if (scv) scv.innerHTML = formatVersion(data.current_version || '-');
+                    if (slv) slv.innerHTML = formatVersion(latestVersion);
 
                     if (sus) {
                         if (data.has_update) {
@@ -2259,7 +2273,7 @@
 
                     // 同步系统更新页面右侧卡片
                     const latestVersionEl = document.getElementById('latest-version');
-                    if (latestVersionEl) latestVersionEl.textContent = latestVersion;
+                    if (latestVersionEl) latestVersionEl.innerHTML = formatVersion(latestVersion);
                     const updateBtn = document.getElementById('do-update-btn');
                     if (updateBtn && data.has_update) updateBtn.style.display = 'inline-block';
                 } else {

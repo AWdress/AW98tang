@@ -130,15 +130,22 @@ class UpdateManager:
             # 优先获取 Release 信息
             release_info = self.get_latest_release()
             if release_info and release_info.get('version'):
-                has_update = (current_version != release_info['version'])
                 # 同时也返回最近一次提交信息用于参考
                 remote_info = self.get_latest_commit_info() or {}
+                remote_commit = remote_info.get('sha', '')
+                
+                # 构建最新版本号：vX.X.X (commit)
+                readme_version = self.get_current_version_from_readme()
+                latest_version = f"{readme_version} ({remote_commit})" if remote_commit else readme_version
+                
+                has_update = (current_version != latest_version)
                 return {
                     'success': True,
                     'has_update': has_update,
                     'current_version': current_version,
                     'current_commit': local_hash or '未知',
-                    'latest_commit': remote_info.get('sha'),
+                    'latest_version': latest_version,
+                    'latest_commit': remote_commit,
                     'latest_message': remote_info.get('message'),
                     'latest_date': remote_info.get('date'),
                     'latest_release': release_info
@@ -151,13 +158,20 @@ class UpdateManager:
                     'success': False,
                     'message': '无法连接到GitHub，请检查网络'
                 }
-            has_update = local_hash != remote_info['sha'] if local_hash else True
+            remote_commit = remote_info['sha']
+            
+            # 构建最新版本号：vX.X.X (commit)
+            readme_version = self.get_current_version_from_readme()
+            latest_version = f"{readme_version} ({remote_commit})"
+            
+            has_update = local_hash != remote_commit if local_hash else True
             return {
                 'success': True,
                 'has_update': has_update,
                 'current_version': current_version,
                 'current_commit': local_hash or '未知',
-                'latest_commit': remote_info['sha'],
+                'latest_version': latest_version,
+                'latest_commit': remote_commit,
                 'latest_message': remote_info['message'],
                 'latest_date': remote_info['date'],
                 'latest_release': None
