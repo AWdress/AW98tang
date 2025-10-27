@@ -1176,8 +1176,28 @@
                             </select>
                         </div>
                         <div class="form-group">
+                            <label>调度模式</label>
+                            <select id="schedule_mode" onchange="toggleScheduleMode()">
+                                <option value="single">单一时间</option>
+                                <option value="multiple">多时间段</option>
+                                <option value="cron">Cron表达式</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="schedule_single_group">
                             <label>定时运行时间</label>
                             <input type="time" id="config_schedule_time">
+                        </div>
+                        <div class="form-group" id="schedule_multiple_group" style="display:none;">
+                            <label>多时间段 <span style="font-size:0.85em;color:#94a3b8;">(每行一个时间，格式：HH:MM)</span></label>
+                            <textarea id="config_schedule_times" rows="4" style="width:100%;padding:8px;background:#1e293b;border:1px solid #334155;border-radius:8px;color:#e2e8f0;font-family:monospace;" placeholder="03:00&#10;09:00&#10;15:00&#10;21:00"></textarea>
+                        </div>
+                        <div class="form-group" id="schedule_cron_group" style="display:none;">
+                            <label>Cron表达式 <span style="font-size:0.85em;color:#94a3b8;">(5个字段)</span></label>
+                            <input type="text" id="config_schedule_cron" placeholder="0 3,9,15,21 * * *" style="width:100%;padding:8px;background:#1e293b;border:1px solid #334155;border-radius:8px;color:#e2e8f0;font-family:monospace;">
+                            <div style="margin-top:8px;font-size:0.85em;color:#94a3b8;">
+                                <div>示例：0 3,9,15,21 * * * （每天3,9,15,21点）</div>
+                                <div>格式：分 时 日 月 周</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1800,6 +1820,18 @@
                 .catch(err => showToast(false, '请求失败: ' + err));
         }
 
+        // 切换调度模式
+        function toggleScheduleMode() {
+            const mode = document.getElementById('schedule_mode').value;
+            const singleGroup = document.getElementById('schedule_single_group');
+            const multipleGroup = document.getElementById('schedule_multiple_group');
+            const cronGroup = document.getElementById('schedule_cron_group');
+            
+            singleGroup.style.display = mode === 'single' ? 'block' : 'none';
+            multipleGroup.style.display = mode === 'multiple' ? 'block' : 'none';
+            cronGroup.style.display = mode === 'cron' ? 'block' : 'none';
+        }
+
         // 加载配置
         function loadConfig() {
             fetch('/api/config')
@@ -1828,7 +1860,19 @@
                     // 签到和定时任务
                     document.getElementById('config_checkin').value = config.enable_daily_checkin ? 'true' : 'false';
                     document.getElementById('config_scheduler').value = config.enable_scheduler ? 'true' : 'false';
-                    document.getElementById('config_schedule_time').value = config.schedule_time || '03:00';
+                    
+                    // 判断调度模式
+                    if (config.schedule_cron) {
+                        document.getElementById('schedule_mode').value = 'cron';
+                        document.getElementById('config_schedule_cron').value = config.schedule_cron;
+                    } else if (config.schedule_times && Array.isArray(config.schedule_times)) {
+                        document.getElementById('schedule_mode').value = 'multiple';
+                        document.getElementById('config_schedule_times').value = config.schedule_times.join('\n');
+                    } else {
+                        document.getElementById('schedule_mode').value = 'single';
+                        document.getElementById('config_schedule_time').value = config.schedule_time || '03:00';
+                    }
+                    toggleScheduleMode();
                     
                     // 测试模式
                     document.getElementById('config_test_mode').value = config.enable_test_mode ? 'true' : 'false';
@@ -1911,7 +1955,24 @@
                     // 签到和定时任务
                     currentConfig.enable_daily_checkin = document.getElementById('config_checkin').value === 'true';
                     currentConfig.enable_scheduler = document.getElementById('config_scheduler').value === 'true';
-                    currentConfig.schedule_time = document.getElementById('config_schedule_time').value;
+                    
+                    // 根据调度模式保存不同配置
+                    const scheduleMode = document.getElementById('schedule_mode').value;
+                    // 清空其他模式的配置
+                    delete currentConfig.schedule_time;
+                    delete currentConfig.schedule_times;
+                    delete currentConfig.schedule_cron;
+                    
+                    if (scheduleMode === 'cron') {
+                        currentConfig.schedule_cron = document.getElementById('config_schedule_cron').value.trim();
+                    } else if (scheduleMode === 'multiple') {
+                        const timesText = document.getElementById('config_schedule_times').value;
+                        currentConfig.schedule_times = timesText.split('\n')
+                            .map(t => t.trim())
+                            .filter(t => t && /^\d{1,2}:\d{2}$/.test(t));
+                    } else {
+                        currentConfig.schedule_time = document.getElementById('config_schedule_time').value;
+                    }
                     
                     // 测试模式
                     currentConfig.enable_test_mode = document.getElementById('config_test_mode').value === 'true';
