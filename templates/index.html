@@ -650,13 +650,13 @@
             gap: 6px;
         }
 
-        /* 配置卡片网格布局 - 固定3列 */
+        /* 配置卡片网格布局 - 固定3列精细布局 */
         .config-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 14px;
             margin-bottom: 16px;
-            align-items: start;
+            grid-auto-rows: auto;
         }
 
         .config-card {
@@ -666,17 +666,57 @@
             padding: 18px;
             border: 1px solid rgba(255, 255, 255, 0.1);
             transition: all 0.3s;
-            height: fit-content;
         }
         
-        /* 内容多的卡片 - 占据2列（横向宽） */
-        .config-card.card-large {
-            grid-column: span 2;
+        /* 第一行：基础配置(2列) + 签到任务(1列,跨2行) */
+        .config-card.card-basic {
+            grid-column: 1 / 3;
+            grid-row: 1;
         }
         
-        /* 内容特别多的卡片 - 占据整行 */
-        .config-card.card-full {
-            grid-column: span 3;
+        .config-card.card-schedule {
+            grid-column: 3;
+            grid-row: 1 / 3;
+        }
+        
+        /* 第二行：回复功能配置(2列) */
+        .config-card.card-reply {
+            grid-column: 1 / 3;
+            grid-row: 2;
+        }
+        
+        /* 第三行：测试模式、目标论坛、过滤规则(各1列) */
+        .config-card.card-test {
+            grid-column: 1;
+            grid-row: 3;
+        }
+        
+        .config-card.card-forum {
+            grid-column: 2;
+            grid-row: 3;
+        }
+        
+        .config-card.card-filter {
+            grid-column: 3;
+            grid-row: 3;
+        }
+        
+        /* 第四行：回复模板(整行) */
+        .config-card.card-template {
+            grid-column: 1 / 4;
+            grid-row: 4;
+        }
+        
+        /* 第五行：代理配置(整行) */
+        .config-card.card-proxy {
+            grid-column: 1 / 4;
+            grid-row: 5;
+        }
+        
+        /* 第六行：AI配置(整行) */
+        .config-card.card-ai {
+            grid-column: 1 / 4;
+            grid-row: 6;
         }
         
         /* 响应式：中等屏幕2列 */
@@ -684,9 +724,26 @@
             .config-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
-            .config-card.card-large,
-            .config-card.card-full {
-                grid-column: span 2;
+            .config-card.card-basic,
+            .config-card.card-reply {
+                grid-column: 1 / 2;
+                grid-row: auto;
+            }
+            .config-card.card-schedule {
+                grid-column: 2;
+                grid-row: auto;
+            }
+            .config-card.card-test,
+            .config-card.card-forum,
+            .config-card.card-filter {
+                grid-column: auto;
+                grid-row: auto;
+            }
+            .config-card.card-template,
+            .config-card.card-proxy,
+            .config-card.card-ai {
+                grid-column: 1 / 3;
+                grid-row: auto;
             }
         }
         
@@ -695,9 +752,9 @@
             .config-grid {
                 grid-template-columns: 1fr;
             }
-            .config-card.card-large,
-            .config-card.card-full {
-                grid-column: span 1;
+            .config-card {
+                grid-column: 1 !important;
+                grid-row: auto !important;
             }
         }
 
@@ -1138,7 +1195,7 @@
             <form class="config-form" id="configForm" onsubmit="saveConfig(event)">
                 <div class="config-grid">
                     <!-- 基础配置区域 -->
-                    <div class="config-card card-large">
+                    <div class="config-card card-basic">
                     <h3>
                         <span style="font-size: 1.5rem;">🔐</span>
                         <span>基础配置</span>
@@ -1181,7 +1238,7 @@
                 </div>
 
                     <!-- 回复功能配置 -->
-                    <div class="config-card card-large">
+                    <div class="config-card card-reply">
                         <h3>
                             <span style="font-size: 1.5rem;">💬</span>
                             <span>回复功能配置</span>
@@ -1228,7 +1285,7 @@
                 </div>
 
                     <!-- 签到和定时任务配置 -->
-                    <div class="config-card">
+                    <div class="config-card card-schedule">
                         <h3>
                             <span style="font-size: 1.5rem;">⏰</span>
                             <span>签到与定时任务</span>
@@ -1289,10 +1346,10 @@
                 </div>
 
                     <!-- 测试模式配置 -->
-                    <div class="config-card">
+                    <div class="config-card card-test">
                         <h3>
                             <span style="font-size: 1.5rem;">🧪</span>
-                            <span>测试模式</span>
+                            <span>测试模式与其他配置</span>
                         </h3>
 
                     <div class="form-row">
@@ -1317,20 +1374,30 @@
                                 <option value="true">是（不点击签到）</option>
                             </select>
                         </div>
+                        <div class="form-group">
+                            <label>日志级别</label>
+                            <select id="config_log_level">
+                                <option value="DEBUG">DEBUG（调试）</option>
+                                <option value="INFO">INFO（信息）</option>
+                                <option value="WARNING">WARNING（警告）</option>
+                                <option value="ERROR">ERROR（错误）</option>
+                            </select>
+                        </div>
                     </div>
 
                     <div style="margin-top: 10px; padding: 10px; background: rgba(245, 158, 11, 0.1); border-left: 3px solid #f59e0b; border-radius: 4px; font-size: 0.85rem; color: #cbd5e1;">
-                        <strong>⚠️ 测试模式说明：</strong>
+                        <strong>⚠️ 说明：</strong>
                         <ul style="margin: 8px 0 0 20px; line-height: 1.8;">
                             <li><strong>全局测试模式：</strong>启用后所有功能都不实际提交</li>
                             <li><strong>测试回复：</strong>只测试回复，输入内容但不发送</li>
                             <li><strong>测试签到：</strong>只测试签到，找到按钮但不点击</li>
+                            <li><strong>日志级别：</strong>DEBUG最详细，ERROR最简洁</li>
                         </ul>
                     </div>
                 </div>
 
                     <!-- 目标论坛配置 -->
-                    <div class="config-card">
+                    <div class="config-card card-forum">
                         <h3>
                             <span style="font-size: 1.5rem;">📍</span>
                             <span>目标论坛</span>
@@ -1356,7 +1423,7 @@
                 </div>
 
                     <!-- 过滤规则配置 -->
-                    <div class="config-card">
+                    <div class="config-card card-filter">
                         <h3>
                             <span style="font-size: 1.5rem;">🚫</span>
                             <span>过滤规则</span>
@@ -1388,7 +1455,7 @@
                 </div>
 
                     <!-- 回复模板配置 -->
-                    <div class="config-card">
+                    <div class="config-card card-template">
                         <h3>
                             <span style="font-size: 1.5rem;">📝</span>
                         <span>回复模板</span>
@@ -1409,28 +1476,8 @@
                     </div>
                 </div>
 
-                    <!-- 其他配置 -->
-                    <div class="config-card">
-                        <h3>
-                            <span style="font-size: 1.5rem;">⚙️</span>
-                        <span>其他配置</span>
-                    </h3>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>日志级别</label>
-                            <select id="config_log_level">
-                                <option value="DEBUG">DEBUG（调试）</option>
-                                <option value="INFO">INFO（信息）</option>
-                                <option value="WARNING">WARNING（警告）</option>
-                                <option value="ERROR">ERROR（错误）</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
                     <!-- 代理配置区域 -->
-                    <div class="config-card card-large">
+                    <div class="config-card card-proxy">
                         <h3>
                             <span style="font-size: 1.5rem;">🌐</span>
                         <span>网络代理配置</span>
@@ -1487,7 +1534,7 @@
                 </div>
 
                     <!-- AI配置区域 -->
-                    <div class="config-card card-large">
+                    <div class="config-card card-ai">
                         <h3>
                             <span style="font-size: 1.5rem;">🤖</span>
                         <span>AI智能回复配置</span>
