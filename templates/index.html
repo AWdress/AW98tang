@@ -647,7 +647,7 @@
         .form-group {
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 4px; /* 减少表单项之间的间距 */
         }
 
         /* 配置卡片网格布局 - 固定3列精细布局 */
@@ -663,7 +663,7 @@
             background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(10px);
             border-radius: 12px;
-            padding: 18px;
+            padding: 14px; /* 减少内边距，从18px改为14px */
             border: 1px solid rgba(255, 255, 255, 0.1);
             transition: all 0.3s;
         }
@@ -764,13 +764,13 @@
         }
 
         .config-card h3 {
-            margin-bottom: 14px;
+            margin-bottom: 10px; /* 减少标题下边距，从14px改为10px */
             display: flex;
             align-items: center;
             gap: 8px;
             color: #f1f5f9;
             font-size: 1.05rem;
-            padding-bottom: 10px;
+            padding-bottom: 8px; /* 减少标题内边距，从10px改为8px */
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
@@ -782,7 +782,7 @@
 
         .form-group input,
         .form-group select {
-            padding: 10px 14px;
+            padding: 8px 12px; /* 减少输入框内边距，从10px 14px改为8px 12px */
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 8px;
             background: rgba(255, 255, 255, 0.05);
@@ -1325,10 +1325,10 @@
                     </div>
                     
                     <!-- 多时间段配置 -->
-                    <div id="schedule_multiple_group" style="display:none;margin-top:10px;">
+                    <div id="schedule_multiple_group" style="display:none;margin-top:8px;">
                         <div class="form-group" style="margin:0;">
                             <label>多时间段 <span style="font-size:0.85em;color:#94a3b8;">(每行一个时间，格式：HH:MM)</span></label>
-                            <textarea id="config_schedule_times" rows="4" style="width:100%;padding:8px;background:#1e293b;border:1px solid #334155;border-radius:8px;color:#e2e8f0;font-family:monospace;" placeholder="03:00&#10;09:00&#10;15:00&#10;21:00"></textarea>
+                            <textarea id="config_schedule_times" rows="4" style="width:100%;padding:6px 8px;background:#1e293b;border:1px solid #334155;border-radius:8px;color:#e2e8f0;font-family:monospace;" placeholder="03:00&#10;09:00&#10;15:00&#10;21:00"></textarea>
                         </div>
                     </div>
                     
@@ -1385,9 +1385,9 @@
                         </div>
                     </div>
 
-                    <div style="margin-top: 10px; padding: 10px; background: rgba(245, 158, 11, 0.1); border-left: 3px solid #f59e0b; border-radius: 4px; font-size: 0.85rem; color: #cbd5e1;">
+                    <div style="margin-top: 8px; padding: 8px; background: rgba(245, 158, 11, 0.1); border-left: 3px solid #f59e0b; border-radius: 4px; font-size: 0.85rem; color: #cbd5e1;">
                         <strong>⚠️ 说明：</strong>
-                        <ul style="margin: 8px 0 0 20px; line-height: 1.8;">
+                        <ul style="margin: 6px 0 0 18px; line-height: 1.7;">
                             <li><strong>全局测试模式：</strong>启用后所有功能都不实际提交</li>
                             <li><strong>测试回复：</strong>只测试回复，输入内容但不发送</li>
                             <li><strong>测试签到：</strong>只测试签到，找到按钮但不点击</li>
@@ -1405,15 +1405,15 @@
 
                     <div class="form-group">
                         <label>论坛ID列表（每行一个，格式：fid=141）</label>
-                        <textarea id="config_target_forums" rows="3" style="width: 100%; padding: 12px; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; background: rgba(255,255,255,0.05); color: #f1f5f9; font-size: 0.95rem; resize: vertical; font-family: monospace;" placeholder="fid=141&#10;fid=2&#10;fid=36"></textarea>
+                        <textarea id="config_target_forums" rows="3" style="width: 100%; padding: 6px 8px; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; background: rgba(255,255,255,0.05); color: #f1f5f9; font-size: 0.9rem; resize: vertical; font-family: monospace;" placeholder="fid=141&#10;fid=2&#10;fid=36"></textarea>
                     </div>
 
                     <div class="form-group">
                         <label>论坛名称映射（格式：fid=141|网友原创区，每行一个）</label>
-                        <textarea id="config_forum_names" rows="4" style="width: 100%; padding: 12px; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; background: rgba(255,255,255,0.05); color: #f1f5f9; font-size: 0.95rem; resize: vertical; font-family: monospace;" placeholder="fid=141|网友原创区&#10;fid=2|亚洲无码原创区&#10;fid=36|亚洲有码原创区"></textarea>
+                        <textarea id="config_forum_names" rows="4" style="width: 100%; padding: 6px 8px; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; background: rgba(255,255,255,0.05); color: #f1f5f9; font-size: 0.9rem; resize: vertical; font-family: monospace;" placeholder="fid=141|网友原创区&#10;fid=2|亚洲无码原创区&#10;fid=36|亚洲有码原创区"></textarea>
                     </div>
 
-                    <div style="margin-top: 10px; padding: 10px; background: rgba(59, 130, 246, 0.1); border-left: 3px solid #3b82f6; border-radius: 4px; font-size: 0.85rem; color: #cbd5e1;">
+                    <div style="margin-top: 8px; padding: 8px; background: rgba(59, 130, 246, 0.1); border-left: 3px solid #3b82f6; border-radius: 4px; font-size: 0.85rem; color: #cbd5e1;">
                         <strong>💡 论坛配置说明：</strong>
                         <ul style="margin: 8px 0 0 20px; line-height: 1.8;">
                             <li>论坛ID可以从论坛URL中获取，如 forum.php?mod=forumdisplay&fid=141</li>
@@ -1431,22 +1431,22 @@
 
                     <div class="form-group">
                         <label>跳过的关键词（每行一个）</label>
-                        <textarea id="config_skip_keywords" rows="5" style="width: 100%; padding: 12px; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; background: rgba(255,255,255,0.05); color: #f1f5f9; font-size: 0.95rem; resize: vertical; font-family: monospace;" placeholder="公告&#10;通知&#10;规则&#10;版规"></textarea>
+                        <textarea id="config_skip_keywords" rows="5" style="width: 100%; padding: 6px 8px; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; background: rgba(255,255,255,0.05); color: #f1f5f9; font-size: 0.9rem; resize: vertical; font-family: monospace;" placeholder="公告&#10;通知&#10;规则&#10;版规"></textarea>
                     </div>
 
                     <div class="form-group">
                         <label>跳过的标题前缀（每行一个）</label>
-                        <textarea id="config_skip_prefixes" rows="4" style="width: 100%; padding: 12px; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; background: rgba(255,255,255,0.05); color: #f1f5f9; font-size: 0.95rem; resize: vertical; font-family: monospace;" placeholder="【公告】&#10;【通知】&#10;公告:"></textarea>
+                        <textarea id="config_skip_prefixes" rows="4" style="width: 100%; padding: 6px 8px; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; background: rgba(255,255,255,0.05); color: #f1f5f9; font-size: 0.9rem; resize: vertical; font-family: monospace;" placeholder="【公告】&#10;【通知】&#10;公告:"></textarea>
                     </div>
 
                     <div class="form-group">
                         <label>跳过的管理员用户名（每行一个）</label>
-                        <textarea id="config_admin_usernames" rows="3" style="width: 100%; padding: 12px; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; background: rgba(255,255,255,0.05); color: #f1f5f9; font-size: 0.95rem; resize: vertical; font-family: monospace;" placeholder="admin&#10;管理员&#10;版主"></textarea>
+                        <textarea id="config_admin_usernames" rows="3" style="width: 100%; padding: 6px 8px; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; background: rgba(255,255,255,0.05); color: #f1f5f9; font-size: 0.9rem; resize: vertical; font-family: monospace;" placeholder="admin&#10;管理员&#10;版主"></textarea>
                     </div>
 
-                    <div style="margin-top: 10px; padding: 10px; background: rgba(59, 130, 246, 0.1); border-left: 3px solid #3b82f6; border-radius: 4px; font-size: 0.85rem; color: #cbd5e1;">
+                    <div style="margin-top: 8px; padding: 8px; background: rgba(59, 130, 246, 0.1); border-left: 3px solid #3b82f6; border-radius: 4px; font-size: 0.85rem; color: #cbd5e1;">
                         <strong>💡 过滤规则说明：</strong>
-                        <ul style="margin: 8px 0 0 20px; line-height: 1.8;">
+                        <ul style="margin: 6px 0 0 18px; line-height: 1.7;">
                             <li>包含关键词的帖子会被跳过</li>
                             <li>以指定前缀开头的帖子会被跳过</li>
                             <li>管理员发布的帖子会被跳过</li>
@@ -1463,12 +1463,12 @@
 
                     <div class="form-group">
                         <label>备用回复模板（每行一个，智能回复关闭时使用）</label>
-                        <textarea id="config_reply_templates" rows="8" style="width: 100%; padding: 12px; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; background: rgba(255,255,255,0.05); color: #f1f5f9; font-size: 0.95rem; resize: vertical; font-family: monospace;" placeholder="谢谢楼主分享！&#10;感谢分享，收藏了！&#10;好资源，支持一下！"></textarea>
+                        <textarea id="config_reply_templates" rows="8" style="width: 100%; padding: 6px 8px; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; background: rgba(255,255,255,0.05); color: #f1f5f9; font-size: 0.9rem; resize: vertical; font-family: monospace;" placeholder="谢谢楼主分享！&#10;感谢分享，收藏了！&#10;好资源，支持一下！"></textarea>
                     </div>
 
-                    <div style="margin-top: 10px; padding: 10px; background: rgba(59, 130, 246, 0.1); border-left: 3px solid #3b82f6; border-radius: 4px; font-size: 0.85rem; color: #cbd5e1;">
+                    <div style="margin-top: 8px; padding: 8px; background: rgba(59, 130, 246, 0.1); border-left: 3px solid #3b82f6; border-radius: 4px; font-size: 0.85rem; color: #cbd5e1;">
                         <strong>💡 回复模板说明：</strong>
-                        <ul style="margin: 8px 0 0 20px; line-height: 1.8;">
+                        <ul style="margin: 6px 0 0 18px; line-height: 1.7;">
                             <li>仅在"启用智能回复"和"启用AI回复"都关闭时使用</li>
                             <li>系统会随机选择一条作为回复内容</li>
                             <li>建议添加多条不同的模板，增加多样性</li>
@@ -1522,9 +1522,9 @@
                         </div>
                     </div>
 
-                    <div style="margin-top: 10px; padding: 10px; background: rgba(59, 130, 246, 0.1); border-left: 3px solid #3b82f6; border-radius: 4px; font-size: 0.85rem; color: #cbd5e1;">
+                    <div style="margin-top: 8px; padding: 8px; background: rgba(59, 130, 246, 0.1); border-left: 3px solid #3b82f6; border-radius: 4px; font-size: 0.85rem; color: #cbd5e1;">
                         <strong>💡 代理配置说明：</strong>
-                        <ul style="margin: 8px 0 0 20px; line-height: 1.8;">
+                        <ul style="margin: 6px 0 0 18px; line-height: 1.7;">
                             <li><strong>启用代理：</strong>如果需要通过代理访问网络，启用此选项</li>
                             <li><strong>Git 更新使用代理：</strong>如果 GitHub 需要代理访问，建议启用</li>
                             <li><strong>Selenium 使用代理：</strong>如果目标网站需要代理访问，才启用</li>
@@ -1597,9 +1597,9 @@
                         <button type="button" class="btn btn-info" onclick="testAI()">🧪 测试AI连接</button>
                     </div>
 
-                    <div style="margin-top: 10px; padding: 10px; background: rgba(59, 130, 246, 0.1); border-left: 3px solid #3b82f6; border-radius: 4px; font-size: 0.85rem; color: #cbd5e1;">
+                    <div style="margin-top: 8px; padding: 8px; background: rgba(59, 130, 246, 0.1); border-left: 3px solid #3b82f6; border-radius: 4px; font-size: 0.85rem; color: #cbd5e1;">
                         <strong>💡 支持的AI接口：</strong>
-                        <ul style="margin: 8px 0 0 20px; line-height: 1.8;">
+                        <ul style="margin: 6px 0 0 18px; line-height: 1.7;">
                             <li>OpenAI (GPT-3.5/GPT-4)</li>
                             <li>Claude (Claude-3)</li>
                             <li>国产AI：智谱AI、DeepSeek、月之暗面（兼容OpenAI格式）</li>
