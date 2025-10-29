@@ -22,7 +22,7 @@ class UpdateManager:
         self.branch = "main"
         
     def get_current_version_from_readme(self):
-        """从README.md读取当前版本（从 ## 🔥 最新更新 标题提取）"""
+        """从本地README.md读取当前版本（从 ## 🔥 最新更新 标题提取）"""
         try:
             with open('README.md', 'r', encoding='utf-8') as f:
                 content = f.read()
@@ -34,6 +34,32 @@ class UpdateManager:
         except Exception as e:
             logging.warning(f"无法从README读取版本: {e}")
         return "v3.7"  # 默认版本
+    
+    def get_remote_version_from_readme(self):
+        """从GitHub远程README.md读取最新版本号"""
+        try:
+            headers = {}
+            github_token = os.getenv('GITHUB_TOKEN')
+            if github_token:
+                headers['Authorization'] = f'token {github_token}'
+            
+            # 使用 raw.githubusercontent.com 直接读取文件内容
+            raw_url = f"https://raw.githubusercontent.com/{self.repo_owner}/{self.repo_name}/{self.branch}/README.md"
+            response = requests.get(raw_url, headers=headers, timeout=10)
+            
+            if response.status_code == 200:
+                content = response.text
+                import re
+                match = re.search(r'##\s*🔥\s*最新更新[（(](v[\d.]+)[）)]', content)
+                if match:
+                    remote_version = match.group(1)
+                    logging.info(f"从GitHub读取到最新版本: {remote_version}")
+                    return remote_version
+        except Exception as e:
+            logging.warning(f"从GitHub读取README版本失败: {e}")
+        
+        # 失败时返回None，让调用方使用本地版本号作为备用
+        return None
     
     def get_current_version(self):
         """获取当前版本：格式 v3.7 (commit)"""
@@ -134,9 +160,15 @@ class UpdateManager:
                 remote_info = self.get_latest_commit_info() or {}
                 remote_commit = remote_info.get('sha', '')
                 
+                # 🔧 修复：从GitHub远程读取最新版本号，而不是本地README
+                remote_version = self.get_remote_version_from_readme()
+                if not remote_version:
+                    # 如果获取失败，降级使用本地版本号
+                    remote_version = self.get_current_version_from_readme()
+                    logging.warning("无法获取远程版本号，使用本地版本号作为参考")
+                
                 # 构建最新版本号：vX.X.X (commit)
-                readme_version = self.get_current_version_from_readme()
-                latest_version = f"{readme_version} ({remote_commit})" if remote_commit else readme_version
+                latest_version = f"{remote_version} ({remote_commit})" if remote_commit else remote_version
                 
                 has_update = (current_version != latest_version)
                 return {
@@ -160,9 +192,15 @@ class UpdateManager:
                 }
             remote_commit = remote_info['sha']
             
+            # 🔧 修复：从GitHub远程读取最新版本号，而不是本地README
+            remote_version = self.get_remote_version_from_readme()
+            if not remote_version:
+                # 如果获取失败，降级使用本地版本号
+                remote_version = self.get_current_version_from_readme()
+                logging.warning("无法获取远程版本号，使用本地版本号作为参考")
+            
             # 构建最新版本号：vX.X.X (commit)
-            readme_version = self.get_current_version_from_readme()
-            latest_version = f"{readme_version} ({remote_commit})"
+            latest_version = f"{remote_version} ({remote_commit})"
             
             has_update = local_hash != remote_commit if local_hash else True
             return {

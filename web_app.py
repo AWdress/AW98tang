@@ -110,66 +110,151 @@ def save_config(config):
         logging.error(f"保存配置失败: {e}")
         return False
 
+def check_today_checkin_status():
+    """检查今天是否已经签到成功"""
+    try:
+        fresh_stats = StatsManager()
+        today_stats = fresh_stats.get_today_stats()
+        return today_stats.get('checkin_success', False)
+    except Exception as e:
+        logging.error(f"检查签到状态失败: {e}")
+        return False
+
 def run_bot():
-    """在后台线程中运行机器人"""
+    """在后台线程中运行机器人（带重试机制）"""
     global bot_instance, bot_status, bot_stop_flag
     
-    try:
-        bot_stop_flag = False  # 重置停止标志
-        bot_status['running'] = True
-        bot_status['last_start'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        
-        bot_instance = SeleniumAutoBot()
-        bot_instance.stop_flag = lambda: bot_stop_flag  # 传递停止标志检查函数
-        
-        # 检查停止标志
-        if bot_stop_flag:
-            logging.info("🛑 机器人已被停止")
-            bot_status['running'] = False
-            return
-        
-        # 设置浏览器
-        if not bot_instance.setup_driver():
-            bot_status['running'] = False
-            bot_status['last_error'] = "浏览器启动失败"
-            return
-        
-        # 检查停止标志
-        if bot_stop_flag:
-            logging.info("🛑 机器人已被停止")
-            bot_status['running'] = False
-            return
-        
-        # 登录
-        if not bot_instance.login():
-            bot_status['running'] = False
-            bot_status['last_error'] = "登录失败"
-            return
-        
-        # 检查停止标志
-        if bot_stop_flag:
-            logging.info("🛑 机器人已被停止")
-            bot_status['running'] = False
-            return
-        
-        # 运行自动化任务
-        bot_instance.run_auto_tasks()
-        
-        bot_status['running'] = False
-        bot_status['last_stop'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        
-    except Exception as e:
-        logging.error(f"机器人运行错误: {e}")
-        bot_status['running'] = False
-        bot_status['errors'] += 1
-        bot_status['last_error'] = str(e)
-    finally:
-        if bot_instance and bot_instance.driver:
-            try:
-                bot_instance.driver.quit()
-                logging.info("🔚 浏览器已关闭")
-            except:
-                pass
+    # 检查今天是否已经签到成功
+    if check_today_checkin_status():
+        logging.info("✅ 今天已经签到成功，跳过本次运行")
+        return
+    
+    max_retries = 3  # 最大重试次数
+    retry_delay = 300  # 重试间隔（秒）= 5分钟
+    
+    for attempt in range(1, max_retries + 1):
+        try:
+            if attempt > 1:
+                logging.info(f"🔄 第 {attempt}/{max_retries} 次尝试...")
+            else:
+                logging.info("🚀 机器人启动中...")
+            
+            bot_stop_flag = False  # 重置停止标志
+            bot_status['running'] = True
+            bot_status['last_start'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            
+            bot_instance = SeleniumAutoBot()
+            bot_instance.stop_flag = lambda: bot_stop_flag  # 传递停止标志检查函数
+            
+            # 检查停止标志
+            if bot_stop_flag:
+                logging.info("🛑 机器人已被停止")
+                bot_status['running'] = False
+                return
+            
+            # 设置浏览器
+            if not bot_instance.setup_driver():
+                logging.error(f"❌ 第 {attempt} 次尝试 - 浏览器启动失败")
+                bot_status['last_error'] = "浏览器启动失败"
+                if attempt < max_retries:
+                    logging.info(f"⏰ {retry_delay}秒后进行第 {attempt + 1} 次重试...")
+                    time.sleep(retry_delay)
+                    continue
+                else:
+                    bot_status['running'] = False
+                    logging.error("❌ 已达到最大重试次数，任务失败")
+                    return
+            
+            # 检查停止标志
+            if bot_stop_flag:
+                logging.info("🛑 机器人已被停止")
+                bot_status['running'] = False
+                return
+            
+            # 登录
+            if not bot_instance.login():
+                logging.error(f"❌ 第 {attempt} 次尝试 - 登录失败")
+                bot_status['last_error'] = "登录失败"
+                
+                # 关闭浏览器
+                if bot_instance.driver:
+                    try:
+                        bot_instance.driver.quit()
+                    except:
+                        pass
+                
+                if attempt < max_retries:
+                    logging.info(f"⏰ {retry_delay}秒后进行第 {attempt + 1} 次重试...")
+                    time.sleep(retry_delay)
+                    continue
+                else:
+                    bot_status['running'] = False
+                    logging.error("❌ 已达到最大重试次数，任务失败")
+                    return
+            
+            # 检查停止标志
+            if bot_stop_flag:
+                logging.info("🛑 机器人已被停止")
+                bot_status['running'] = False
+                return
+            
+            # 运行自动化任务
+            bot_instance.run_auto_tasks()
+            
+            # 检查签到是否成功
+            if check_today_checkin_status():
+                logging.info("🎉 签到已完成，任务成功")
+                bot_status['running'] = False
+                bot_status['last_stop'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                return
+            else:
+                logging.warning("⚠️ 任务执行完成但签到未成功")
+                if attempt < max_retries:
+                    logging.info(f"⏰ {retry_delay}秒后进行第 {attempt + 1} 次重试...")
+                    # 关闭浏览器
+                    if bot_instance.driver:
+                        try:
+                            bot_instance.driver.quit()
+                        except:
+                            pass
+                    time.sleep(retry_delay)
+                    continue
+                else:
+                    bot_status['running'] = False
+                    bot_status['last_stop'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                    logging.error("❌ 已达到最大重试次数，签到未完成")
+                    return
+            
+        except Exception as e:
+            logging.error(f"❌ 第 {attempt} 次尝试异常: {e}")
+            bot_status['errors'] += 1
+            bot_status['last_error'] = str(e)
+            
+            # 关闭浏览器
+            if bot_instance and bot_instance.driver:
+                try:
+                    bot_instance.driver.quit()
+                except:
+                    pass
+            
+            if attempt < max_retries:
+                logging.info(f"⏰ {retry_delay}秒后进行第 {attempt + 1} 次重试...")
+                time.sleep(retry_delay)
+            else:
+                bot_status['running'] = False
+                logging.error("❌ 已达到最大重试次数，任务失败")
+                return
+        finally:
+            # 确保浏览器被关闭
+            if bot_instance and bot_instance.driver:
+                try:
+                    bot_instance.driver.quit()
+                    logging.info("🔚 浏览器已关闭")
+                except:
+                    pass
+    
+    bot_status['running'] = False
+    bot_status['last_stop'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
 # 登录验证装饰器
 def login_required(f):
