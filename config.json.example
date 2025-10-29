@@ -1,117 +1,80 @@
 {
-  "_comment_基础配置": "论坛账号和安全设置",
   "base_url": "https://sehuatang.org/",
   "username": "你的用户名",
   "password": "你的密码",
-  
-  "_comment_安全提问": "需要在论坛设置中查看自己选择的问题",
-  "security_question_id": "1",
+  "security_question_id": "3",
   "security_answer": "你的安全问题答案",
-  
-  "_安全问题对照表": {
-    "0": "不设置安全提问",
-    "1": "母亲的名字",
-    "2": "爷爷的名字",
-    "3": "父亲出生的城市",
-    "4": "您其中一位老师的名字",
-    "5": "您个人计算机的型号",
-    "6": "您喜欢的餐馆名称",
-    "7": "驾驶执照最后四位数字"
-  },
-  
-  "_comment_回复功能": "自动回复相关配置",
   "enable_auto_reply": true,
-  "enable_smart_reply": true,
-  "max_replies_per_day": 30,
-  "reply_interval": [3600, 7200],
-  
-  "_说明_reply_interval": "回复间隔（秒），格式 [最小值, 最大值]，如 [3600, 7200] 表示 1-2 小时随机间隔",
-  
-  "_comment_签到功能": "每日签到配置",
   "enable_daily_checkin": true,
-  
-  "_说明_签到规则": "论坛要求先回复帖子才能签到",
-  
-  "_comment_测试模式": "用于测试功能，不实际提交",
+  "enable_smart_reply": true,
+  "enable_ai_reply": false,
   "enable_test_mode": false,
   "enable_test_checkin": false,
   "enable_test_reply": false,
-  
-  "_说明_测试模式": {
-    "enable_test_mode": "测试所有功能（回复+签到），不实际提交",
-    "enable_test_checkin": "仅测试签到，找到按钮但不点击",
-    "enable_test_reply": "仅测试回复，输入内容但不发送"
-  },
-  
-  "_comment_定时任务": "自动定时运行配置",
-  "enable_scheduler": false,
-  "schedule_cron": "",
+  "enable_random_delay": false,
+  "enable_scheduler": true,
+  "max_replies_per_day": 3,
+  "reply_interval": [
+    60,
+    120
+  ],
+  "schedule_time": "03:00",
   "schedule_times": [
     "03:00",
     "09:00",
     "15:00",
     "21:00"
   ],
-  
-  "_说明_定时任务": {
-    "enable_scheduler": "启用后会按照配置的时间自动运行",
-    "schedule_cron": "Cron表达式（优先级最高），例如: '0 3,9,15,21 * * *' 表示每天3,9,15,21点运行",
-    "schedule_times": "固定时间点列表（当schedule_cron为空时使用）",
-    "重试机制": "每次运行失败会自动重试3次，每次间隔5分钟",
-    "智能跳过": "如果检测到今天已经签到成功，会自动跳过后续运行"
-  },
-  
-  "_Cron表达式示例": {
-    "每天3点": "0 3 * * *",
-    "每天3,9,15,21点": "0 3,9,15,21 * * *",
-    "每6小时": "0 */6 * * *",
-    "每小时": "0 * * * *",
-    "每30分钟": "*/30 * * * *",
-    "工作日9点": "0 9 * * 1-5",
-    "周末10点": "0 10 * * 0,6"
-  },
-  
-  "_comment_目标论坛": "要回复的论坛ID列表",
+  "schedule_cron": "",
   "target_forums": [
     "fid=141"
   ],
-  
-  "_说明_target_forums": "可以添加多个论坛 ID，如 ['fid=141', 'fid=142']",
-  
-  "_comment_论坛名称映射": "论坛ID对应的友好名称（用于Web显示）",
   "forum_names": {
     "fid=141": "网友原创区",
     "fid=2": "亚洲无码原创区",
-    "fid=36": "亚洲有码原创区"
+    "fid=36": "亚洲有码原创区",
+    "fid=37": "中字原创区",
+    "fid=103": "国产原创区"
   },
-  
-  "_说明_forum_names": "添加新论坛时，建议在此配置对应的名称，否则将显示原始ID",
-  
-  "_comment_过滤规则": "跳过不需要回复的帖子",
   "skip_keywords": [
-    "公告", "通知", "规则", "版规", "置顶", "精华",
-    "2024年永久访问本站方法", "APP下载", "白名单", 
-    "邀请码", "访问方法", "申诉", "发布器"
+    "公告",
+    "通知",
+    "规则",
+    "版规",
+    "置顶",
+    "精华",
+    "热门",
+    "2024年永久访问本站方法",
+    "APP下载",
+    "白名单",
+    "邀请码",
+    "访问方法",
+    "屏蔽",
+    "封禁",
+    "违规",
+    "删除",
+    "警告",
+    "发布器",
+    "最新方法",
+    "申诉",
+    "二次验证",
+    "禁止申诉"
   ],
-  
   "skip_prefixes": [
-    "【公告】", "【通知】", "【规则】", "【版规】",
-    "公告:", "通知:", "规则:", "版规:"
+    "【公告】",
+    "【通知】",
+    "【规则】",
+    "【版规】",
+    "公告:",
+    "通知:",
+    "规则:",
+    "版规:"
   ],
-  
-  "_说明_过滤规则": {
-    "skip_keywords": "包含这些关键词的帖子会被跳过",
-    "skip_prefixes": "以这些前缀开头的帖子会被跳过"
-  },
-  
-  "_comment_管理员": "避免回复管理员的帖子",
   "admin_usernames": [
     "admin",
     "管理员",
     "版主"
   ],
-  
-  "_comment_通用回复模板": "备用回复内容（当智能回复关闭时使用）",
   "reply_templates": [
     "谢谢楼主分享！",
     "感谢分享，收藏了！",
@@ -122,44 +85,93 @@
     "收藏了，慢慢看！",
     "好东西，必须支持！",
     "楼主威武，感谢分享！",
-    "优质内容，点赞！"
+    "优质内容，点赞！",
+    "感谢原创内容！",
+    "楼主创作辛苦了！",
+    "原创不易，支持！",
+    "好文章，学到了！",
+    "楼主才华横溢！"
   ],
-  
-  "_说明_reply_templates": "仅在 enable_smart_reply=false 时使用，智能回复模式下系统会自动生成内容",
-  
-  "_comment_AI智能回复": "AI接口配置（可选，启用后使用AI生成回复）",
-  "enable_ai_reply": false,
+  "smart_reply_templates": {
+    "general": [
+      "内容很不错！",
+      "楼主辛苦了！",
+      "感谢分享！",
+      "支持原创！",
+      "很有意思！"
+    ],
+    "resource": [
+      "资源很棒，感谢分享！",
+      "好东西，必须收藏！",
+      "链接有效，谢谢楼主！",
+      "福利满满，支持！",
+      "资源质量很高！"
+    ],
+    "photo": [
+      "照片拍得真不错！",
+      "颜值很高啊，赞！",
+      "摄影技术很棒！",
+      "美女如云，眼福不浅！",
+      "拍摄角度很好，学习了！"
+    ],
+    "video": [
+      "视频质量不错！",
+      "内容很精彩，感谢分享！",
+      "制作用心，点赞！",
+      "画质清晰，很棒！",
+      "剪辑得很好，专业！"
+    ],
+    "story": [
+      "好精彩的故事！情节很吸引人！",
+      "写得真好，很有代入感！",
+      "故事很棒，期待后续！",
+      "楼主文笔不错，赞一个！",
+      "情节设计很巧妙，学习了！"
+    ],
+    "tutorial": [
+      "教程很实用，收藏了！",
+      "步骤很详细，谢谢分享！",
+      "方法很好用，学会了！",
+      "攻略很全面，赞！",
+      "技巧很实用，感谢！"
+    ],
+    "discussion": [
+      "观点很有道理！",
+      "分析得很透彻！",
+      "说得对，深有同感！",
+      "角度很独特，学习了！",
+      "讨论很有意义！"
+    ],
+    "question": [
+      "问题很有意思！",
+      "希望能帮到你！",
+      "这个问题我也遇到过！",
+      "建议可以试试其他方法！",
+      "楼主加油，会解决的！"
+    ],
+    "review": [
+      "评价很中肯！",
+      "推荐得很好，参考了！",
+      "体验分享很有用！",
+      "测评很详细，赞！",
+      "感受很真实！"
+    ]
+  },
   "ai_api_type": "openai",
-  "ai_api_url": "https://api.openai.com/v1/chat/completions",
+  "ai_api_url": "",
   "ai_api_key": "",
   "ai_model": "gpt-3.5-turbo",
   "ai_temperature": 0.8,
   "ai_max_tokens": 200,
   "ai_timeout": 10,
   "ai_system_prompt": "你是一个论坛用户，需要根据帖子标题和内容生成简短的回复。回复要自然、友好、简洁，不超过50字。不要使用敏感词汇，保持礼貌和正能量。",
-  
-  "_说明_AI配置": {
-    "enable_ai_reply": "是否启用AI回复（启用后将优先使用AI生成回复）",
-    "ai_api_type": "API类型：openai（OpenAI及兼容接口）、claude（Claude）、custom（自定义）",
-    "ai_api_url": "API接口地址（留空使用默认地址）",
-    "ai_api_key": "API密钥（必填）",
-    "ai_model": "模型名称，如 gpt-3.5-turbo, gpt-4, claude-3-haiku-20240307",
-    "ai_temperature": "生成温度（0-1，越大越随机）",
-    "ai_max_tokens": "最大生成长度",
-    "ai_timeout": "请求超时时间（秒）",
-    "ai_system_prompt": "系统提示词（定义AI回复风格）"
+  "proxy": {
+    "enabled": false,
+    "http_proxy": "http://127.0.0.1:7890",
+    "https_proxy": "http://127.0.0.1:7890",
+    "no_proxy": "localhost,127.0.0.1",
+    "use_for_git": true,
+    "use_for_selenium": false
   },
-  
-  "_comment_国产AI接口": "支持的国产AI接口",
-  "_支持的国产AI": {
-    "智谱AI": "https://open.bigmodel.cn/api/paas/v4/chat/completions (兼容OpenAI格式)",
-    "通义千问": "https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation",
-    "文心一言": "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/completions",
-    "DeepSeek": "https://api.deepseek.com/v1/chat/completions (兼容OpenAI格式)",
-    "月之暗面": "https://api.moonshot.cn/v1/chat/completions (兼容OpenAI格式)"
-  },
-  
-  "_comment_其他配置": "杂项配置",
-  "enable_random_delay": true,
   "log_level": "INFO"
 }
