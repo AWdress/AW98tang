@@ -16,6 +16,10 @@ from selenium_auto_bot import SeleniumAutoBot
 from update_manager import UpdateManager
 import logging
 from functools import wraps
+try:
+    from croniter import croniter
+except ImportError:
+    croniter = None
 
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY', 'your-secret-key-change-this-in-production-2024')
@@ -32,6 +36,8 @@ TEST_USERS = {
 bot_instance = None
 bot_thread = None
 bot_stop_flag = False  # 停止标志
+scheduler_thread = None  # 定时任务线程
+scheduler_stop_flag = False  # 定时任务停止标志
 stats_manager = StatsManager()  # 统计管理器
 update_manager = UpdateManager()  # 更新管理器
 bot_status = {
@@ -379,14 +385,33 @@ def manage_config():
     elif request.method == 'POST':
         try:
             new_config = request.json
+            old_config = load_config()
             
             # 如果密码是******，则保留原密码
             if new_config.get('password') == '******':
-                old_config = load_config()
                 new_config['password'] = old_config.get('password', '')
             
+            # 检查定时任务配置是否变更
+            scheduler_config_changed = (
+                new_config.get('enable_scheduler') != old_config.get('enable_scheduler') or
+                new_config.get('schedule_time') != old_config.get('schedule_time') or
+                new_config.get('schedule_times') != old_config.get('schedule_times') or
+                new_config.get('schedule_cron') != old_config.get('schedule_cron')
+            )
+            
             if save_config(new_config):
-                return jsonify({'success': True, 'message': '配置保存成功'})
+                # 如果定时任务配置变更且启用了scheduler，自动重启
+                if scheduler_config_changed and new_config.get('enable_scheduler', False):
+                    try:
+                        restart_scheduler_thread()
+                        message = '配置保存成功，定时任务已自动重新加载 ✅'
+                    except Exception as e:
+                        logging.error(f"重启定时任务失败: {e}")
+                        message = f'配置保存成功，但定时任务重启失败: {e}'
+                else:
+                    message = '配置保存成功'
+                
+                return jsonify({'success': True, 'message': message})
             else:
                 return jsonify({'success': False, 'message': '配置保存失败'}), 500
                 
@@ -572,35 +597,122 @@ def calculate_uptime():
     return "未运行"
 
 def scheduled_task():
-    """定时任务 - 在后台线程运行"""
-    config = load_config()
-    
-    if not config.get('enable_scheduler', False):
-        logging.info("⏰ 定时任务未启用")
-        return
-    
-    schedule_time = config.get('schedule_time', '03:00')
-    logging.info(f"⏰ 定时任务已启用，每天 {schedule_time} 自动运行")
+    """定时任务 - 在后台线程运行（支持动态重载）"""
+    global scheduler_stop_flag
     
     def run_scheduled_bot():
         """执行定时任务"""
         logging.info("⏰ 定时任务触发，开始运行机器人...")
-        # 直接调用现有的run_bot函数
         run_bot()
     
-    # 设置每日定时任务
-    schedule.every().day.at(schedule_time).do(run_scheduled_bot)
-    
-    # 持续运行
-    while True:
-        schedule.run_pending()
-        time.sleep(60)  # 每分钟检查一次
+    while not scheduler_stop_flag:
+        # 每次循环都重新加载配置，支持动态更新
+        config = load_config()
+        
+        if not config.get('enable_scheduler', False):
+            logging.info("⏰ 定时任务已禁用，等待重新启用...")
+            time.sleep(60)
+            continue
+        
+        # 清空之前的任务
+        schedule.clear()
+        
+        # 支持三种配置方式
+        cron_expr = config.get('schedule_cron', '').strip()
+        schedule_times = config.get('schedule_times', [])
+        schedule_time = config.get('schedule_time', '03:00')
+        
+        # 优先使用cron表达式
+        if cron_expr and croniter:
+            try:
+                # 使用cron表达式
+                cron = croniter(cron_expr, datetime.now())
+                next_time = cron.get_next(datetime)
+                logging.info(f"⏰ 使用Cron表达式: {cron_expr}")
+                logging.info(f"⏰ 下次运行: {next_time.strftime('%Y-%m-%d %H:%M:%S')}")
+                
+                # 持续检查cron触发时间
+                while not scheduler_stop_flag:
+                    now = datetime.now()
+                    if now >= next_time:
+                        run_scheduled_bot()
+                        # 计算下一次运行时间
+                        cron = croniter(cron_expr, now)
+                        next_time = cron.get_next(datetime)
+                        logging.info(f"⏰ 下次运行: {next_time.strftime('%Y-%m-%d %H:%M:%S')}")
+                    time.sleep(30)  # 每30秒检查一次
+                    
+                    # 检查配置是否改变
+                    new_config = load_config()
+                    if new_config.get('schedule_cron', '').strip() != cron_expr:
+                        logging.info("🔄 检测到配置变更，重新加载...")
+                        break
+            except Exception as e:
+                logging.error(f"Cron表达式解析失败: {e}")
+                time.sleep(60)
+                continue
+        
+        # 使用多时间段
+        elif schedule_times and isinstance(schedule_times, list):
+            for time_str in schedule_times:
+                if time_str and isinstance(time_str, str):
+                    try:
+                        schedule.every().day.at(time_str.strip()).do(run_scheduled_bot)
+                        logging.info(f"⏰ 已设置定时任务: 每天 {time_str}")
+                    except Exception as e:
+                        logging.error(f"设置定时任务失败 ({time_str}): {e}")
+        
+        # 使用单一时间（兼容旧配置）
+        else:
+            try:
+                schedule.every().day.at(schedule_time).do(run_scheduled_bot)
+                logging.info(f"⏰ 已设置定时任务: 每天 {schedule_time}")
+            except Exception as e:
+                logging.error(f"设置定时任务失败: {e}")
+        
+        # 运行调度器（每60秒检查一次配置变更）
+        check_count = 0
+        last_config = config.copy()
+        
+        while not scheduler_stop_flag:
+            schedule.run_pending()
+            time.sleep(10)  # 每10秒检查一次任务
+            
+            check_count += 1
+            if check_count >= 6:  # 每60秒检查配置变更
+                check_count = 0
+                new_config = load_config()
+                # 检查关键配置是否变化
+                if (new_config.get('schedule_time') != last_config.get('schedule_time') or
+                    new_config.get('schedule_times') != last_config.get('schedule_times') or
+                    new_config.get('schedule_cron') != last_config.get('schedule_cron') or
+                    new_config.get('enable_scheduler') != last_config.get('enable_scheduler')):
+                    logging.info("🔄 检测到定时任务配置变更，正在重新加载...")
+                    break
 
 def start_scheduler_thread():
     """在后台线程启动定时任务调度器"""
+    global scheduler_thread, scheduler_stop_flag
+    
+    scheduler_stop_flag = False
     scheduler_thread = threading.Thread(target=scheduled_task, daemon=True)
     scheduler_thread.start()
     logging.info("🔄 定时任务调度器已在后台启动")
+
+def stop_scheduler_thread():
+    """停止定时任务调度器"""
+    global scheduler_stop_flag
+    scheduler_stop_flag = True
+    schedule.clear()
+    logging.info("⏸️ 定时任务调度器已停止")
+
+def restart_scheduler_thread():
+    """重启定时任务调度器（配置更新后调用）"""
+    logging.info("🔄 重启定时任务调度器...")
+    stop_scheduler_thread()
+    time.sleep(1)  # 等待线程完全停止
+    start_scheduler_thread()
+    logging.info("✅ 定时任务调度器已重启，新配置已生效")
 
 if __name__ == '__main__':
     print("=" * 50)
@@ -613,8 +725,18 @@ if __name__ == '__main__':
     # 启动定时任务后台线程
     config = load_config()
     if config.get('enable_scheduler', False):
+        cron_expr = config.get('schedule_cron', '').strip()
+        schedule_times = config.get('schedule_times', [])
         schedule_time = config.get('schedule_time', '03:00')
-        print(f"⏰ 定时任务已启用，每天 {schedule_time} 自动运行")
+        
+        if cron_expr:
+            print(f"⏰ 定时任务已启用（Cron模式）: {cron_expr}")
+        elif schedule_times and isinstance(schedule_times, list):
+            print(f"⏰ 定时任务已启用（多时间段）: {', '.join(schedule_times)}")
+        else:
+            print(f"⏰ 定时任务已启用: 每天 {schedule_time}")
+        
+        print("💡 配置修改后会自动重新加载，无需重启")
         start_scheduler_thread()
     
     print("=" * 50)
