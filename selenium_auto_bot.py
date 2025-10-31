@@ -408,6 +408,12 @@ class SeleniumAutoBot:
                 # 保存登录状态
                 self.save_cookies()
                 
+                # 获取用户信息
+                try:
+                    self.get_user_info()
+                except:
+                    pass
+                
                 return True
             else:
                 logging.error("❌ 登录失败，请检查账号信息")
@@ -473,6 +479,76 @@ class SeleniumAutoBot:
             logging.error(f"❌ 加载cookies失败: {e}")
             return False
     
+    def get_user_info(self):
+        """获取用户信息（等级、积分、金钱等）"""
+        try:
+            logging.info("📊 开始获取用户信息...")
+            
+            # 访问个人中心页面
+            profile_url = f"{self.base_url}home.php?mod=space&uid=&do=profile"
+            self.driver.get(profile_url)
+            time.sleep(2)
+            
+            user_info = {
+                "user_group": "",
+                "credits": 0,
+                "money": 0,
+                "coins": 0,
+                "rating": 0
+            }
+            
+            # 获取页面源码
+            page_source = self.driver.page_source
+            
+            # 使用正则表达式提取信息
+            import re
+            
+            # 提取用户组（如：Lv5 小有名气）
+            group_match = re.search(r'用户组[：:]\s*([^<\n]+)', page_source)
+            if group_match:
+                user_info["user_group"] = group_match.group(1).strip()
+                logging.info(f"✅ 用户组: {user_info['user_group']}")
+            
+            # 提取积分
+            credits_match = re.search(r'积分[：:]\s*(\d+)', page_source)
+            if credits_match:
+                user_info["credits"] = int(credits_match.group(1))
+                logging.info(f"✅ 积分: {user_info['credits']}")
+            
+            # 提取金钱
+            money_match = re.search(r'金钱[：:]\s*(\d+)', page_source)
+            if money_match:
+                user_info["money"] = int(money_match.group(1))
+                logging.info(f"✅ 金钱: {user_info['money']}")
+            
+            # 提取色币
+            coins_match = re.search(r'色币[：:]\s*(\d+)', page_source)
+            if coins_match:
+                user_info["coins"] = int(coins_match.group(1))
+                logging.info(f"✅ 色币: {user_info['coins']}")
+            
+            # 提取评分
+            rating_match = re.search(r'评分[：:]\s*(\d+)', page_source)
+            if rating_match:
+                user_info["rating"] = int(rating_match.group(1))
+                logging.info(f"✅ 评分: {user_info['rating']}")
+            
+            # 保存到统计数据
+            self.stats.update_user_info(
+                user_group=user_info["user_group"],
+                credits=user_info["credits"],
+                money=user_info["money"],
+                coins=user_info["coins"],
+                rating=user_info["rating"]
+            )
+            
+            logging.info("✅ 用户信息获取成功")
+            return user_info
+            
+        except Exception as e:
+            logging.error(f"❌ 获取用户信息失败: {e}")
+            return None
+    
     def check_login_status(self):
         """检查当前是否已登录"""
         try:
@@ -488,6 +564,11 @@ class SeleniumAutoBot:
             
             if any(quick_indicators):
                 logging.info(f"✅ 快速检测到已登录状态（用户: {self.username}）")
+                # 获取用户信息
+                try:
+                    self.get_user_info()
+                except:
+                    pass
                 return True
             
             # 如果快速检查未通过，访问个人中心确认
@@ -518,6 +599,11 @@ class SeleniumAutoBot:
                 
                 if any(login_indicators):
                     logging.info(f"✅ 确认已登录状态（用户: {self.username}）")
+                    # 获取用户信息
+                    try:
+                        self.get_user_info()
+                    except:
+                        pass
                     return True
                 else:
                     logging.info("ℹ️ 未检测到登录状态")

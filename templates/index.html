@@ -1086,6 +1086,40 @@
 
                 <div class="stat-card">
                     <div class="stat-header">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">👤</div>
+                        <div class="stat-info">
+                            <h3>用户信息</h3>
+                        </div>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="color: #94a3b8; font-size: 0.9rem;">用户组</span>
+                            <span id="userGroup" style="color: #e879f9; font-weight: 500;">-</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="color: #94a3b8; font-size: 0.9rem;">积分</span>
+                            <span id="userCredits" style="color: #60a5fa; font-weight: 500;">0</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="color: #94a3b8; font-size: 0.9rem;">金钱</span>
+                            <span id="userMoney" style="color: #fbbf24; font-weight: 500;">0</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="color: #94a3b8; font-size: 0.9rem;">色币</span>
+                            <span id="userCoins" style="color: #34d399; font-weight: 500;">0</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="color: #94a3b8; font-size: 0.9rem;">评分</span>
+                            <span id="userRating" style="color: #f472b6; font-weight: 500;">0</span>
+                        </div>
+                    </div>
+                    <div style="margin-top: 12px; font-size: 0.8rem; color: #64748b; text-align: center; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.05);">
+                        更新: <span id="userInfoUpdate">-</span>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
                         <div class="stat-icon warning">⚙️</div>
                         <div class="stat-info">
                             <h3>配置信息</h3>
@@ -1768,6 +1802,36 @@
                     document.getElementById('checkinStatus').textContent = stats.checkin_success ? '✔' : '✘';
                     document.getElementById('checkinLabel').textContent = stats.checkin_success ? '已签到' : '未签到';
                     document.getElementById('checkinTime').textContent = stats.checkin_time || '-';
+
+                    // 用户信息
+                    const userInfo = data.user_info || {};
+                    document.getElementById('userGroup').textContent = userInfo.user_group || '-';
+                    document.getElementById('userCredits').textContent = userInfo.credits || 0;
+                    document.getElementById('userMoney').textContent = userInfo.money || 0;
+                    document.getElementById('userCoins').textContent = userInfo.coins || 0;
+                    document.getElementById('userRating').textContent = userInfo.rating || 0;
+                    
+                    // 格式化更新时间
+                    if (userInfo.last_update) {
+                        const updateTime = new Date(userInfo.last_update);
+                        const now = new Date();
+                        const diffMs = now - updateTime;
+                        const diffMins = Math.floor(diffMs / 60000);
+                        
+                        let timeText;
+                        if (diffMins < 1) {
+                            timeText = '刚刚';
+                        } else if (diffMins < 60) {
+                            timeText = `${diffMins}分钟前`;
+                        } else if (diffMins < 1440) {
+                            timeText = `${Math.floor(diffMins / 60)}小时前`;
+                        } else {
+                            timeText = userInfo.last_update.split(' ')[0];
+                        }
+                        document.getElementById('userInfoUpdate').textContent = timeText;
+                    } else {
+                        document.getElementById('userInfoUpdate').textContent = '未获取';
+                    }
 
                     // 配置信息
                     const forumNames = config.forum_names || {};

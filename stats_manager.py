@@ -38,7 +38,15 @@ class StatsManager:
             "checkin_time": None,
             "replies": [],
             "history": [],
-            "all_replies": []  # 保存所有历史回复
+            "all_replies": [],  # 保存所有历史回复
+            "user_info": {      # 用户信息
+                "user_group": "",
+                "credits": 0,
+                "money": 0,
+                "coins": 0,
+                "rating": 0,
+                "last_update": None
+            }
         }
     
     def save_stats(self):
@@ -135,6 +143,33 @@ class StatsManager:
         return {
             "today": self.get_today_stats(),
             "history": self.get_history(),
-            "all_replies": self.get_all_replies(100)
+            "all_replies": self.get_all_replies(100),
+            "user_info": self.get_user_info()
         }
+    
+    def update_user_info(self, user_group: str = "", credits: int = 0, money: int = 0, coins: int = 0, rating: int = 0):
+        """更新用户信息"""
+        if "user_info" not in self.stats:
+            self.stats["user_info"] = {}
+        
+        self.stats["user_info"]["user_group"] = user_group
+        self.stats["user_info"]["credits"] = credits
+        self.stats["user_info"]["money"] = money
+        self.stats["user_info"]["coins"] = coins
+        self.stats["user_info"]["rating"] = rating
+        self.stats["user_info"]["last_update"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
+        self.save_stats()
+    
+    def get_user_info(self) -> Dict:
+        """获取用户信息"""
+        default_info = {
+            "user_group": "",
+            "credits": 0,
+            "money": 0,
+            "coins": 0,
+            "rating": 0,
+            "last_update": None
+        }
+        return self.stats.get("user_info", default_info)
 
