@@ -280,34 +280,52 @@ class UpdateManager:
     def do_update(self):
         """执行更新"""
         try:
+            logging.info("=" * 60)
+            logging.info("开始执行系统更新...")
+            logging.info("=" * 60)
+            
             # 备份配置文件
+            logging.info("正在备份配置文件...")
             if not self.backup_config():
+                logging.error("配置文件备份失败")
                 return {
                     'success': False,
                     'message': '备份配置文件失败'
                 }
+            logging.info("配置文件备份成功")
+            
             # 直接走 ZIP 镜像/API 更新（不再使用 git）
             logging.info("正在通过ZIP方式获取最新代码...")
             fb = self._fallback_update_via_zip()
+            
             if fb.get('success'):
+                logging.info("ZIP更新成功")
+                # 恢复配置文件
+                self.restore_config()
                 # 与前端对齐：返回通用成功信息，不暴露回退来源
                 fb['message'] = '更新成功'
                 fb.pop('from', None)
+                logging.info("=" * 60)
+                logging.info("系统更新完成！")
+                logging.info("=" * 60)
                 return fb
             else:
+                error_msg = fb.get('message', '更新失败')
+                logging.error(f"ZIP更新失败: {error_msg}")
+                # 尝试恢复配置
+                self.restore_config()
                 return {
                     'success': False,
-                    'message': fb.get('message', '更新失败')
+                    'message': error_msg
                 }
             
         except Exception as e:
-            logging.error(f"更新失败: {e}")
-            # 尝试恢复
+            logging.error(f"更新过程发生异常: {e}", exc_info=True)
+            # 尝试恢复配置
             try:
-                subprocess.run(['git', 'stash', 'pop'], capture_output=True)
                 self.restore_config()
-            except:
-                pass
+            except Exception as restore_err:
+                logging.error(f"恢复配置失败: {restore_err}")
             
             return {
                 'success': False,
@@ -319,63 +337,80 @@ class UpdateManager:
         try:
             def download_with_requests(url: str, out_path: str, headers: dict | None = None) -> bool:
                 try:
+                    logging.info(f"尝试使用requests下载: {url}")
                     resp = requests.get(url, timeout=60, stream=True, headers=headers or {})
                     if resp.status_code == 200:
+                        total_size = 0
                         with open(out_path, 'wb') as f:
                             for chunk in resp.iter_content(chunk_size=1024 * 256):
                                 if chunk:
                                     f.write(chunk)
+                                    total_size += len(chunk)
+                        logging.info(f"requests下载成功，文件大小: {total_size / 1024 / 1024:.2f} MB")
                         return True
                     logging.warning(f"requests 下载失败: {url} -> HTTP {resp.status_code}")
                 except Exception as e:
-                    logging.warning(f"requests 异常: {e}")
+                    logging.warning(f"requests 下载异常: {e}")
                 return False
 
             def download_with_curl(url: str, out_path: str, headers: dict | None = None) -> bool:
                 try:
+                    logging.info(f"尝试使用curl下载: {url}")
                     cmd = ['curl', '-L', '-sS', '--fail', '-o', out_path]
                     if headers:
                         for k, v in headers.items():
                             cmd.extend(['-H', f"{k}: {v}"])
                     cmd.append(url)
-                    r = subprocess.run(cmd, capture_output=True, text=True)
+                    r = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
                     if r.returncode == 0 and os.path.exists(out_path) and os.path.getsize(out_path) > 0:
+                        size = os.path.getsize(out_path)
+                        logging.info(f"curl下载成功，文件大小: {size / 1024 / 1024:.2f} MB")
                         return True
-                    logging.warning(f"curl 下载失败: {url} -> {r.stderr.strip()}")
+                    logging.warning(f"curl 下载失败: {url} -> 返回码{r.returncode}, 错误: {r.stderr.strip()}")
+                except subprocess.TimeoutExpired:
+                    logging.error("curl下载超时（120秒）")
                 except Exception as ce:
-                    logging.warning(f"curl 异常: {ce}")
+                    logging.warning(f"curl 下载异常: {ce}")
                 return False
 
             # 1) 私有仓库：优先 GitHub API zipball
             github_token = os.getenv('GITHUB_TOKEN')
             if github_token:
+                logging.info("检测到GITHUB_TOKEN，尝试使用GitHub API下载...")
                 api_url = f"https://api.github.com/repos/{self.repo_owner}/{self.repo_name}/zipball/{self.branch}"
                 headers = {'Authorization': f'token {github_token}', 'Accept': 'application/vnd.github+json'}
                 with tempfile.TemporaryDirectory() as td:
                     zip_path = os.path.join(td, 'repo.zip')
                     if download_with_requests(api_url, zip_path, headers) or download_with_curl(api_url, zip_path, headers):
+                        logging.info("GitHub API方式下载成功，开始解压...")
                         return self._extract_and_overlay(zip_path)
+                logging.warning("GitHub API方式下载失败，尝试公开下载...")
+            else:
+                logging.info("未设置GITHUB_TOKEN，使用公开下载方式")
 
             # 2) GitHub官方下载地址
             official_url = f"https://github.com/{self.repo_owner}/{self.repo_name}/archive/refs/heads/{self.branch}.zip"
             
             last_error = None
+            logging.info(f"尝试从GitHub官方地址下载: {official_url}")
             for url in [official_url]:
                 try:
                     with tempfile.TemporaryDirectory() as td:
                         zip_path = os.path.join(td, 'repo.zip')
                         ok = download_with_requests(url, zip_path) or download_with_curl(url, zip_path)
                         if not ok:
-                            last_error = '下载失败'
+                            last_error = '下载失败，可能是网络问题或GitHub访问受限'
                             continue
+                        logging.info("下载成功，开始解压和覆盖文件...")
                         return self._extract_and_overlay(zip_path)
                 except Exception as e:
                     last_error = str(e)
+                    logging.error(f"下载或解压过程异常: {e}", exc_info=True)
                     continue
 
             return {'success': False, 'message': f'GitHub ZIP更新失败: {last_error or "未知错误"}'}
         except Exception as e:
-            logging.error(f"ZIP回退更新异常: {e}")
+            logging.error(f"ZIP回退更新异常: {e}", exc_info=True)
             return {'success': False, 'message': f'ZIP回退更新异常: {str(e)}'}
 
     def _extract_and_overlay(self, zip_path: str) -> dict:
