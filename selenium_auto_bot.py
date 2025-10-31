@@ -147,7 +147,27 @@ class SeleniumAutoBot:
                 service = Service(ChromeDriverManager().install())
                 self.driver = webdriver.Chrome(service=service, options=chrome_options)
             
-            self.driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
+            # 使用CDP命令移除webdriver标志（兼容Chrome 142+）
+            try:
+                self.driver.execute_cdp_cmd('Page.addScriptToEvaluateOnNewDocument', {
+                    'source': '''
+                        Object.defineProperty(navigator, 'webdriver', {
+                            get: () => undefined
+                        });
+                        window.navigator.chrome = {
+                            runtime: {}
+                        };
+                        Object.defineProperty(navigator, 'plugins', {
+                            get: () => [1, 2, 3, 4, 5]
+                        });
+                        Object.defineProperty(navigator, 'languages', {
+                            get: () => ['zh-CN', 'zh', 'en-US', 'en']
+                        });
+                    '''
+                })
+            except Exception as e:
+                logging.warning(f"⚠️ CDP命令执行失败（可忽略）: {e}")
+            
             self.wait = WebDriverWait(self.driver, 30)  # 增加到30秒，应对首次访问慢的情况
             
             # 设置页面加载超时（防止页面加载卡住）
