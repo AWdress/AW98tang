@@ -143,7 +143,7 @@ class SeleniumAutoBot:
                 self.driver = webdriver.Chrome(service=service, options=chrome_options)
             
             self.driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
-            self.wait = WebDriverWait(self.driver, 20)
+            self.wait = WebDriverWait(self.driver, 30)  # 增加到30秒，应对首次访问慢的情况
             
             # 设置页面加载超时（防止页面加载卡住）
             self.driver.set_page_load_timeout(60)
@@ -236,22 +236,37 @@ class SeleniumAutoBot:
             # 处理年龄验证
             self.handle_age_verification()
             
-            # 等待页面加载完成
-            time.sleep(3)
+            # 等待页面加载完成（首次访问需要更多时间处理Cloudflare等）
+            time.sleep(5)
             
-            # 等待登录表单加载
-            try:
-                username_field = self.wait.until(
-                    EC.presence_of_element_located((By.NAME, "username"))
-                )
-                logging.info("✅ 登录表单加载完成")
-            except TimeoutException:
-                # 尝试其他可能的用户名字段
+            # 等待登录表单加载，增加重试机制
+            username_field = None
+            max_retries = 3
+            for retry in range(max_retries):
                 try:
-                    username_field = self.driver.find_element(By.NAME, "user")
-                except:
-                    logging.error("❌ 找不到用户名输入框")
-                    return False
+                    username_field = self.wait.until(
+                        EC.presence_of_element_located((By.NAME, "username"))
+                    )
+                    logging.info("✅ 登录表单加载完成")
+                    break
+                except TimeoutException:
+                    if retry < max_retries - 1:
+                        logging.warning(f"⚠️ 第 {retry + 1} 次未找到用户名输入框，等待5秒后重试...")
+                        time.sleep(5)
+                    else:
+                        # 最后一次尝试其他可能的字段名
+                        try:
+                            username_field = self.driver.find_element(By.NAME, "user")
+                            logging.info("✅ 找到备用用户名输入框")
+                        except:
+                            logging.error("❌ 找不到用户名输入框")
+                            # 保存调试信息
+                            self.save_debug_info("login_failed")
+                            return False
+            
+            if not username_field:
+                logging.error("❌ 找不到用户名输入框")
+                return False
             
             # 填写用户名
             username_field.clear()
