@@ -503,9 +503,36 @@ class SeleniumAutoBot:
         """保存登录cookies到文件"""
         try:
             cookies = self.driver.get_cookies()
+            
+            # 保存为pickle格式（供程序使用）
             with open(self.cookies_file, 'wb') as f:
                 pickle.dump(cookies, f)
             logging.info(f"🍪 登录状态已保存到 {self.cookies_file}")
+            
+            # 同时保存为JSON格式（便于查看和调试）
+            json_cookies_file = self.cookies_file.replace('.pkl', '.json')
+            try:
+                import json
+                # 处理不可序列化的字段
+                cookies_for_json = []
+                for cookie in cookies:
+                    cookie_copy = cookie.copy()
+                    # 转换expiry为可读时间
+                    if 'expiry' in cookie_copy:
+                        from datetime import datetime
+                        try:
+                            expiry_time = datetime.fromtimestamp(cookie_copy['expiry'])
+                            cookie_copy['expiry_readable'] = expiry_time.strftime('%Y-%m-%d %H:%M:%S')
+                        except:
+                            pass
+                    cookies_for_json.append(cookie_copy)
+                
+                with open(json_cookies_file, 'w', encoding='utf-8') as f:
+                    json.dump(cookies_for_json, f, indent=2, ensure_ascii=False)
+                logging.info(f"📝 Cookie已同步保存为JSON: {json_cookies_file}")
+            except Exception as e:
+                logging.debug(f"保存JSON格式Cookie失败（不影响功能）: {e}")
+            
             return True
         except Exception as e:
             logging.error(f"❌ 保存cookies失败: {e}")
