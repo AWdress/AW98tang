@@ -532,11 +532,11 @@ class SeleniumAutoBot:
                     logging.info(f"✅ 用户组: {user_info['user_group']}")
                     break
             
-            # 提取积分 - 使用更灵活的正则
+            # 提取积分 - 匹配 <em>积分</em>108 格式（无冒号）
             credits_patterns = [
-                r'积分[：:]\s*(\d+)',
-                r'积分[：:]</em>\s*(\d+)',
-                r'>积分[：:]\s*</em>\s*<em[^>]*>(\d+)</em>',
+                r'<em>积分</em>\s*(\d+)',
+                r'>积分</em>\s*(\d+)',
+                r'积分[：:]\s*(\d+)',  # 兼容带冒号的格式
             ]
             for pattern in credits_patterns:
                 credits_match = re.search(pattern, page_source)
@@ -545,11 +545,11 @@ class SeleniumAutoBot:
                     logging.info(f"✅ 积分: {user_info['credits']}")
                     break
             
-            # 提取金钱 - 使用更灵活的正则
+            # 提取金钱 - 匹配 <em>金钱</em>302 格式（无冒号）
             money_patterns = [
-                r'金钱[：:]\s*(\d+)',
-                r'金钱[：:]</em>\s*(\d+)',
-                r'>金钱[：:]\s*</em>\s*<em[^>]*>(\d+)</em>',
+                r'<em>金钱</em>\s*(\d+)',
+                r'>金钱</em>\s*(\d+)',
+                r'金钱[：:]\s*(\d+)',  # 兼容带冒号的格式
             ]
             for pattern in money_patterns:
                 money_match = re.search(pattern, page_source)
@@ -558,11 +558,11 @@ class SeleniumAutoBot:
                     logging.info(f"✅ 金钱: {user_info['money']}")
                     break
             
-            # 提取色币 - 使用更灵活的正则
+            # 提取色币 - 匹配 <em>色币</em>0 格式（无冒号）
             coins_patterns = [
-                r'色币[：:]\s*(\d+)',
-                r'色币[：:]</em>\s*(\d+)',
-                r'>色币[：:]\s*</em>\s*<em[^>]*>(\d+)</em>',
+                r'<em>色币</em>\s*(\d+)',
+                r'>色币</em>\s*(\d+)',
+                r'色币[：:]\s*(\d+)',  # 兼容带冒号的格式
             ]
             for pattern in coins_patterns:
                 coins_match = re.search(pattern, page_source)
@@ -571,11 +571,11 @@ class SeleniumAutoBot:
                     logging.info(f"✅ 色币: {user_info['coins']}")
                     break
             
-            # 提取评分 - 使用更灵活的正则
+            # 提取评分 - 匹配 <em>评分</em>0 格式（无冒号）
             rating_patterns = [
-                r'评分[：:]\s*(\d+)',
-                r'评分[：:]</em>\s*(\d+)',
-                r'>评分[：:]\s*</em>\s*<em[^>]*>(\d+)</em>',
+                r'<em>评分</em>\s*(\d+)',
+                r'>评分</em>\s*(\d+)',
+                r'评分[：:]\s*(\d+)',  # 兼容带冒号的格式
             ]
             for pattern in rating_patterns:
                 rating_match = re.search(pattern, page_source)
@@ -584,9 +584,15 @@ class SeleniumAutoBot:
                     logging.info(f"✅ 评分: {user_info['rating']}")
                     break
             
-            # 调试：如果某些字段未获取到，保存HTML用于分析
-            if user_info["money"] == 0:
-                logging.warning("⚠️ 金钱字段未获取到，保存HTML用于调试...")
+            # 调试：如果关键字段未获取到，保存HTML用于分析
+            missing_fields = []
+            if not user_info["user_group"]:
+                missing_fields.append("用户组")
+            if user_info["credits"] == 0:
+                missing_fields.append("积分")
+            
+            if missing_fields:
+                logging.warning(f"⚠️ 以下字段未获取到: {', '.join(missing_fields)}，保存HTML用于调试...")
                 try:
                     os.makedirs('debug', exist_ok=True)
                     debug_file = 'debug/user_info_page.html'
@@ -599,13 +605,6 @@ class SeleniumAutoBot:
                     if stats_section:
                         section_html = stats_section.group(0)
                         logging.info(f"📊 统计信息HTML片段（前800字符）:\n{section_html[:800]}")
-                    else:
-                        # 尝试查找"金钱"关键字周围的内容
-                        money_context = re.search(r'.{0,200}金钱.{0,200}', page_source, re.DOTALL)
-                        if money_context:
-                            logging.info(f"💰 找到'金钱'关键字周围的内容:\n{money_context.group(0)}")
-                        else:
-                            logging.warning("⚠️ 页面中未找到'金钱'关键字")
                 except Exception as debug_error:
                     logging.error(f"保存调试信息失败: {debug_error}")
             
