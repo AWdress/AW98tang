@@ -72,10 +72,8 @@ class UpdateManager:
             return version
     
     def get_local_commit_hash(self):
-        """获取当前代码对应的commit标识。
-        优先读取 data/last_update.json（ZIP更新会写入准确commit），否则回退到 .git HEAD。
-        """
-        # 1) 优先 last_update.json（ZIP路径会写真实commit）
+        """获取当前代码对应的commit标识"""
+        # 1) 优先读取 last_update.json
         try:
             state_path = os.path.join('data', 'last_update.json')
             if os.path.exists(state_path):
@@ -87,7 +85,7 @@ class UpdateManager:
         except Exception as e:
             logging.warning(f"读取上次更新记录失败: {e}")
 
-        # 2) 回退到git HEAD
+        # 2) 尝试从本地获取
         try:
             result = subprocess.run(
                 ['git', 'rev-parse', 'HEAD'],
@@ -97,8 +95,8 @@ class UpdateManager:
             )
             if result.returncode == 0:
                 return result.stdout.strip()[:7]
-        except Exception as e:
-            logging.error(f"获取本地commit失败: {e}")
+        except Exception:
+            pass
         return None
     
     def get_latest_commit_info(self):
@@ -160,7 +158,7 @@ class UpdateManager:
                 remote_info = self.get_latest_commit_info() or {}
                 remote_commit = remote_info.get('sha', '')
                 
-                # 🔧 修复：从GitHub远程读取最新版本号，而不是本地README
+                # 从远程读取最新版本号
                 remote_version = self.get_remote_version_from_readme()
                 if not remote_version:
                     # 如果获取失败，降级使用本地版本号
@@ -243,40 +241,6 @@ class UpdateManager:
             logging.error(f"恢复配置失败: {e}")
         return False
     
-    def is_git_repo(self):
-        """检查是否为Git仓库"""
-        return os.path.exists('.git')
-    
-    def init_git_repo(self):
-        """初始化Git仓库"""
-        try:
-            if not self.is_git_repo():
-                logging.info("初始化Git仓库...")
-                
-                subprocess.run(['git', 'init'], check=True, stdin=subprocess.DEVNULL)
-                
-                # 配置Git禁用凭据
-                subprocess.run(['git', 'config', 'credential.helper', ''], check=True)
-                
-                # 添加远程仓库
-                github_token = os.getenv('GITHUB_TOKEN', '')
-                if github_token:
-                    logging.info("使用GitHub Token进行认证")
-                    remote_url = f"https://{github_token}@github.com/{self.repo_owner}/{self.repo_name}.git"
-                else:
-                    logging.info("使用公开访问模式（无认证）")
-                    remote_url = f"https://github.com/{self.repo_owner}/{self.repo_name}.git"
-                
-                subprocess.run(['git', 'remote', 'add', 'origin', remote_url], check=True)
-                subprocess.run(['git', 'fetch', 'origin'], check=True, stdin=subprocess.DEVNULL)
-                subprocess.run(['git', 'checkout', '-b', self.branch, f'origin/{self.branch}'], check=True, stdin=subprocess.DEVNULL)
-                
-                logging.info("Git仓库初始化完成")
-                return True
-        except Exception as e:
-            logging.error(f"初始化Git仓库失败: {e}")
-        return False
-    
     def do_update(self):
         """执行更新"""
         try:
@@ -294,8 +258,8 @@ class UpdateManager:
                 }
             logging.info("配置文件备份成功")
             
-            # 直接走 ZIP 镜像/API 更新（不再使用 git）
-            logging.info("正在通过ZIP方式获取最新代码...")
+            # 使用ZIP方式更新
+            logging.info("正在下载最新代码...")
             fb = self._fallback_update_via_zip()
             
             if fb.get('success'):
@@ -462,8 +426,8 @@ class UpdateManager:
                     dst_file = os.path.join(dest_dir, filename)
                     shutil.copy2(src_file, dst_file)
 
-            logging.info("ZIP更新完成")
-            # 记录本次更新来源与时间，便于非git环境显示版本信息
+            logging.info("更新完成")
+            # 记录更新信息
             try:
                 os.makedirs('data', exist_ok=True)
                 with open(os.path.join('data', 'last_update.json'), 'w', encoding='utf-8') as f:
@@ -487,9 +451,7 @@ class UpdateManager:
             }
 
     def get_update_log(self, limit=10):
-        """获取更新日志（包含完整提交内容）。
-        逻辑：优先本地 git；如本地最新提交与远端不一致，改用 GitHub API；本地不可用也用 API。
-        """
+        """获取更新日志"""
         def _from_github_api(n: int):
             try:
                 headers = {'User-Agent': 'aw98tang-update-client'}
@@ -517,7 +479,7 @@ class UpdateManager:
         remote_info = self.get_latest_commit_info() or {}
         remote_sha = remote_info.get('sha')
 
-        # 1) 读取本地 git 日志
+        # 1) 尝试读取本地日志
         try:
             record_sep = '\x1e'
             field_sep = '\x1f'
@@ -549,10 +511,10 @@ class UpdateManager:
                         return api_logs
                 if logs:
                     return {'success': True, 'logs': logs}
-        except Exception as e:
-            logging.warning(f"本地git日志不可用: {e}")
+        except Exception:
+            pass
 
-        # 2) 直接用远端
+        # 2) 使用远程API
         return _from_github_api(limit)
 
 
