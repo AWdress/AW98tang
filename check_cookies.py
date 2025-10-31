@@ -129,7 +129,40 @@ def check_cookies():
     
     print()
     print("=" * 80)
-    print("💡 提示：如需查看完整JSON格式，请打开 data/cookies.json 文件")
+    print("🍪 Cookie字符串格式（HTTP请求头格式）")
+    print("=" * 80)
+    print()
+    
+    # 生成Cookie字符串（浏览器/HTTP格式）
+    cookie_string_parts = []
+    for cookie in cookies:
+        name = cookie.get('name', '')
+        value = cookie.get('value', '')
+        if name and value:
+            cookie_string_parts.append(f"{name}={value}")
+    
+    cookie_string = "; ".join(cookie_string_parts)
+    
+    print("📋 完整Cookie字符串:")
+    print("-" * 80)
+    print(cookie_string)
+    print()
+    
+    # 保存到文件
+    cookie_txt_file = 'data/cookies_string.txt'
+    try:
+        with open(cookie_txt_file, 'w', encoding='utf-8') as f:
+            f.write(cookie_string)
+        print(f"✅ Cookie字符串已保存到: {cookie_txt_file}")
+    except Exception as e:
+        print(f"⚠️ 保存Cookie字符串失败: {e}")
+    
+    print()
+    print("=" * 80)
+    print("💡 提示：")
+    print("   - JSON格式详情：data/cookies.json")
+    print("   - HTTP字符串格式：data/cookies_string.txt")
+    print("   - Pickle格式（程序用）：data/cookies.pkl")
     print("=" * 80)
 
 if __name__ == '__main__':

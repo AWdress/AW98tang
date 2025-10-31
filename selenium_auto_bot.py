@@ -287,7 +287,15 @@ class SeleniumAutoBot:
                         except:
                             logging.error("❌ 找不到用户名输入框")
                             # 保存调试信息
-                            self.save_debug_info("login_failed")
+                            try:
+                                os.makedirs('debug', exist_ok=True)
+                                self.driver.save_screenshot("debug/login_failed.png")
+                                logging.info("📸 登录失败截图已保存: debug/login_failed.png")
+                                with open('debug/login_page_debug.html', 'w', encoding='utf-8') as f:
+                                    f.write(self.driver.page_source)
+                                logging.info("📄 登录页面HTML已保存: debug/login_page_debug.html")
+                            except Exception as e:
+                                logging.debug(f"保存调试信息失败: {e}")
                             return False
             
             if not username_field:
@@ -511,6 +519,7 @@ class SeleniumAutoBot:
             
             # 同时保存为JSON格式（便于查看和调试）
             json_cookies_file = self.cookies_file.replace('.pkl', '.json')
+            cookie_string_file = self.cookies_file.replace('.pkl', '_string.txt')
             try:
                 import json
                 # 处理不可序列化的字段
@@ -530,6 +539,20 @@ class SeleniumAutoBot:
                 with open(json_cookies_file, 'w', encoding='utf-8') as f:
                     json.dump(cookies_for_json, f, indent=2, ensure_ascii=False)
                 logging.info(f"📝 Cookie已同步保存为JSON: {json_cookies_file}")
+                
+                # 保存Cookie字符串格式（HTTP请求头格式）
+                cookie_string_parts = []
+                for cookie in cookies:
+                    name = cookie.get('name', '')
+                    value = cookie.get('value', '')
+                    if name and value:
+                        cookie_string_parts.append(f"{name}={value}")
+                cookie_string = "; ".join(cookie_string_parts)
+                
+                with open(cookie_string_file, 'w', encoding='utf-8') as f:
+                    f.write(cookie_string)
+                logging.info(f"📝 Cookie字符串已保存: {cookie_string_file}")
+                
             except Exception as e:
                 logging.debug(f"保存JSON格式Cookie失败（不影响功能）: {e}")
             
