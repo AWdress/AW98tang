@@ -182,64 +182,47 @@ version: '3.8'
 
 services:
   AW98tang:
-    # 使用 Docker Hub 镜像（如需本地构建，将 image 改为 build: .）
     image: awdress/aw98tang:latest
-    
-    # 容器名称
     container_name: AW98tang
-    
-    # 自动重启策略：除非手动停止，否则总是重启
     restart: unless-stopped
     
-    # 端口映射：主机端口:容器端口
     ports:
-      - "5000:5000"  # Web 控制面板端口（可自定义主机端口，如：15000:5000）
+      - "5000:5000"  # Web 控制面板端口（可自定义，如：15000:5000）
     
-    # 数据卷挂载：将主机目录映射到容器内
     volumes:
-      - ./AW98tang/config.json:/app/config.json  # 配置文件（必须）
-      - ./AW98tang/logs:/app/logs                # 日志目录
-      - ./AW98tang/debug:/app/debug              # 调试文件目录
-      - ./AW98tang/data:/app/data                # 统计数据目录
+      - ./AW98tang/config.json:/app/config.json
+      - ./AW98tang/logs:/app/logs
+      - ./AW98tang/debug:/app/debug
+      - ./AW98tang/data:/app/data
     
-    # 环境变量配置
     environment:
-      # Python 输出不缓冲，实时显示日志
       - PYTHONUNBUFFERED=1
-      
-      # 时区设置
       - TZ=Asia/Shanghai
-      
-      # Web 控制面板登录配置（建议修改默认密码）
-      - WEB_USERNAME=${WEB_USERNAME:-admin}      # 默认用户名: admin
-      - WEB_PASSWORD=${WEB_PASSWORD:-password}   # 默认密码: password
-      
-      # 自动更新配置（可选，启用后每次容器启动时自动从 GitHub 拉取最新代码）
-      # - AUTO_UPDATE=true  # 启用自动更新
-      # - GITHUB_TOKEN=ghp_YOUR_GITHUB_TOKEN_HERE  # GitHub 私有仓库访问令牌
-      
-      # 代理配置（可选，如需使用代理请取消注释并填写）
-      # - http_proxy=http://proxy.example.com:8080
-      # - https_proxy=http://proxy.example.com:8080
-      # - no_proxy=localhost,127.0.0.1
+      - WEB_USERNAME=${WEB_USERNAME:-admin}      # 默认: admin
+      - WEB_PASSWORD=${WEB_PASSWORD:-password}   # 默认: password
     
-    # 网络配置
     networks:
       - sehuatang-net
     
-    # 资源限制
     deploy:
       resources:
         limits:
-          memory: 1G      # 最大内存使用 1GB
+          memory: 1G
         reservations:
-          memory: 512M    # 预留内存 512MB
+          memory: 512M
 
-# 网络定义
 networks:
   sehuatang-net:
-    driver: bridge  # 使用桥接网络
+    driver: bridge
 ```
+
+> 💡 **自定义配置：** 可通过环境变量或创建 `.env` 文件修改用户名密码
+> 
+> **示例 `.env` 文件：**
+> ```bash
+> WEB_USERNAME=your_username
+> WEB_PASSWORD=your_password
+> ```
 
 #### 3️⃣ 启动服务
 
@@ -258,6 +241,11 @@ http://localhost:5000
 ```
 
 **默认登录：** `admin / password`
+
+> 💡 **修改登录信息：**
+> - 方式1：编辑 docker-compose.yml 中的环境变量
+> - 方式2：创建 `.env` 文件设置 `WEB_USERNAME` 和 `WEB_PASSWORD`
+> - 方式3：在启动时指定：`WEB_USERNAME=user WEB_PASSWORD=pass docker-compose up -d`
 
 #### 5️⃣ 常用命令
 
@@ -480,10 +468,12 @@ SECRET_KEY=your-secret-key
 ### 服务说明
 
 - **容器名称**：AW98tang
-- **端口**：5000
+- **端口**：5000 (可自定义，如：15000:5000)
 - **自动重启**：是
-- **内存限制**：1GB
+- **内存限制**：1GB (最大) / 512MB (预留)
 - **功能**：Web控制面板 + 定时任务（一体化）
+- **网络**：sehuatang-net (桥接模式)
+- **默认登录**：admin / password (可通过环境变量修改)
 
 ---
 

@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   AW98tang:
-    # 使用 Docker Hub 镜像（如需本地构建，将 image 改为 build: .）
+    # 使用 Docker Hub 镜像
     image: awdress/aw98tang:latest
     
     # 容器名称
