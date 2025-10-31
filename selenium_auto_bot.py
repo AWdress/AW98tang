@@ -502,7 +502,7 @@ class SeleniumAutoBot:
             # 访问个人中心页面
             profile_url = f"{self.base_url}home.php?mod=space&uid=&do=profile"
             self.driver.get(profile_url)
-            time.sleep(2)
+            time.sleep(3)  # 增加等待时间确保页面完全加载
             
             user_info = {
                 "user_group": "",
@@ -519,34 +519,79 @@ class SeleniumAutoBot:
             import re
             
             # 提取用户组（如：Lv5 小有名气）
-            group_match = re.search(r'用户组[：:]\s*([^<\n]+)', page_source)
-            if group_match:
-                user_info["user_group"] = group_match.group(1).strip()
-                logging.info(f"✅ 用户组: {user_info['user_group']}")
+            # 更灵活的匹配模式，支持HTML标签和空白字符
+            group_patterns = [
+                r'用户组[：:]\s*([^<\n]+)',
+                r'用户组[：:]</em>\s*([^<\n]+)',
+                r'>用户组[：:]\s*</em>\s*<em[^>]*>([^<]+)</em>',
+            ]
+            for pattern in group_patterns:
+                group_match = re.search(pattern, page_source)
+                if group_match:
+                    user_info["user_group"] = group_match.group(1).strip()
+                    logging.info(f"✅ 用户组: {user_info['user_group']}")
+                    break
             
-            # 提取积分
-            credits_match = re.search(r'积分[：:]\s*(\d+)', page_source)
-            if credits_match:
-                user_info["credits"] = int(credits_match.group(1))
-                logging.info(f"✅ 积分: {user_info['credits']}")
+            # 提取积分 - 使用更灵活的正则
+            credits_patterns = [
+                r'积分[：:]\s*(\d+)',
+                r'积分[：:]</em>\s*(\d+)',
+                r'>积分[：:]\s*</em>\s*<em[^>]*>(\d+)</em>',
+            ]
+            for pattern in credits_patterns:
+                credits_match = re.search(pattern, page_source)
+                if credits_match:
+                    user_info["credits"] = int(credits_match.group(1))
+                    logging.info(f"✅ 积分: {user_info['credits']}")
+                    break
             
-            # 提取金钱
-            money_match = re.search(r'金钱[：:]\s*(\d+)', page_source)
-            if money_match:
-                user_info["money"] = int(money_match.group(1))
-                logging.info(f"✅ 金钱: {user_info['money']}")
+            # 提取金钱 - 使用更灵活的正则
+            money_patterns = [
+                r'金钱[：:]\s*(\d+)',
+                r'金钱[：:]</em>\s*(\d+)',
+                r'>金钱[：:]\s*</em>\s*<em[^>]*>(\d+)</em>',
+            ]
+            for pattern in money_patterns:
+                money_match = re.search(pattern, page_source)
+                if money_match:
+                    user_info["money"] = int(money_match.group(1))
+                    logging.info(f"✅ 金钱: {user_info['money']}")
+                    break
             
-            # 提取色币
-            coins_match = re.search(r'色币[：:]\s*(\d+)', page_source)
-            if coins_match:
-                user_info["coins"] = int(coins_match.group(1))
-                logging.info(f"✅ 色币: {user_info['coins']}")
+            # 提取色币 - 使用更灵活的正则
+            coins_patterns = [
+                r'色币[：:]\s*(\d+)',
+                r'色币[：:]</em>\s*(\d+)',
+                r'>色币[：:]\s*</em>\s*<em[^>]*>(\d+)</em>',
+            ]
+            for pattern in coins_patterns:
+                coins_match = re.search(pattern, page_source)
+                if coins_match:
+                    user_info["coins"] = int(coins_match.group(1))
+                    logging.info(f"✅ 色币: {user_info['coins']}")
+                    break
             
-            # 提取评分
-            rating_match = re.search(r'评分[：:]\s*(\d+)', page_source)
-            if rating_match:
-                user_info["rating"] = int(rating_match.group(1))
-                logging.info(f"✅ 评分: {user_info['rating']}")
+            # 提取评分 - 使用更灵活的正则
+            rating_patterns = [
+                r'评分[：:]\s*(\d+)',
+                r'评分[：:]</em>\s*(\d+)',
+                r'>评分[：:]\s*</em>\s*<em[^>]*>(\d+)</em>',
+            ]
+            for pattern in rating_patterns:
+                rating_match = re.search(pattern, page_source)
+                if rating_match:
+                    user_info["rating"] = int(rating_match.group(1))
+                    logging.info(f"✅ 评分: {user_info['rating']}")
+                    break
+            
+            # 调试：如果某些字段未获取到，尝试查找HTML片段
+            if user_info["money"] == 0 or user_info["coins"] == 0:
+                logging.debug("🔍 尝试查找统计信息HTML片段...")
+                # 查找包含"统计信息"的HTML区域
+                stats_section = re.search(r'统计信息.*?</ul>', page_source, re.DOTALL)
+                if stats_section:
+                    section_html = stats_section.group(0)
+                    logging.debug(f"找到统计信息区域（前500字符）: {section_html[:500]}")
             
             # 保存到统计数据
             self.stats.update_user_info(
@@ -562,6 +607,8 @@ class SeleniumAutoBot:
             
         except Exception as e:
             logging.error(f"❌ 获取用户信息失败: {e}")
+            import traceback
+            logging.debug(traceback.format_exc())
             return None
     
     def check_login_status(self):
