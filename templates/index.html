@@ -225,16 +225,63 @@
         [data-theme="light"] input,
         [data-theme="light"] select,
         [data-theme="light"] textarea {
-            background: rgba(0, 0, 0, 0.03);
-            color: var(--text-primary);
-            border-color: rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.95) !important;
+            color: #1e293b !important;
+            border: 1px solid rgba(139, 92, 246, 0.3) !important;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
 
         [data-theme="light"] input:focus,
         [data-theme="light"] select:focus,
         [data-theme="light"] textarea:focus {
-            background: rgba(0, 0, 0, 0.05);
-            border-color: var(--primary);
+            background: rgba(255, 255, 255, 1) !important;
+            border-color: var(--primary) !important;
+            box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.1);
+        }
+
+        [data-theme="light"] input::placeholder,
+        [data-theme="light"] textarea::placeholder {
+            color: #94a3b8 !important;
+        }
+
+        /* 亮色主题 - select下拉箭头 */
+        [data-theme="light"] select {
+            background-image: linear-gradient(45deg, transparent 50%, #7c3aed 50%), 
+                              linear-gradient(135deg, #7c3aed 50%, transparent 50%);
+            background-position: calc(100% - 15px) calc(1em + 2px), 
+                                calc(100% - 10px) calc(1em + 2px);
+            background-size: 5px 5px, 5px 5px;
+            background-repeat: no-repeat;
+        }
+
+        /* 亮色主题 - 密码框等特殊输入框 */
+        [data-theme="light"] input[type="password"],
+        [data-theme="light"] input[type="text"],
+        [data-theme="light"] input[type="number"],
+        [data-theme="light"] input[type="url"] {
+            -webkit-text-fill-color: #1e293b;
+        }
+
+        /* 亮色主题 - 禁用状态 */
+        [data-theme="light"] input:disabled,
+        [data-theme="light"] select:disabled,
+        [data-theme="light"] textarea:disabled {
+            background: rgba(0, 0, 0, 0.05) !important;
+            color: #94a3b8 !important;
+            cursor: not-allowed;
+        }
+
+        /* 亮色主题 - 复选框和单选按钮 */
+        [data-theme="light"] input[type="checkbox"],
+        [data-theme="light"] input[type="radio"] {
+            border: 2px solid rgba(139, 92, 246, 0.5) !important;
+            background: white !important;
+        }
+
+        [data-theme="light"] input[type="checkbox"]:checked,
+        [data-theme="light"] input[type="radio"]:checked {
+            background: var(--primary) !important;
+            border-color: var(--primary) !important;
         }
 
         /* 亮色主题 - 日志面板 */
@@ -306,12 +353,20 @@
         [data-theme="light"] .stat-label,
         [data-theme="light"] .stat-info,
         [data-theme="light"] .form-label,
+        [data-theme="light"] .form-group label,
         [data-theme="light"] label {
-            color: #475569 !important;
+            color: #334155 !important;
+            font-weight: 500;
         }
 
         [data-theme="light"] .stat-value {
             color: #0f172a !important;
+        }
+
+        /* 亮色主题 - 表单组标题 */
+        [data-theme="light"] .form-group-title,
+        [data-theme="light"] .config-card > div > div {
+            color: #1e293b !important;
         }
 
         /* 亮色主题 - 状态指示器 */
@@ -2664,9 +2719,18 @@
                     document.getElementById('maxReplies').textContent = config.max_replies_per_day || 30;
 
                     // 签到状态
-                    // 使用单色符号避免某些环境下emoji渲染为色块
-                    document.getElementById('checkinStatus').textContent = stats.checkin_success ? '✔' : '✘';
-                    document.getElementById('checkinLabel').textContent = stats.checkin_success ? '已签到' : '未签到';
+                    const isCheckedIn = stats.checkin_success === true || stats.checkin_success === 1 || stats.checkin_success === '1';
+                    if (isCheckedIn) {
+                        document.getElementById('checkinStatus').textContent = '✔';
+                        document.getElementById('checkinStatus').style.color = '#10b981';
+                        document.getElementById('checkinLabel').textContent = '已签到';
+                        document.getElementById('checkinLabel').style.color = '#10b981';
+                    } else {
+                        document.getElementById('checkinStatus').textContent = '✘';
+                        document.getElementById('checkinStatus').style.color = '#ef4444';
+                        document.getElementById('checkinLabel').textContent = '未签到';
+                        document.getElementById('checkinLabel').style.color = '#94a3b8';
+                    }
                     document.getElementById('checkinTime').textContent = stats.checkin_time || '-';
 
                     // 用户信息
