@@ -1306,6 +1306,7 @@
             cursor: pointer;
             font-size: 0.85rem;
             transition: all 0.3s;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif;
         }
 
         .log-btn:hover {
@@ -3534,17 +3535,17 @@
                     statusEl.innerHTML = '<span style="font-size: 1.5rem;">🎉</span><span style="margin-left: 8px;">发现新版本</span>';
                     updateBtn.style.display = 'inline-block';
                     
-                    let message = '发现新版本！\n';
-                    message += '最新提交: ' + data.latest_message + '\n';
-                    if (data.latest_release) {
-                        message += '版本: ' + data.latest_release.version;
-                    }
+                    // 显示简洁的版本信息
+                    const currentVer = data.current_version || '-';
+                    const latestVer = data.latest_version || '-';
+                    let message = `发现新版本！\n当前: ${currentVer}\n最新: ${latestVer}`;
                     
                     showToast(true, message);
                 } else {
                     statusEl.innerHTML = '<span style="font-size: 1.5rem;">✅</span><span style="margin-left: 8px;">已是最新</span>';
                     updateBtn.style.display = 'none';
-                    showToast(true, '已是最新版本');
+                    const currentVer = data.current_version || '-';
+                    showToast(true, `已是最新版本 ${currentVer}`);
                 }
                 
             } catch (err) {
