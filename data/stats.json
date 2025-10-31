@@ -1,9 +1,17 @@
 {
-  "today": "2025-10-30",
+  "today": "2025-10-31",
   "reply_count": 0,
   "checkin_success": false,
   "checkin_time": null,
   "replies": [],
   "history": [],
-  "all_replies": []
+  "all_replies": [],
+  "user_info": {
+    "user_group": "",
+    "credits": 0,
+    "money": 0,
+    "coins": 0,
+    "rating": 0,
+    "last_update": "2025-10-31 16:25:03"
+  }
 }
