@@ -639,6 +639,12 @@
             color: #7c3aed !important;
             font-weight: 600;
         }
+        
+        /* 亮色主题 - Emoji保持原色 */
+        [data-theme="light"] .emoji {
+            color: inherit;
+            filter: none;
+        }
 
         [data-theme="light"] .log-btn:hover {
             background: rgba(139, 92, 246, 0.25) !important;
@@ -1307,6 +1313,12 @@
             font-size: 0.85rem;
             transition: all 0.3s;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif;
+        }
+        
+        /* Emoji保持原色，不受按钮文字颜色影响 */
+        .emoji {
+            font-style: normal;
+            font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
         }
 
         .log-btn:hover {
@@ -2226,8 +2238,8 @@
                             <span>实时日志（最新200条）</span>
                     </div>
                     <div class="log-actions">
-                        <button class="log-btn" onclick="scrollToTop()">⬆️ 顶部</button>
-                        <button class="log-btn" onclick="scrollToBottom()">⬇️ 底部</button>
+                        <button class="log-btn" onclick="scrollToTop()"><span class="emoji">⬆️</span> 顶部</button>
+                        <button class="log-btn" onclick="scrollToBottom()"><span class="emoji">⬇️</span> 底部</button>
                     </div>
                 </div>
                 <div class="log-container" id="logContainer">
@@ -2262,8 +2274,8 @@
                                 <option value="5000">最后5000行</option>
                                 <option value="999999">全部</option>
                             </select>
-                            <button class="log-btn" onclick="loadLogContent(currentLogFile)">🔍 搜索</button>
-                            <button class="log-btn" onclick="loadHistoryLogs()">🔄 刷新</button>
+                            <button class="log-btn" onclick="loadLogContent(currentLogFile)"><span class="emoji">🔍</span> 搜索</button>
+                            <button class="log-btn" onclick="loadHistoryLogs()"><span class="emoji">🔄</span> 刷新</button>
                         </div>
                     </div>
 
@@ -2748,13 +2760,13 @@
 
                 <div class="action-buttons" style="margin-top: 20px; gap: 15px;">
                     <button class="btn btn-primary" onclick="checkUpdate()" id="check-update-btn">
-                        🔍 检查更新
+                        <span class="emoji">🔍</span> 检查更新
                     </button>
                     <button class="btn btn-success" onclick="doUpdate()" id="do-update-btn" style="display: none;">
-                        ⬇️ 立即更新
+                        <span class="emoji">⬇️</span> 立即更新
                     </button>
                     <button class="btn" onclick="refreshVersion()">
-                        🔄 刷新信息
+                        <span class="emoji">🔄</span> 刷新信息
                     </button>
                 </div>
             </div>
@@ -2764,7 +2776,7 @@
                 <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: #f1f5f9; flex-wrap: wrap;">
                     <span style="font-size: 1.5rem;">📝</span>
                     <span style="flex: 1;">更新日志</span>
-                    <button class="log-btn" onclick="loadUpdateLogs()">🔄 刷新日志</button>
+                    <button class="log-btn" onclick="loadUpdateLogs()"><span class="emoji">🔄</span> 刷新日志</button>
                 </h3>
                 
                 <div id="update-logs-container" style="max-height: 500px; overflow-y: auto;">
@@ -3513,14 +3525,14 @@
             
             btn.disabled = true;
             btn.innerHTML = '🔄 检查中...';
-            statusEl.innerHTML = '<span style="font-size: 1.5rem;">🔄</span><span style="margin-left: 8px;">检查中...</span>';
+            statusEl.innerHTML = '<span style="font-size: 1.5rem;" class="emoji">🔄</span><span style="margin-left: 8px;">检查中...</span>';
             
             try {
                 const response = await fetch('/api/check_update');
                 const data = await response.json();
                 
                 if (!data.success) {
-                    statusEl.innerHTML = '<span style="font-size: 1.5rem;">❌</span><span style="margin-left: 8px;">检查失败</span>';
+                    statusEl.innerHTML = '<span style="font-size: 1.5rem;" class="emoji">❌</span><span style="margin-left: 8px;">检查失败</span>';
                     showToast(false, data.message);
                     return;
                 }
@@ -3532,7 +3544,7 @@
                 if (lvEl) lvEl.innerHTML = formatVersion(data.latest_version || data.current_version);
                 
                 if (data.has_update) {
-                    statusEl.innerHTML = '<span style="font-size: 1.5rem;">🎉</span><span style="margin-left: 8px;">发现新版本</span>';
+                    statusEl.innerHTML = '<span style="font-size: 1.5rem;" class="emoji">🎉</span><span style="margin-left: 8px;">发现新版本</span>';
                     updateBtn.style.display = 'inline-block';
                     
                     // 显示简洁的版本信息
@@ -3542,7 +3554,7 @@
                     
                     showToast(true, message);
                 } else {
-                    statusEl.innerHTML = '<span style="font-size: 1.5rem;">✅</span><span style="margin-left: 8px;">已是最新</span>';
+                    statusEl.innerHTML = '<span style="font-size: 1.5rem;" class="emoji">✅</span><span style="margin-left: 8px;">已是最新</span>';
                     updateBtn.style.display = 'none';
                     const currentVer = data.current_version || '-';
                     showToast(true, `已是最新版本 ${currentVer}`);
@@ -3553,7 +3565,7 @@
                 showToast(false, '检查更新失败: ' + err);
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = '🔍 检查更新';
+                btn.innerHTML = '<span class="emoji">🔍</span> 检查更新';
             }
         }
 
@@ -3570,7 +3582,7 @@
             btn.disabled = true;
             checkBtn.disabled = true;
             btn.innerHTML = '⏳ 更新中...';
-            statusEl.innerHTML = '<span style="font-size: 1.5rem;">⏳</span><span style="margin-left: 8px;">正在更新...</span>';
+            statusEl.innerHTML = '<span style="font-size: 1.5rem;" class="emoji">⏳</span><span style="margin-left: 8px;">正在更新...</span>';
             
             try {
                 const response = await fetch('/api/do_update', {
@@ -3602,7 +3614,7 @@
                         
                         // 显示重启中状态
                         setTimeout(() => {
-                            statusEl.innerHTML = '<span style="font-size: 1.5rem;">🔄</span><span style="margin-left: 8px;">正在重启...</span>';
+                            statusEl.innerHTML = '<span style="font-size: 1.5rem;" class="emoji">🔄</span><span style="margin-left: 8px;">正在重启...</span>';
                         }, 3000);
                         
                         // 等待容器重启，然后自动刷新页面
@@ -3621,11 +3633,11 @@
                     
                     btn.style.display = 'none';
                 } else {
-                    statusEl.innerHTML = '<span style="font-size: 1.5rem;">❌</span><span style="margin-left: 8px;">更新失败</span>';
+                    statusEl.innerHTML = '<span style="font-size: 1.5rem;" class="emoji">❌</span><span style="margin-left: 8px;">更新失败</span>';
                     showToast(false, '更新失败: ' + data.message);
                     btn.disabled = false;
                     checkBtn.disabled = false;
-                    btn.innerHTML = '⬇️ 立即更新';
+                    btn.innerHTML = '<span class="emoji">⬇️</span> 立即更新';
                 }
                 
             } catch (err) {
