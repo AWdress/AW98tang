@@ -1572,12 +1572,18 @@ class SeleniumAutoBot:
         
         # 检查是否已经回复过该帖子（根据URL）
         if check_replied and post_url:
+            logging.debug(f"🔍 检查已回复记录: {post_url}")
             all_replies = self.stats.get_all_replies(limit=1000)  # 获取最近1000条回复记录
+            logging.debug(f"🔍 共有 {len(all_replies)} 条回复记录")
             for reply in all_replies:
                 if reply.get('url') == post_url:
                     logging.info(f"⏭️ 跳过已回复过的帖子: {title}")
                     return True
+        else:
+            if not check_replied:
+                logging.debug(f"🔍 测试模式：跳过已回复检查")
         
+        logging.debug(f"✅ 帖子未被跳过: {title[:50]}")
         return False
     
     def get_smart_reply(self, title, content=""):
@@ -2833,11 +2839,15 @@ class SeleniumAutoBot:
                 
                 for idx, post in enumerate(posts, 1):
                     logging.info(f"🧪 [{idx}/{len(posts)}] 检查帖子: {post['title'][:50]}...")
+                    
                     # 测试模式不检查已回复（check_replied=False），只检查关键词和前缀
                     if self.should_skip_post(post['title'], post['url'], check_replied=False):
                         continue  # 已经在 should_skip_post 中显示了跳过信息
+                    
+                    logging.info(f"✅ 帖子符合条件，将处理: {post['title'][:60]}...")
                     will_process.append(post)
                     if len(will_process) >= self.daily_reply_limit:
+                        logging.info(f"🧪 已找到足够的帖子 ({len(will_process)}/{self.daily_reply_limit})，停止扫描")
                         break
                 
                 if will_process:
@@ -3042,59 +3052,84 @@ class SeleniumAutoBot:
                 return
             
             # 2. 先执行自动回帖（论坛要求）
-            reply_count = 0
-            for forum_id in self.target_forums:
-                # 检查停止标志
-                if self.stop_flag():
-                    logging.info("🛑 检测到停止信号，停止自动回帖")
+            # 读取今日已回复数量
+            today_stats = self.stats.get_today_stats()
+            today_reply_count = today_stats.get('reply_count', 0)
+            reply_count = 0  # 本次运行的回复计数（初始化在外部，供签到逻辑使用）
+            
+            logging.info(f"📊 今日已回复: {today_reply_count}/{self.daily_reply_limit} 个帖子")
+            
+            # 检查是否已达到每日回复限制
+            if today_reply_count >= self.daily_reply_limit:
+                logging.info(f"⏭️ 已达到每日回复限制 ({today_reply_count}/{self.daily_reply_limit})，跳过回复任务")
+                # 继续执行签到（如果开启）
+                if not self.enable_daily_checkin:
                     return
+            else:
+                # 计算本次可回复数量
+                remaining_replies = self.daily_reply_limit - today_reply_count
+                logging.info(f"📝 本次最多可回复: {remaining_replies} 个帖子")
                 
-                if reply_count >= self.daily_reply_limit:
-                    break
-                
-                posts = self.get_forum_posts(forum_id)
-                
-                for post in posts:
+                for forum_id in self.target_forums:
                     # 检查停止标志
                     if self.stop_flag():
                         logging.info("🛑 检测到停止信号，停止自动回帖")
                         return
                     
-                    if reply_count >= self.daily_reply_limit:
+                    if reply_count >= remaining_replies:
+                        logging.info(f"✅ 已完成本次回复任务 ({reply_count}/{remaining_replies})")
                         break
                     
-                    # 检查是否应该跳过该帖子（包括已回复检查）
-                    if self.should_skip_post(post['title'], post['url']):
-                        continue
+                    posts = self.get_forum_posts(forum_id)
                     
-                    # 回复帖子（传递标题用于智能回复）
-                    if self.reply_to_post(post['url'], post_title=post['title']):
-                        reply_count += 1
-                        logging.info(f"✅ 已回复 {reply_count}/{self.daily_reply_limit} 个帖子")
+                    for post in posts:
+                        # 检查停止标志
+                        if self.stop_flag():
+                            logging.info("🛑 检测到停止信号，停止自动回帖")
+                            return
                         
-                        # 等待间隔（期间也检查停止标志）
-                        wait_time = random.randint(self.reply_interval_min, self.reply_interval_max)
-                        logging.info(f"⏰ 等待 {wait_time} 秒...")
+                        if reply_count >= remaining_replies:
+                            logging.info(f"✅ 已完成本次回复任务 ({reply_count}/{remaining_replies})")
+                            break
                         
-                        # 分段等待，便于响应停止信号
-                        for i in range(wait_time):
-                            if self.stop_flag():
-                                logging.info("🛑 检测到停止信号，中断等待")
-                                return
-                            time.sleep(1)
-                    else:
-                        logging.warning("⚠️ 回复失败，跳过此帖")
-            
-            logging.info(f"✅ 自动回帖完成！共回复 {reply_count} 个帖子")
+                        # 检查是否应该跳过该帖子（包括已回复检查）
+                        if self.should_skip_post(post['title'], post['url']):
+                            continue
+                        
+                        # 回复帖子（传递标题用于智能回复）
+                        if self.reply_to_post(post['url'], post_title=post['title']):
+                            reply_count += 1
+                            current_total = today_reply_count + reply_count
+                            logging.info(f"✅ 本次已回复 {reply_count} 个，今日总计 {current_total}/{self.daily_reply_limit} 个帖子")
+                            
+                            # 等待间隔（期间也检查停止标志）
+                            wait_time = random.randint(self.reply_interval_min, self.reply_interval_max)
+                            logging.info(f"⏰ 等待 {wait_time} 秒...")
+                            
+                            # 分段等待，便于响应停止信号
+                            for i in range(wait_time):
+                                if self.stop_flag():
+                                    logging.info("🛑 检测到停止信号，中断等待")
+                                    return
+                                time.sleep(1)
+                        else:
+                            logging.warning("⚠️ 回复失败，跳过此帖")
+                
+                logging.info(f"✅ 自动回帖完成！本次回复 {reply_count} 个帖子，今日总计 {today_reply_count + reply_count}/{self.daily_reply_limit} 个")
             
             # 3. 回复完成后执行签到（论坛要求先回复才能签到）
             if self.enable_daily_checkin:
-                if reply_count > 0:
-                    logging.info("📋 已完成回复，现在开始签到...")
+                # 检查今日是否有回复（本次回复或之前已回复）
+                final_reply_count = today_reply_count + reply_count
+                if final_reply_count > 0:
+                    if reply_count > 0:
+                        logging.info("📋 已完成本次回复，现在开始签到...")
+                    else:
+                        logging.info("📋 今日已有回复记录，现在开始签到...")
                     self.daily_checkin()
                     # 注意：签到成功后会自动获取用户信息
                 else:
-                    logging.warning("⚠️ 未成功回复任何帖子，跳过签到（论坛要求回复后才能签到）")
+                    logging.warning("⚠️ 今日未成功回复任何帖子，跳过签到（论坛要求回复后才能签到）")
             else:
                 logging.info("ℹ️ 签到功能已禁用")
                 # 如果没有开启签到，在回复完成后获取用户信息
