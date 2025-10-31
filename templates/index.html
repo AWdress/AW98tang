@@ -19,6 +19,24 @@
             box-sizing: border-box;
         }
 
+        /* 平滑滚动 */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* 移动端点击优化 */
+        * {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+        }
+
+        /* 文本选择优化 */
+        body {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+        }
+
         :root {
             --primary: #ec4899;
             --primary-dark: #be185d;
@@ -29,6 +47,25 @@
             --info: #3b82f6;
             --dark: #0f172a;
             --dark-2: #1e293b;
+            --bg-gradient-start: #1e293b;
+            --bg-gradient-end: #0f172a;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --sidebar-width: 260px;
+        }
+
+        /* 亮色主题 */
+        [data-theme="light"] {
+            --bg-gradient-start: #f8fafc;
+            --bg-gradient-end: #e2e8f0;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --card-border: rgba(0, 0, 0, 0.08);
+            --dark: #f8fafc;
+            --dark-2: #e2e8f0;
             --dark-3: #334155;
             --sidebar-width: 260px;
         }
@@ -83,11 +120,12 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Microsoft YaHei', sans-serif;
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-            color: #f1f5f9;
+            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            color: var(--text-primary);
             min-height: 100vh;
             overflow-x: hidden;
             position: relative;
+            transition: background 0.3s ease, color 0.3s ease;
         }
 
         /* 背景装饰 */
@@ -117,17 +155,63 @@
             }
         }
 
-        /* 顶部加载进度条 */
-        .progress-bar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 0%;
-            height: 3px;
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-            transition: width 0.3s ease;
-            z-index: 99999;
-            box-shadow: 0 0 10px rgba(236, 72, 153, 0.5);
+
+        /* 亮色主题适配 - 侧边栏 */
+        [data-theme="light"] .sidebar {
+            background: rgba(255, 255, 255, 0.95);
+            border-right: 1px solid rgba(0, 0, 0, 0.08);
+        }
+
+        [data-theme="light"] .menu-item {
+            color: #334155;
+        }
+
+        [data-theme="light"] .menu-item:hover {
+            background: rgba(236, 72, 153, 0.1);
+            color: var(--primary);
+        }
+
+        [data-theme="light"] .menu-item.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+
+        /* 亮色主题 - 输入框和表单元素 */
+        [data-theme="light"] input,
+        [data-theme="light"] select,
+        [data-theme="light"] textarea {
+            background: rgba(0, 0, 0, 0.03);
+            color: var(--text-primary);
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="light"] input:focus,
+        [data-theme="light"] select:focus,
+        [data-theme="light"] textarea:focus {
+            background: rgba(0, 0, 0, 0.05);
+            border-color: var(--primary);
+        }
+
+        /* 亮色主题 - 日志面板 */
+        [data-theme="light"] .log-panel {
+            background: rgba(0, 0, 0, 0.03);
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="light"] .log-container {
+            background: rgba(255, 255, 255, 0.5);
+            color: #1e293b;
+        }
+
+        /* 亮色主题 - 顶部栏 */
+        [data-theme="light"] .header-bar {
+            background: rgba(255, 255, 255, 0.9);
+            border-bottom-color: rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="light"] .mobile-header {
+            background: rgba(255, 255, 255, 0.95);
+            border-bottom-color: rgba(0, 0, 0, 0.1);
         }
 
         /* 侧边栏 */
@@ -362,12 +446,12 @@
         }
 
         .stat-card {
-            background: rgba(255, 255, 255, 0.05);
+            background: var(--card-bg);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border-radius: 16px;
             padding: 24px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--card-border);
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             animation: fadeInUp 0.6s ease-out;
             position: relative;
@@ -580,11 +664,11 @@
         }
 
         .reply-card {
-            background: rgba(255, 255, 255, 0.03);
+            background: var(--card-bg);
             backdrop-filter: blur(15px);
             border-radius: 16px;
             padding: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--card-border);
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
             position: relative;
@@ -899,11 +983,11 @@
         }
 
         .config-card {
-            background: rgba(255, 255, 255, 0.05);
+            background: var(--card-bg);
             backdrop-filter: blur(15px);
             border-radius: 16px;
             padding: 14px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--card-border);
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             overflow: hidden;
@@ -1138,6 +1222,43 @@
             }
         }
 
+        /* 骨架屏统计卡片 */
+        .skeleton-stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .skeleton-title {
+            height: 16px;
+            width: 60%;
+            margin-bottom: 12px;
+        }
+
+        .skeleton-value {
+            height: 32px;
+            width: 40%;
+            margin-bottom: 8px;
+        }
+
+        .skeleton-text {
+            height: 14px;
+            width: 80%;
+        }
+
+        /* 骨架屏日志列表 */
+        .skeleton-log-item {
+            height: 20px;
+            margin-bottom: 8px;
+            width: 100%;
+        }
+
+        .skeleton-log-item:last-child {
+            width: 70%;
+        }
+
         /* 输入框聚焦效果 */
         input[type="text"],
         input[type="password"],
@@ -1260,6 +1381,54 @@
         .header-left { display:none; }
         .app-logo { width: 28px; height: 28px; border-radius:6px; object-fit: contain; }
         .header-right { display:flex; align-items:center; gap:12px; margin-left:auto; }
+        
+        /* 主题切换按钮 */
+        .theme-toggle-btn {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .theme-toggle-btn::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .theme-toggle-btn:hover {
+            transform: scale(1.05);
+            border-color: rgba(236, 72, 153, 0.5);
+            box-shadow: 0 4px 12px rgba(236, 72, 153, 0.2);
+        }
+        
+        .theme-toggle-btn:hover::before {
+            opacity: 0.1;
+        }
+        
+        .theme-icon {
+            font-size: 1.4rem;
+            position: relative;
+            z-index: 1;
+            transition: transform 0.3s;
+        }
+        
+        .theme-toggle-btn:active .theme-icon {
+            transform: rotate(180deg) scale(0.9);
+        }
+        
         .user-chip { display:flex; align-items:center; gap:10px; padding:8px 12px; background: rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); border-radius:10px; }
         .user-avatar { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; background: rgba(99,102,241,0.25); }
         .user-subtitle { font-size:12px; color:#94a3b8; }
@@ -1288,13 +1457,16 @@
     </style>
 </head>
 <body>
-    <!-- 顶部加载进度条 -->
-    <div class="progress-bar" id="progressBar"></div>
-
     <!-- 移动端顶部栏 -->
     <div class="mobile-header">
         <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
         <div class="mobile-logo"><img src="{{ url_for('static', filename='img/logo.png') }}" alt="logo"/></div>
+        
+        <!-- 移动端主题切换 -->
+        <button class="theme-toggle-btn" onclick="toggleTheme()" title="切换主题" style="margin-left: auto; margin-right: 10px;">
+            <span class="theme-icon">🌙</span>
+        </button>
+        
         <div class="user-menu">
             <div class="user-menu-btn" onclick="toggleUserMenu('mobileUserMenu')">
                 <div class="avatar">👤</div>
@@ -1378,6 +1550,11 @@
             <div style="font-size:14px; color:#e2e8f0; font-weight:600;">色花堂助手</div>
         </div>
         <div class="header-right">
+            <!-- 主题切换按钮 -->
+            <button class="theme-toggle-btn" onclick="toggleTheme()" title="切换主题">
+                <span class="theme-icon" id="themeIcon">🌙</span>
+            </button>
+            
             <div class="user-menu">
                 <div class="user-menu-btn" onclick="toggleUserMenu('desktopUserMenu')">
                     <div class="avatar">👤</div>
@@ -2487,7 +2664,19 @@
             const linesSelect = document.getElementById('logLinesSelect');
             const searchInput = document.getElementById('logSearchInput');
             
-            container.innerHTML = '<div style="text-align: center; padding: 40px; color: #64748b;"><div style="font-size: 2rem;">⏳</div><div>加载中...</div></div>';
+            // 显示骨架屏
+            container.innerHTML = `
+                <div style="padding: 20px;">
+                    <div class="skeleton skeleton-log-item"></div>
+                    <div class="skeleton skeleton-log-item"></div>
+                    <div class="skeleton skeleton-log-item"></div>
+                    <div class="skeleton skeleton-log-item"></div>
+                    <div class="skeleton skeleton-log-item"></div>
+                    <div class="skeleton skeleton-log-item"></div>
+                    <div class="skeleton skeleton-log-item"></div>
+                    <div class="skeleton skeleton-log-item"></div>
+                </div>
+            `;
 
             try {
                 const lines = linesSelect.value;
@@ -2996,7 +3185,18 @@
         async function loadUpdateLogs() {
             const container = document.getElementById('update-logs-container');
             
-            container.innerHTML = '<div style="text-align: center; padding: 40px; color: #64748b;"><div style="font-size: 3rem;">⏳</div><div>加载中...</div></div>';
+            // 显示骨架屏
+            container.innerHTML = `
+                <div style="padding: 20px;">
+                    <div class="skeleton skeleton-log-item" style="height: 24px; width: 90%; margin-bottom: 16px;"></div>
+                    <div class="skeleton skeleton-log-item" style="height: 16px; width: 95%;"></div>
+                    <div class="skeleton skeleton-log-item" style="height: 16px; width: 88%;"></div>
+                    <div class="skeleton skeleton-log-item" style="height: 16px; width: 92%; margin-bottom: 24px;"></div>
+                    <div class="skeleton skeleton-log-item" style="height: 24px; width: 85%; margin-bottom: 16px;"></div>
+                    <div class="skeleton skeleton-log-item" style="height: 16px; width: 93%;"></div>
+                    <div class="skeleton skeleton-log-item" style="height: 16px; width: 90%;"></div>
+                </div>
+            `;
             
             try {
                 const response = await fetch('/api/update_logs?limit=5');
@@ -3205,32 +3405,53 @@
             lucide.createIcons();
         }
 
-        // 顶部进度条
-        let progressBar = document.getElementById('progressBar');
-        function showProgress() {
-            progressBar.style.width = '30%';
+        // 主题切换功能
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            const themeIcons = document.querySelectorAll('.theme-icon');
+            
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            
+            // 更新所有主题图标（桌面端和移动端）
+            themeIcons.forEach(icon => {
+                icon.textContent = newTheme === 'light' ? '☀️' : '🌙';
+            });
+            
+            // 添加主题切换动画
+            html.style.transition = 'all 0.3s ease';
             setTimeout(() => {
-                progressBar.style.width = '70%';
-            }, 200);
-        }
-        
-        function hideProgress() {
-            progressBar.style.width = '100%';
-            setTimeout(() => {
-                progressBar.style.width = '0%';
+                html.style.transition = '';
             }, 300);
         }
 
-        // 在页面切换时显示进度条
-        const originalShowPage = window.showPage;
-        if (originalShowPage) {
-            window.showPage = function(pageName) {
-                showProgress();
-                setTimeout(() => {
-                    originalShowPage.call(this, pageName);
-                    hideProgress();
-                }, 300);
-            };
+        // 初始化主题
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            const html = document.documentElement;
+            const themeIcons = document.querySelectorAll('.theme-icon');
+            
+            html.setAttribute('data-theme', savedTheme);
+            // 更新所有主题图标
+            themeIcons.forEach(icon => {
+                icon.textContent = savedTheme === 'light' ? '☀️' : '🌙';
+            });
+        }
+
+        // 页面加载时初始化主题
+        initTheme();
+
+        // 创建骨架屏HTML
+        function createSkeletonCard() {
+            return `
+                <div class="skeleton-stat-card">
+                    <div class="skeleton skeleton-title"></div>
+                    <div class="skeleton skeleton-value"></div>
+                    <div class="skeleton skeleton-text"></div>
+                </div>
+            `;
         }
 
         // 数字滚动动画（CountUp效果）
@@ -3313,7 +3534,6 @@
 
         // 页面加载完成动画
         window.addEventListener('load', function() {
-            hideProgress();
             // 添加页面加载完成的淡入效果
             document.body.style.opacity = '0';
             setTimeout(() => {
@@ -3321,15 +3541,6 @@
                 document.body.style.opacity = '1';
             }, 100);
         });
-
-        // 监听AJAX请求显示进度条
-        const originalFetch = window.fetch;
-        window.fetch = function(...args) {
-            showProgress();
-            return originalFetch.apply(this, args).finally(() => {
-                setTimeout(hideProgress, 300);
-            });
-        };
     </script>
 </body>
 </html>
