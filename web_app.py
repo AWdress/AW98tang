@@ -216,6 +216,8 @@ def run_bot():
                             bot_instance.driver.quit()
                         except:
                             pass
+                        finally:
+                            bot_instance.driver = None
                     time.sleep(retry_delay)
                     continue
                 else:
@@ -235,6 +237,8 @@ def run_bot():
                     bot_instance.driver.quit()
                 except:
                     pass
+                finally:
+                    bot_instance.driver = None
             
             if attempt < max_retries:
                 logging.info(f"⏰ {retry_delay}秒后进行第 {attempt + 1} 次重试...")
@@ -252,6 +256,8 @@ def run_bot():
                     logging.info("🔚 浏览器已关闭")
                 except:
                     pass
+                finally:
+                    bot_instance.driver = None
     
     bot_status['running'] = False
     bot_status['last_stop'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -552,6 +558,8 @@ def stop_bot():
                 logging.info("✅ 浏览器已关闭")
             except Exception as e:
                 logging.warning(f"关闭浏览器时出错: {e}")
+            finally:
+                bot_instance.driver = None
         
         # 更新状态
         bot_status['running'] = False

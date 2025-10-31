@@ -111,8 +111,8 @@ class SeleniumAutoBot:
             # 尝试获取当前URL来测试driver是否响应
             _ = self.driver.current_url
             return True
-        except Exception as e:
-            logging.warning(f"⚠️ ChromeDriver已失效: {e}")
+        except Exception:
+            # 静默处理，避免产生重试警告日志
             return False
     
     def ensure_driver_alive(self, headless=False):
@@ -3168,8 +3168,14 @@ class SeleniumAutoBot:
             return False
         finally:
             if self.driver:
-                self.driver.quit()
-                logging.info("🔚 浏览器已关闭")
+                try:
+                    self.driver.quit()
+                    logging.info("🔚 浏览器已关闭")
+                except Exception as e:
+                    # 忽略关闭浏览器时的错误（可能已经关闭）
+                    logging.debug(f"关闭浏览器时出错: {e}")
+                finally:
+                    self.driver = None
 
 def main():
     """主函数"""
