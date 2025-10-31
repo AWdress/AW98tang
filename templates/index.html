@@ -563,10 +563,19 @@
             color: #334155 !important;
         }
 
-        /* 亮色主题 - 系统更新页面版本卡片保持原始颜色 */
-        /* 移除了所有颜色覆盖，让卡片保持夜间模式的彩色显示效果 */
-
-        /* 系统更新页面的版本信息卡片颜色保持原样，不需要亮色主题覆盖 */
+        /* 亮色主题 - 系统更新页面版本信息文字适配 */
+        [data-theme="light"] #page-update #current-version,
+        [data-theme="light"] #page-update #latest-version {
+            color: #1e293b !important;
+        }
+        
+        [data-theme="light"] #page-update #update-status {
+            color: #1e293b !important;
+        }
+        
+        [data-theme="light"] #page-update #update-status span {
+            color: #1e293b !important;
+        }
 
         /* 亮色主题 - 更新说明 */
         [data-theme="light"] #page-update ul {
