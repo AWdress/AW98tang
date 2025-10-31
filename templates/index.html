@@ -629,10 +629,8 @@
             color: #64748b !important;
         }
 
-        /* 亮色主题 - 签到状态符号 */
-        [data-theme="light"] #checkinStatus {
-            color: inherit !important;
-        }
+        /* 亮色主题 - 签到状态符号（保持和夜间模式一样的颜色） */
+        /* 移除此覆盖，让JS动态设置的颜色（绿色✔/红色✘）在两个主题下都生效 */
 
         /* 亮色主题 - 刷新日志按钮 */
         [data-theme="light"] .log-btn {
@@ -1057,6 +1055,14 @@
             gap: 8px;
             position: relative;
             overflow: hidden;
+        }
+        
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            border-radius: 8px;
+            white-space: nowrap;
+            line-height: 1.5;
         }
 
         .btn::before {
@@ -1656,13 +1662,22 @@
                 max-width: 100%;
             }
             
-            .mini-reply-title,
+            .mini-reply-title {
+                max-width: 100%;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                word-break: break-all;
+                font-size: 0.8rem !important;  /* 移动端缩小字体 */
+            }
+            
             .mini-reply-content {
                 max-width: 100%;
                 overflow: hidden;
                 text-overflow: ellipsis;
                 white-space: nowrap;
                 word-break: break-all;
+                font-size: 0.75rem !important;  /* 移动端缩小字体 */
             }
         }
 
@@ -2757,7 +2772,7 @@
                 <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: #f1f5f9;">
                     <span style="font-size: 1.5rem;">📝</span>
                     <span>更新日志</span>
-                    <button class="btn btn-sm" onclick="loadUpdateLogs()" style="margin-left: auto; padding: 6px 12px; font-size: 0.85rem; background: rgba(139, 92, 246, 0.2); border: 1px solid rgba(139, 92, 246, 0.3); color: #a78bfa; font-weight: 600;">
+                    <button class="btn btn-sm" onclick="loadUpdateLogs()" style="margin-left: auto; background: rgba(139, 92, 246, 0.2); border: 1px solid rgba(139, 92, 246, 0.3); color: #a78bfa; white-space: nowrap; line-height: 1.5;">
                         🔄 刷新日志
                     </button>
                 </h3>
