@@ -977,7 +977,7 @@ class SeleniumAutoBot:
             logging.error(f"❌ 访问帖子失败: {e}")
             return False
     
-    def should_skip_post(self, title):
+    def should_skip_post(self, title, post_url=""):
         """判断是否应该跳过该帖子"""
         # 检查跳过关键词
         for keyword in self.skip_keywords:
@@ -990,6 +990,14 @@ class SeleniumAutoBot:
             if title.startswith(prefix):
                 logging.info(f"⏭️ 跳过前缀为 '{prefix}' 的帖子: {title}")
                 return True
+        
+        # 检查是否已经回复过该帖子（根据URL）
+        if post_url:
+            all_replies = self.stats.get_all_replies(limit=1000)  # 获取最近1000条回复记录
+            for reply in all_replies:
+                if reply.get('url') == post_url:
+                    logging.info(f"⏭️ 跳过已回复过的帖子: {title}")
+                    return True
         
         return False
     
@@ -2244,7 +2252,7 @@ class SeleniumAutoBot:
                 will_process = []
                 
                 for post in posts:
-                    if self.should_skip_post(post['title']):
+                    if self.should_skip_post(post['title'], post['url']):
                         continue  # 已经在 should_skip_post 中显示了跳过信息
                     will_process.append(post)
                     if len(will_process) >= self.daily_reply_limit:
@@ -2453,8 +2461,8 @@ class SeleniumAutoBot:
                     if reply_count >= self.daily_reply_limit:
                         break
                     
-                    # 检查是否应该跳过该帖子
-                    if self.should_skip_post(post['title']):
+                    # 检查是否应该跳过该帖子（包括已回复检查）
+                    if self.should_skip_post(post['title'], post['url']):
                         continue
                     
                     # 回复帖子（传递标题用于智能回复）
