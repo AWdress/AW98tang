@@ -3,19 +3,34 @@ FROM python:3.11-slim
 # 设置工作目录
 WORKDIR /app
 
-# 安装系统依赖、Git 和 Chrome浏览器
+# 安装系统依赖、Git、中文字体和Chrome浏览器
 RUN apt-get update && apt-get install -y \
     wget \
     gnupg \
     unzip \
     curl \
     git \
+    locales \
+    fonts-wqy-zenhei \
+    fonts-wqy-microhei \
+    fonts-noto-cjk \
+    fonts-noto-cjk-extra \
     && wget -q -O /tmp/google-chrome-key.pub https://dl-ssl.google.com/linux/linux_signing_key.pub \
     && gpg --dearmor -o /usr/share/keyrings/google-chrome.gpg /tmp/google-chrome-key.pub \
     && echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list \
     && apt-get update \
     && apt-get install -y google-chrome-stable \
     && rm -rf /var/lib/apt/lists/* /tmp/google-chrome-key.pub
+
+# 设置UTF-8 locale
+RUN sed -i 's/# zh_CN.UTF-8 UTF-8/zh_CN.UTF-8 UTF-8/' /etc/locale.gen \
+    && sed -i 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen \
+    && locale-gen \
+    && update-locale LANG=zh_CN.UTF-8
+
+ENV LANG=zh_CN.UTF-8
+ENV LC_ALL=zh_CN.UTF-8
+ENV LANGUAGE=zh_CN:zh
 
 # 安装 ChromeDriver（避免运行时下载）
 RUN CHROME_VERSION=$(google-chrome --version | awk '{print $3}') \

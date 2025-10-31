@@ -602,6 +602,33 @@
             color: inherit !important;
         }
 
+        /* 亮色主题 - 刷新日志按钮 */
+        [data-theme="light"] .log-btn {
+            background: rgba(139, 92, 246, 0.15) !important;
+            border: 1px solid rgba(139, 92, 246, 0.3) !important;
+            color: #7c3aed !important;
+            font-weight: 600;
+        }
+
+        [data-theme="light"] .log-btn:hover {
+            background: rgba(139, 92, 246, 0.25) !important;
+            border-color: rgba(139, 92, 246, 0.5) !important;
+        }
+
+        /* 亮色主题 - 更新日志刷新按钮 */
+        [data-theme="light"] #update-logs-container ~ * button[onclick*="loadUpdateLogs"],
+        [data-theme="light"] button[onclick*="loadUpdateLogs"] {
+            background: rgba(139, 92, 246, 0.15) !important;
+            border: 1px solid rgba(139, 92, 246, 0.3) !important;
+            color: #7c3aed !important;
+            font-weight: 600;
+        }
+
+        [data-theme="light"] button[onclick*="loadUpdateLogs"]:hover {
+            background: rgba(139, 92, 246, 0.25) !important;
+            border-color: rgba(139, 92, 246, 0.5) !important;
+        }
+
         /* 侧边栏 */
         .sidebar {
             position: fixed;
