@@ -23,14 +23,19 @@ from stats_manager import StatsManager
 from ai_reply_service import AIReplyService
 
 # 设置日志
+import sys
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
         logging.FileHandler('logs/selenium_bot.log', encoding='utf-8'),
-        logging.StreamHandler()
+        logging.StreamHandler(sys.stdout)
     ]
 )
+# 设置StreamHandler的编码为UTF-8
+for handler in logging.root.handlers:
+    if isinstance(handler, logging.StreamHandler) and not isinstance(handler, logging.FileHandler):
+        handler.stream = open(sys.stdout.fileno(), mode='w', encoding='utf-8', buffering=1)
 
 class SeleniumAutoBot:
     def __init__(self, config_file='config.json'):

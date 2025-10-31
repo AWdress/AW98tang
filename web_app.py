@@ -172,10 +172,10 @@ def run_bot():
                 bot_status['running'] = False
                 return
             
-            # 设置浏览器
-            if not bot_instance.setup_driver():
-                logging.error(f"❌ 第 {attempt} 次尝试 - 浏览器启动失败")
-                bot_status['last_error'] = "浏览器启动失败"
+            # 使用run()方法，它会自动处理Cookie登录和自动化任务
+            if not bot_instance.run():
+                logging.error(f"❌ 第 {attempt} 次尝试 - 任务执行失败")
+                bot_status['last_error'] = "任务执行失败"
                 if attempt < max_retries:
                     logging.info(f"⏰ {retry_delay}秒后进行第 {attempt + 1} 次重试...")
                     time.sleep(retry_delay)
@@ -184,42 +184,6 @@ def run_bot():
                     bot_status['running'] = False
                     logging.error("❌ 已达到最大重试次数，任务失败")
                     return
-            
-            # 检查停止标志
-            if bot_stop_flag:
-                logging.info("🛑 机器人已被停止")
-                bot_status['running'] = False
-                return
-            
-            # 登录
-            if not bot_instance.login():
-                logging.error(f"❌ 第 {attempt} 次尝试 - 登录失败")
-                bot_status['last_error'] = "登录失败"
-                
-                # 关闭浏览器
-                if bot_instance.driver:
-                    try:
-                        bot_instance.driver.quit()
-                    except:
-                        pass
-                
-                if attempt < max_retries:
-                    logging.info(f"⏰ {retry_delay}秒后进行第 {attempt + 1} 次重试...")
-                    time.sleep(retry_delay)
-                    continue
-                else:
-                    bot_status['running'] = False
-                    logging.error("❌ 已达到最大重试次数，任务失败")
-                    return
-            
-            # 检查停止标志
-            if bot_stop_flag:
-                logging.info("🛑 机器人已被停止")
-                bot_status['running'] = False
-                return
-            
-            # 运行自动化任务
-            bot_instance.run_auto_tasks()
             
             # 测试模式：不检查签到状态，直接完成
             if is_test_mode:
