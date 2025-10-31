@@ -376,7 +376,7 @@ def get_stats():
 @app.route('/api/logs')
 @login_required
 def get_logs():
-    """获取日志"""
+    """获取实时日志"""
     response = jsonify({
         'logs': log_messages[-200:]  # 返回最新200条日志
     })
@@ -385,6 +385,72 @@ def get_logs():
     response.headers['Pragma'] = 'no-cache'
     response.headers['Expires'] = '0'
     return response
+
+@app.route('/api/log_files')
+@login_required
+def get_log_files():
+    """获取历史日志文件列表"""
+    try:
+        log_dir = 'logs'
+        if not os.path.exists(log_dir):
+            return jsonify({'success': True, 'files': []})
+        
+        files = []
+        for filename in os.listdir(log_dir):
+            if filename.endswith('.log'):
+                filepath = os.path.join(log_dir, filename)
+                stat = os.stat(filepath)
+                files.append({
+                    'name': filename,
+                    'size': stat.st_size,
+                    'modified': datetime.fromtimestamp(stat.st_mtime).strftime('%Y-%m-%d %H:%M:%S')
+                })
+        
+        # 按修改时间倒序排序
+        files.sort(key=lambda x: x['modified'], reverse=True)
+        
+        return jsonify({'success': True, 'files': files})
+    except Exception as e:
+        logging.error(f"获取日志文件列表失败: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/log_content/<filename>')
+@login_required
+def get_log_content(filename):
+    """获取指定日志文件内容"""
+    try:
+        # 安全检查：只允许读取logs目录下的.log文件
+        if not filename.endswith('.log') or '/' in filename or '\\' in filename:
+            return jsonify({'success': False, 'message': '无效的文件名'}), 400
+        
+        filepath = os.path.join('logs', filename)
+        if not os.path.exists(filepath):
+            return jsonify({'success': False, 'message': '文件不存在'}), 404
+        
+        # 获取查询参数
+        lines = request.args.get('lines', 500, type=int)  # 默认最后500行
+        search = request.args.get('search', '', type=str)  # 搜索关键字
+        
+        # 读取文件（最后N行）
+        with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
+            all_lines = f.readlines()
+            
+        # 如果有搜索关键字，过滤行
+        if search:
+            all_lines = [line for line in all_lines if search.lower() in line.lower()]
+        
+        # 获取最后N行
+        content_lines = all_lines[-lines:] if len(all_lines) > lines else all_lines
+        
+        return jsonify({
+            'success': True,
+            'content': ''.join(content_lines),
+            'total_lines': len(all_lines),
+            'returned_lines': len(content_lines)
+        })
+    except Exception as e:
+        logging.error(f"读取日志文件失败: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
 
 @app.route('/api/config', methods=['GET', 'POST'])
 @login_required
