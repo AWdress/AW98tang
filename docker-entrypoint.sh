@@ -96,12 +96,6 @@ setup_proxy() {
     fi
 }
 
-# Git 拉取函数
-gitpull() {
-    echo "[Git] 拉取远程分支 $GIT_BRANCH..."
-    git reset --hard origin/"$GIT_BRANCH"
-    git pull origin "$GIT_BRANCH"
-}
 
 # 使用ZIP回退更新（支持公开/私有仓库）
 zip_fallback_update() {
@@ -195,7 +189,7 @@ else
         git log -1 --oneline 2>/dev/null || echo "  (无法获取版本信息)"
         # 直接跳出更新逻辑，继续启动服务
     else
-        echo "🔄 开始 Git/ZIP 代码同步流程（ZIP优先）..."
+        echo "🔄 开始代码同步流程..."
     
     # 设置默认分支
     if [ -z "$GIT_BRANCH" ]; then
@@ -277,26 +271,7 @@ else
         if zip_fallback_update; then
             echo "✅ ZIP回退优先更新成功"
         else
-            echo "⚠️ ZIP回退失败，尝试Git同步..."
-            if git fetch origin "$GIT_BRANCH" 2>/dev/null; then
-                echo "✅ 成功获取远程更新"
-                LOCAL_HASH=$(git rev-parse HEAD 2>/dev/null || echo "local")
-                REMOTE_HASH=$(git rev-parse origin/"$GIT_BRANCH" 2>/dev/null || echo "remote")
-                if [ "$LOCAL_HASH" != "$REMOTE_HASH" ]; then
-                    echo "[Git] 发现新版本，准备更新..."
-                    if gitpull; then
-                        echo "✅ 代码更新成功"
-                        echo "📌 更新后版本:"
-                        git log -1 --oneline
-                    else
-                        echo "⚠️ 更新失败，使用当前版本继续"
-                    fi
-                else
-                    echo "✅ 已是最新版本"
-                fi
-            else
-                echo "❌ Git 同步失败，使用当前版本继续运行"
-            fi
+            echo "⚠️ ZIP更新失败，使用当前版本继续运行"
         fi
     fi
     fi

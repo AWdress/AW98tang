@@ -25,20 +25,20 @@
 
 **症状**:
 ```
-❌ 获取远程更新失败！
-错误信息: remote: Invalid username or token...
+❌ ZIP更新失败
+错误信息: 下载失败...
 ```
 
-**原因**: GitHub Token认证问题
+**原因**: 网络连接问题
 
 **解决方案**:
 
-#### 方案A: 跳过Git更新（最简单）⭐⭐⭐⭐⭐
+#### 方案A: 跳过启动时更新（推荐）⭐⭐⭐⭐⭐
 
 编辑 `docker-compose.yml`:
 ```yaml
 environment:
-  - SKIP_GIT=true  # 添加这一行
+  - STARTUP_AUTO_UPDATE=false  # 关闭启动时更新
 ```
 
 然后重启：
@@ -47,31 +47,18 @@ docker-compose down
 docker-compose up -d
 ```
 
-#### 方案B: 修复Token认证
+#### 方案B: 检查网络连接
 
-1. **检查Token类型**
-   - 需要使用 **Classic Token**（`ghp_` 开头）
-   - 不要使用 Fine-grained Token
-
-2. **重新生成Token**
-   - 访问: https://github.com/settings/tokens
-   - Generate new token → **Classic**
-   - 勾选 **repo** (完整权限)
-   - 复制Token
-
-3. **配置到Docker**
+1. **检查网络状态**
    ```bash
-   # 创建或编辑 .env 文件
-   echo "GITHUB_TOKEN=ghp_你的新token" > .env
+   docker exec -it aw98tang ping -c 3 github.com
    ```
 
-4. **重启容器**
-   ```bash
-   docker-compose down
-   docker-compose up -d
-   ```
+2. **配置代理（如需要）**
+   在 `config.json` 中配置代理设置
 
-**详细文档**: 查看 `docs/GITHUB_TOKEN_SOLUTION.md`
+3. **手动更新**
+   使用Web界面的"系统更新"功能手动检查更新
 
 ---
 
@@ -222,7 +209,7 @@ Web控制: web_app.py (13,378 bytes)
 - ✅ 一键测试AI连接
 
 Docker: docker-entrypoint.sh (5,983 bytes)
-- ✅ AWLottery风格Git配置
+- ✅ ZIP更新方式
 - ✅ 灵活的环境变量支持
 ```
 
@@ -231,8 +218,8 @@ Docker: docker-entrypoint.sh (5,983 bytes)
 ## 🔧 根据您的具体问题选择方案
 
 ### 如果是"Docker更新失败"
-→ 添加 `SKIP_GIT=true` 到 docker-compose.yml  
-→ 查看 `docs/GITHUB_TOKEN_SOLUTION.md`
+→ 添加 `STARTUP_AUTO_UPDATE=false` 到 docker-compose.yml  
+→ 检查网络连接
 
 ### 如果是"每次都登录"
 → 检查 `data/cookies.pkl` 是否存在  
@@ -286,11 +273,11 @@ Docker: docker-entrypoint.sh (5,983 bytes)
 
 最近更新包括：
 - ✅ 登录状态保存功能（v3.1）
-- ✅ AWLottery风格Git配置（v3.3）
+- ✅ ZIP更新方式（v3.3）
 - ✅ AI智能回复功能（v3.4）
 - ✅ 优化登录验证逻辑（v3.5）
 
-所有代码已提交到Git，可以正常拉取更新。
+所有代码已提交，可以正常更新。
 
 ---
 
@@ -315,7 +302,7 @@ python web_app.py
 ```yaml
 # docker-compose.yml
 environment:
-  - SKIP_GIT=true          # 跳过自动更新，更稳定
+  - STARTUP_AUTO_UPDATE=false  # 关闭启动时自动更新，更稳定
   - WEB_USERNAME=admin
   - WEB_PASSWORD=你的密码
 ```
