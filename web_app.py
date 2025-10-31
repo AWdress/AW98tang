@@ -159,19 +159,19 @@ def run_bot():
             else:
                 logging.info("🚀 机器人启动中...")
             
-        bot_stop_flag = False  # 重置停止标志
-        bot_status['running'] = True
-        bot_status['last_start'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        
-        bot_instance = SeleniumAutoBot()
-        bot_instance.stop_flag = lambda: bot_stop_flag  # 传递停止标志检查函数
-        
-        # 检查停止标志
-        if bot_stop_flag:
-            logging.info("🛑 机器人已被停止")
-            bot_status['running'] = False
-            return
-        
+            bot_stop_flag = False  # 重置停止标志
+            bot_status['running'] = True
+            bot_status['last_start'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            
+            bot_instance = SeleniumAutoBot()
+            bot_instance.stop_flag = lambda: bot_stop_flag  # 传递停止标志检查函数
+            
+            # 检查停止标志
+            if bot_stop_flag:
+                logging.info("🛑 机器人已被停止")
+                bot_status['running'] = False
+                return
+            
             # 使用run()方法，它会自动处理Cookie登录和自动化任务
             if not bot_instance.run():
                 # 检查是否是致命错误（如密码错误、账号封禁）
@@ -179,9 +179,9 @@ def run_bot():
                     logging.critical(f"🚨 检测到致命错误: {bot_instance.fatal_error}")
                     logging.critical("🚨 停止重试，请修复配置后再运行")
                     bot_status['last_error'] = f"致命错误: {bot_instance.fatal_error}"
-            bot_status['running'] = False
-            return
-        
+                    bot_status['running'] = False
+                    return
+                
                 logging.error(f"❌ 第 {attempt} 次尝试 - 任务执行失败")
                 bot_status['last_error'] = "任务执行失败"
                 if attempt < max_retries:
@@ -189,17 +189,17 @@ def run_bot():
                     time.sleep(retry_delay)
                     continue
                 else:
-            bot_status['running'] = False
+                    bot_status['running'] = False
                     logging.error("❌ 已达到最大重试次数，任务失败")
-            return
-        
+                    return
+            
             # 测试模式：不检查签到状态，直接完成
             if is_test_mode:
                 logging.info("🧪 测试模式完成")
-            bot_status['running'] = False
+                bot_status['running'] = False
                 bot_status['last_stop'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            return
-        
+                return
+            
             # 正常模式：检查签到是否成功
             if check_today_checkin_status():
                 logging.info("🎉 签到已完成，任务成功")
@@ -219,15 +219,15 @@ def run_bot():
                     time.sleep(retry_delay)
                     continue
                 else:
-        bot_status['running'] = False
-        bot_status['last_stop'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                    bot_status['running'] = False
+                    bot_status['last_stop'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                     logging.error("❌ 已达到最大重试次数，签到未完成")
                     return
         
-    except Exception as e:
+        except Exception as e:
             logging.error(f"❌ 第 {attempt} 次尝试异常: {e}")
-        bot_status['errors'] += 1
-        bot_status['last_error'] = str(e)
+            bot_status['errors'] += 1
+            bot_status['last_error'] = str(e)
             
             # 关闭浏览器
             if bot_instance and bot_instance.driver:
@@ -243,14 +243,14 @@ def run_bot():
                 bot_status['running'] = False
                 logging.error("❌ 已达到最大重试次数，任务失败")
                 return
-    finally:
+        finally:
             # 确保浏览器被关闭
-        if bot_instance and bot_instance.driver:
-            try:
-                bot_instance.driver.quit()
-                logging.info("🔚 浏览器已关闭")
-            except:
-                pass
+            if bot_instance and bot_instance.driver:
+                try:
+                    bot_instance.driver.quit()
+                    logging.info("🔚 浏览器已关闭")
+                except:
+                    pass
     
     bot_status['running'] = False
     bot_status['last_stop'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
