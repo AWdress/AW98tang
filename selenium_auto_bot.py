@@ -196,21 +196,21 @@ class SeleniumAutoBot:
             for attempt in range(max_attempts):
                 page_source = self.driver.page_source
                 
-                # 检查是否有年龄验证页面
+            # 检查是否有年龄验证页面
                 if "满18岁" in page_source or "If you are over 18" in page_source or "SEHUATANG.ORG" in page_source:
                     if attempt > 0:
                         logging.info(f"🔞 年龄验证页面仍存在，第 {attempt + 1} 次尝试...")
                     else:
-                        logging.info("🔞 检测到年龄验证页面")
-                    
+                logging.info("🔞 检测到年龄验证页面")
+                
                     try:
                         # 尝试多种方式查找进入按钮
                         enter_button = None
-                        
+                
                         # 方案1: 通过class查找
                         try:
                             enter_buttons = self.driver.find_elements(By.CLASS_NAME, "enter-btn")
-                            if enter_buttons:
+                if enter_buttons:
                                 enter_button = enter_buttons[0]
                                 logging.info("✅ 找到年龄验证按钮 (通过class)")
                         except:
@@ -236,7 +236,7 @@ class SeleniumAutoBot:
                         if not enter_button:
                             logging.warning("⚠️ 未找到年龄验证按钮，尝试直接访问主页...")
                             self.driver.get(self.base_url)
-                            time.sleep(3)
+                    time.sleep(3)
                             continue
                         
                         # 点击按钮
@@ -257,11 +257,11 @@ class SeleniumAutoBot:
                             if "满18岁" not in new_page_source and "If you are over 18" not in new_page_source:
                                 logging.info("✅ 年龄验证完成，页面已跳转")
                                 return True
-                            else:
+                else:
                                 logging.warning("⚠️ 点击后页面未跳转，重试...")
                                 time.sleep(2)
                     
-                    except Exception as e:
+        except Exception as e:
                         logging.warning(f"⚠️ 年龄验证处理异常: {e}")
                         time.sleep(2)
                 else:
@@ -377,11 +377,11 @@ class SeleniumAutoBot:
                     # 使用较短的超时，因为已经等待过了
                     wait_short = WebDriverWait(self.driver, 10)
                     username_field = wait_short.until(
-                        EC.presence_of_element_located((By.NAME, "username"))
-                    )
-                    logging.info("✅ 登录表单加载完成")
+                    EC.presence_of_element_located((By.NAME, "username"))
+                )
+                logging.info("✅ 登录表单加载完成")
                     break
-                except TimeoutException:
+            except TimeoutException:
                     if retry < max_retries - 1:
                         logging.warning(f"⚠️ 第 {retry + 1} 次未找到用户名输入框，等待8秒后重试...")
                         time.sleep(8)
@@ -390,10 +390,10 @@ class SeleniumAutoBot:
                         logging.warning("🔍 尝试备用查找方案...")
                         try:
                             # 方案1: 尝试name="user"
-                            username_field = self.driver.find_element(By.NAME, "user")
+                    username_field = self.driver.find_element(By.NAME, "user")
                             logging.info("✅ 找到备用用户名输入框 (name='user')")
                             break
-                        except:
+                except:
                             pass
                         
                         try:
@@ -431,8 +431,8 @@ class SeleniumAutoBot:
                             return False
             
             if not username_field:
-                logging.error("❌ 找不到用户名输入框")
-                return False
+                    logging.error("❌ 找不到用户名输入框")
+                    return False
             
             # 填写用户名
             username_field.clear()
@@ -1395,7 +1395,7 @@ class SeleniumAutoBot:
             for reply in all_replies:
                 if reply.get('url') == post_url:
                     logging.info(f"⏭️ 跳过已回复过的帖子: {title}")
-                    return True
+                return True
         
         return False
     
