@@ -332,6 +332,11 @@
             border-bottom: 1px solid rgba(236, 72, 153, 0.2);
             box-shadow: 0 2px 8px rgba(236, 72, 153, 0.05);
         }
+        
+        /* 亮色主题 - 移动端菜单按钮 */
+        [data-theme="light"] .menu-toggle {
+            color: #1e293b !important;
+        }
 
         /* 亮色主题 - 按钮优化 */
         [data-theme="light"] .btn {
@@ -2003,7 +2008,7 @@
         <!-- 版本信息（自动显示当前/最新版本与状态） -->
         <div class="version-section" id="sidebar-version" style="margin: 16px 12px 24px; padding: 12px; border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; background: rgba(15,23,42,0.6);">
             <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px; color:#94a3b8; font-size:0.9rem;">
-                <span>📦</span>
+                <span class="emoji">📦</span>
                 <span>版本信息</span>
             </div>
             <div style="font-size:0.85rem; color:#94a3b8; display:flex; align-items:center; justify-content:space-between;">
@@ -2167,8 +2172,8 @@
 
             <!-- 最近回复预览 -->
             <div class="stat-card" style="margin-bottom: 20px;">
-                <h3 style="margin-bottom: 16px; display: flex; align-items: center; gap: 10px;">
-                    <span style="font-size: 1.3rem;">💬</span>
+                    <h3 style="margin-bottom: 16px; display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.3rem;" class="emoji">💬</span>
                     <span>最近回复</span>
                     <a href="#" onclick="showPage('replies'); return false;" style="margin-left: auto; font-size: 0.85rem; color: var(--primary); text-decoration: none;">查看全部 →</a>
                 </h3>
@@ -2184,7 +2189,7 @@
             <!-- 运行日志预览 -->
             <div class="stat-card">
                 <h3 style="margin-bottom: 16px; display: flex; align-items: center; gap: 10px;">
-                    <span style="font-size: 1.3rem;">📋</span>
+                    <span style="font-size: 1.3rem;" class="emoji">📋</span>
                     <span>运行日志</span>
                     <a href="#" onclick="showPage('logs'); return false;" style="margin-left: auto; font-size: 0.85rem; color: var(--primary); text-decoration: none;">查看完整日志 →</a>
                 </h3>
@@ -2305,7 +2310,7 @@
                     <!-- 基础配置区域 -->
                     <div class="config-card card-basic">
                     <h3>
-                        <span style="font-size: 1.5rem;">🔐</span>
+                        <span style="font-size: 1.5rem;" class="emoji">🔐</span>
                         <span>基础配置</span>
                     </h3>
                     
@@ -2348,7 +2353,7 @@
                     <!-- 回复功能配置 -->
                     <div class="config-card card-reply">
                         <h3>
-                            <span style="font-size: 1.5rem;">💬</span>
+                            <span style="font-size: 1.5rem;" class="emoji">💬</span>
                             <span>回复功能配置</span>
                         </h3>
 
@@ -2395,7 +2400,7 @@
                     <!-- 签到和定时任务配置 -->
                     <div class="config-card card-schedule">
                         <h3>
-                            <span style="font-size: 1.5rem;">⏰</span>
+                            <span style="font-size: 1.5rem;" class="emoji">⏰</span>
                             <span>签到与定时任务</span>
                         </h3>
 
@@ -2507,7 +2512,7 @@
                     <!-- 目标论坛配置 -->
                     <div class="config-card card-forum">
                         <h3>
-                            <span style="font-size: 1.5rem;">📍</span>
+                            <span style="font-size: 1.5rem;" class="emoji">📍</span>
                             <span>目标论坛</span>
                         </h3>
 
@@ -2522,7 +2527,7 @@
                     </div>
 
                     <div style="margin-top: 8px; padding: 8px; background: rgba(59, 130, 246, 0.1); border-left: 3px solid #3b82f6; border-radius: 4px; font-size: 0.85rem; color: #cbd5e1;">
-                        <strong>💡 论坛配置说明：</strong>
+                        <strong><span class="emoji">💡</span> 论坛配置说明：</strong>
                         <ul style="margin: 8px 0 0 20px; line-height: 1.8;">
                             <li>论坛ID可以从论坛URL中获取，如 forum.php?mod=forumdisplay&fid=141</li>
                             <li>名称映射用于在Web界面显示友好名称</li>
@@ -2533,7 +2538,7 @@
                     <!-- 过滤规则配置 -->
                     <div class="config-card card-filter">
                         <h3>
-                            <span style="font-size: 1.5rem;">🚫</span>
+                            <span style="font-size: 1.5rem;" class="emoji">🚫</span>
                             <span>过滤规则</span>
                         </h3>
 
@@ -2553,7 +2558,7 @@
                     </div>
 
                     <div style="margin-top: 8px; padding: 8px; background: rgba(59, 130, 246, 0.1); border-left: 3px solid #3b82f6; border-radius: 4px; font-size: 0.85rem; color: #cbd5e1;">
-                        <strong>💡 过滤规则说明：</strong>
+                        <strong><span class="emoji">💡</span> 过滤规则说明：</strong>
                         <ul style="margin: 6px 0 0 18px; line-height: 1.7;">
                             <li>包含关键词的帖子会被跳过</li>
                             <li>以指定前缀开头的帖子会被跳过</li>
@@ -2565,7 +2570,7 @@
                     <!-- 回复模板配置 -->
                     <div class="config-card card-template">
                         <h3>
-                            <span style="font-size: 1.5rem;">📝</span>
+                            <span style="font-size: 1.5rem;" class="emoji">📝</span>
                         <span>回复模板</span>
                     </h3>
 
@@ -2575,7 +2580,7 @@
                     </div>
 
                     <div style="margin-top: 8px; padding: 8px; background: rgba(59, 130, 246, 0.1); border-left: 3px solid #3b82f6; border-radius: 4px; font-size: 0.85rem; color: #cbd5e1;">
-                        <strong>💡 回复模板说明：</strong>
+                        <strong><span class="emoji">💡</span> 回复模板说明：</strong>
                         <ul style="margin: 6px 0 0 18px; line-height: 1.7;">
                             <li>仅在"启用智能回复"和"启用AI回复"都关闭时使用</li>
                             <li>系统会随机选择一条作为回复内容</li>
