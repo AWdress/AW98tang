@@ -2486,6 +2486,7 @@ class SeleniumAutoBot:
                 logging.info("🧪 会打开浏览器，但不实际提交")
                 logging.info("🧪 用于验证所有功能是否正常")
                 logging.info("🧪 无视签到/自动回复等所有开关设置")
+                logging.info("🧪 不受今日签到状态限制，可重复测试")
                 logging.info("🧪 =====================================")
                 logging.info("💡 注意：按照论坛规则，先回复后签到")
                 logging.info("")
@@ -2516,6 +2517,17 @@ class SeleniumAutoBot:
             
             # 正常模式：按照配置执行
             # 注意：论坛要求先回复一条才能签到，所以先回复后签到
+            
+            # 0. 检查今天是否已经签到成功（测试模式下跳过此检查）
+            if not (self.enable_test_mode or self.enable_test_checkin or self.enable_test_reply):
+                today_stats = self.stats.get_today_stats()
+                if today_stats.get('checkin_success', False):
+                    logging.info("=" * 60)
+                    logging.info("✅ 今天已经签到成功，跳过本次运行")
+                    logging.info(f"📅 签到时间: {today_stats.get('checkin_time', '-')}")
+                    logging.info(f"💬 今日回复: {today_stats.get('reply_count', 0)} 次")
+                    logging.info("=" * 60)
+                    return
             
             # 1. 检查是否启用自动回复
             if not self.enable_auto_reply:
