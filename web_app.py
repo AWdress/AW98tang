@@ -726,7 +726,7 @@ def scheduled_task():
         # 使用单一时间（兼容旧配置）
         else:
             try:
-    schedule.every().day.at(schedule_time).do(run_scheduled_bot)
+                schedule.every().day.at(schedule_time).do(run_scheduled_bot)
                 logging.info(f"⏰ 已设置定时任务: 每天 {schedule_time}")
             except Exception as e:
                 logging.error(f"设置定时任务失败: {e}")
@@ -736,7 +736,7 @@ def scheduled_task():
         last_config = config.copy()
         
         while not scheduler_stop_flag:
-        schedule.run_pending()
+            schedule.run_pending()
             time.sleep(10)  # 每10秒检查一次任务
             
             check_count += 1
