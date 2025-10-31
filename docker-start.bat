@@ -53,7 +53,7 @@ goto end
 echo.
 echo ========================================
 echo 📍 访问地址: http://localhost:5000
-echo 🔐 默认账号: admin / admin123
+echo 🔐 默认账号: admin / password
 echo 💡 自定义账号: 创建.env文件设置环境变量
 echo ⏰ 定时任务: 在config.json中配置
 echo ========================================

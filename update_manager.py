@@ -356,15 +356,11 @@ class UpdateManager:
                     if download_with_requests(api_url, zip_path, headers) or download_with_curl(api_url, zip_path, headers):
                         return self._extract_and_overlay(zip_path)
 
-            # 2) 公开镜像
-            mirrors = [
-                f"https://mirror.ghproxy.com/https://codeload.github.com/{self.repo_owner}/{self.repo_name}/zip/refs/heads/{self.branch}",
-                f"https://kgithub.com/{self.repo_owner}/{self.repo_name}/archive/refs/heads/{self.branch}.zip",
-                f"https://hub.fgit.cf/{self.repo_owner}/{self.repo_name}/archive/refs/heads/{self.branch}.zip"
-            ]
-
+            # 2) GitHub官方下载地址
+            official_url = f"https://github.com/{self.repo_owner}/{self.repo_name}/archive/refs/heads/{self.branch}.zip"
+            
             last_error = None
-            for url in mirrors:
+            for url in [official_url]:
                 try:
                     with tempfile.TemporaryDirectory() as td:
                         zip_path = os.path.join(td, 'repo.zip')
@@ -377,7 +373,7 @@ class UpdateManager:
                     last_error = str(e)
                     continue
 
-            return {'success': False, 'message': f'镜像ZIP更新失败: {last_error or "未知错误"}'}
+            return {'success': False, 'message': f'GitHub ZIP更新失败: {last_error or "未知错误"}'}
         except Exception as e:
             logging.error(f"ZIP回退更新异常: {e}")
             return {'success': False, 'message': f'ZIP回退更新异常: {str(e)}'}

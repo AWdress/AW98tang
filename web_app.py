@@ -130,8 +130,14 @@ def run_bot():
     """在后台线程中运行机器人（带重试机制）"""
     global bot_instance, bot_status, bot_stop_flag
     
-    # 检查今天是否已经签到成功
-    if check_today_checkin_status():
+    # 检查是否是测试模式
+    config = load_config()
+    is_test_mode = (config.get('enable_test_mode', False) or 
+                    config.get('enable_test_checkin', False) or 
+                    config.get('enable_test_reply', False))
+    
+    # 检查今天是否已经签到成功（测试模式下跳过此检查）
+    if not is_test_mode and check_today_checkin_status():
         logging.info("✅ 今天已经签到成功，跳过本次运行")
         return
     
@@ -207,7 +213,14 @@ def run_bot():
             # 运行自动化任务
             bot_instance.run_auto_tasks()
             
-            # 检查签到是否成功
+            # 测试模式：不检查签到状态，直接完成
+            if is_test_mode:
+                logging.info("🧪 测试模式完成")
+                bot_status['running'] = False
+                bot_status['last_stop'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                return
+            
+            # 正常模式：检查签到是否成功
             if check_today_checkin_status():
                 logging.info("🎉 签到已完成，任务成功")
                 bot_status['running'] = False
