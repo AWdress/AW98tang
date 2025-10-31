@@ -645,19 +645,7 @@
             border-color: rgba(139, 92, 246, 0.5) !important;
         }
 
-        /* 亮色主题 - 更新日志刷新按钮 */
-        [data-theme="light"] #update-logs-container ~ * button[onclick*="loadUpdateLogs"],
-        [data-theme="light"] button[onclick*="loadUpdateLogs"] {
-            background: rgba(139, 92, 246, 0.15) !important;
-            border: 1px solid rgba(139, 92, 246, 0.3) !important;
-            color: #7c3aed !important;
-            font-weight: 600;
-        }
-
-        [data-theme="light"] button[onclick*="loadUpdateLogs"]:hover {
-            background: rgba(139, 92, 246, 0.25) !important;
-            border-color: rgba(139, 92, 246, 0.5) !important;
-        }
+        /* 已移除：现在使用统一的 .log-btn 类样式 */
 
         /* 侧边栏 */
         .sidebar {
@@ -2775,9 +2763,7 @@
                 <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: #f1f5f9; flex-wrap: wrap;">
                     <span style="font-size: 1.5rem;">📝</span>
                     <span style="flex: 1;">更新日志</span>
-                    <button class="log-btn" onclick="loadUpdateLogs()">
-                        🔄 刷新日志
-                    </button>
+                    <button class="log-btn" onclick="loadUpdateLogs()">🔄 刷新日志</button>
                 </h3>
                 
                 <div id="update-logs-container" style="max-height: 500px; overflow-y: auto;">
