@@ -2803,8 +2803,22 @@
                     document.getElementById('lastStop').textContent = status.last_stop || '-';
 
                     // 回复统计
-                    document.getElementById('todayReplies').textContent = stats.today_replies || 0;
-                    document.getElementById('maxReplies').textContent = config.max_replies_per_day || 30;
+                    const todayReplies = stats.today_replies || 0;
+                    const maxReplies = config.max_replies_per_day || 30;
+                    const repliesElement = document.getElementById('todayReplies');
+                    
+                    repliesElement.textContent = todayReplies;
+                    document.getElementById('maxReplies').textContent = maxReplies;
+                    
+                    // 如果超出限额，显示警告样式
+                    if (todayReplies > maxReplies) {
+                        repliesElement.style.color = '#ef4444';  // 红色
+                        repliesElement.innerHTML = todayReplies + ' ⚠️';
+                    } else if (todayReplies === maxReplies) {
+                        repliesElement.style.color = '#f59e0b';  // 橙色（已达限额）
+                    } else {
+                        repliesElement.style.color = '';  // 默认颜色
+                    }
 
                     // 签到状态
                     const isCheckedIn = stats.checkin_success === true || stats.checkin_success === 1 || stats.checkin_success === '1';
