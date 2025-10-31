@@ -2585,6 +2585,14 @@ class SeleniumAutoBot:
                     logging.info("🧪 ========== 签到测试完成 ==========")
                     logging.info("🧪 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
                 
+                # 3. 测试模式完成后获取用户信息
+                logging.info("")
+                try:
+                    logging.info("📊 测试完成，获取最新用户信息...")
+                    self.get_user_info()
+                except Exception as e:
+                    logging.warning(f"⚠️ 获取用户信息失败: {e}")
+                
                 return  # 测试模式完成后直接返回
             
             # 正常模式：按照配置执行
