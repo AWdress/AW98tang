@@ -44,6 +44,7 @@ class SeleniumAutoBot:
         self.driver = None
         self.wait = None
         self.stop_flag = lambda: False  # 停止标志检查函数
+        self.fatal_error = None  # 致命错误标记（如密码错误、账号封禁等）
         self.stats = StatsManager()  # 初始化统计管理器
         self.ai_service = AIReplyService(self.config)  # 初始化AI服务
         
@@ -430,6 +431,33 @@ class SeleniumAutoBot:
             current_url = self.driver.current_url
             page_source = self.driver.page_source
             
+            # 检查是否有明确的错误提示
+            error_indicators = {
+                "密码错误": "账号密码错误，请检查配置文件",
+                "用户名错误": "账号不存在，请检查配置文件",
+                "安全提问答案不正确": "安全提问答案错误，请检查配置文件",
+                "登录失败超过限制": "登录失败次数过多，请稍后再试",
+                "您的账号已被禁止": "账号已被封禁，请联系管理员",
+                "验证码错误": "验证码错误，将重试"
+            }
+            
+            for error_keyword, error_msg in error_indicators.items():
+                if error_keyword in page_source:
+                    logging.error(f"❌ {error_msg}")
+                    logging.error(f"当前页面: {current_url}")
+                    # 保存页面截图用于调试
+                    try:
+                        self.driver.save_screenshot("debug/login_failed.png")
+                        logging.info("📸 登录失败截图已保存: debug/login_failed.png")
+                    except:
+                        pass
+                    # 密码错误等致命错误直接返回，并标记错误类型
+                    if error_keyword in ["密码错误", "用户名错误", "您的账号已被禁止"]:
+                        logging.critical(f"🚨 致命错误: {error_msg}")
+                        logging.critical("🚨 此类错误无需重试，请修复配置后再运行")
+                        self.fatal_error = error_msg  # 设置致命错误标记
+                    return False
+            
             # 多种登录成功的判断条件
             success_indicators = [
                 "欢迎您回来" in page_source,
@@ -452,12 +480,17 @@ class SeleniumAutoBot:
                 
                 return True
             else:
-                logging.error("❌ 登录失败，请检查账号信息")
+                logging.error("❌ 登录失败，原因未知")
                 logging.error(f"当前页面: {current_url}")
+                logging.warning("💡 可能原因：网络问题、页面加载慢、需要额外验证")
                 # 保存页面截图用于调试
                 try:
                     self.driver.save_screenshot("debug/login_failed.png")
                     logging.info("📸 登录失败截图已保存: debug/login_failed.png")
+                    # 保存HTML用于调试
+                    with open('debug/login_failed.html', 'w', encoding='utf-8') as f:
+                        f.write(page_source)
+                    logging.info("📄 登录失败页面已保存: debug/login_failed.html")
                 except:
                     pass
                 return False

@@ -174,6 +174,14 @@ def run_bot():
             
             # 使用run()方法，它会自动处理Cookie登录和自动化任务
             if not bot_instance.run():
+                # 检查是否是致命错误（如密码错误、账号封禁）
+                if hasattr(bot_instance, 'fatal_error') and bot_instance.fatal_error:
+                    logging.critical(f"🚨 检测到致命错误: {bot_instance.fatal_error}")
+                    logging.critical("🚨 停止重试，请修复配置后再运行")
+                    bot_status['last_error'] = f"致命错误: {bot_instance.fatal_error}"
+                    bot_status['running'] = False
+                    return
+                
                 logging.error(f"❌ 第 {attempt} 次尝试 - 任务执行失败")
                 bot_status['last_error'] = "任务执行失败"
                 if attempt < max_retries:
