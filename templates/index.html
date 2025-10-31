@@ -563,22 +563,8 @@
             color: #334155 !important;
         }
 
-        /* 亮色主题 - 系统更新页面 */
-        [data-theme="light"] #page-update .stat-item {
-            background: rgba(139, 92, 246, 0.08) !important;
-        }
-
-        [data-theme="light"] #page-update .stat-item [style*="color: #a78bfa"],
-        [data-theme="light"] #page-update .stat-item [style*="color: #6ee7b7"],
-        [data-theme="light"] #page-update .stat-item [style*="color: #93c5fd"] {
-            color: #1e293b !important;
-            font-weight: 600;
-        }
-
-        [data-theme="light"] #page-update .stat-item [style*="font-size: 1.5rem"],
-        [data-theme="light"] #page-update .stat-item [style*="font-size: 1.2rem"] {
-            color: #0f172a !important;
-        }
+        /* 亮色主题 - 系统更新页面版本卡片保持原始颜色 */
+        /* 移除了所有颜色覆盖，让卡片保持夜间模式的彩色显示效果 */
 
         /* 系统更新页面的版本信息卡片颜色保持原样，不需要亮色主题覆盖 */
 
@@ -2735,7 +2721,7 @@
             <!-- 版本信息 -->
             <div class="stat-card" style="margin-bottom: 30px;">
                 <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: #f1f5f9;">
-                    <span style="font-size: 1.5rem;">📦</span>
+                    <span style="font-size: 1.5rem;" class="emoji">📦</span>
                     <span>版本信息</span>
                 </h3>
                 
