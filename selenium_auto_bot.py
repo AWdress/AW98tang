@@ -1311,6 +1311,22 @@ class SeleniumAutoBot:
             self.driver.get(forum_url)
             time.sleep(3)
             
+            # 检查是否真的处于登录状态
+            page_source = self.driver.page_source
+            if self.username and self.username in page_source:
+                logging.info(f"✅ 确认已登录状态（用户: {self.username}）")
+            elif "退出" in page_source or "个人资料" in page_source:
+                logging.info(f"✅ 确认已登录状态（检测到登录标识）")
+            else:
+                logging.warning(f"⚠️ 警告: 访问论坛页面时可能未登录！")
+                logging.warning(f"⚠️ 当前URL: {self.driver.current_url}")
+                # 尝试重新访问个人中心再返回
+                logging.info("🔄 尝试访问个人中心后重新获取...")
+                self.driver.get(f"{self.base_url}home.php?mod=space")
+                time.sleep(2)
+                self.driver.get(forum_url)
+                time.sleep(3)
+            
             # 查找帖子链接
             post_links = self.driver.find_elements(By.CSS_SELECTOR, "a[href*='thread-'], a[href*='tid=']")
             
@@ -2799,10 +2815,12 @@ class SeleniumAutoBot:
                 logging.info(f"📋 [测试模式] 获取论坛帖子: {forum_id}")
                 posts = self.get_forum_posts(forum_id)
                 
+                logging.info(f"🧪 [测试模式] 实际获取到 {len(posts)} 个帖子")
                 logging.info(f"🧪 [测试模式] 开始分析帖子...")
                 will_process = []
                 
-                for post in posts:
+                for idx, post in enumerate(posts, 1):
+                    logging.info(f"🧪 [{idx}/{len(posts)}] 检查帖子: {post['title'][:50]}...")
                     if self.should_skip_post(post['title'], post['url']):
                         continue  # 已经在 should_skip_post 中显示了跳过信息
                     will_process.append(post)
