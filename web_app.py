@@ -138,7 +138,15 @@ def run_bot():
     
     # 检查今天是否已经签到成功（测试模式下跳过此检查）
     if not is_test_mode and check_today_checkin_status():
+        # 获取今日统计信息
+        fresh_stats = StatsManager()
+        today_stats = fresh_stats.get_today_stats()
+        
+        logging.info("=" * 60)
         logging.info("✅ 今天已经签到成功，跳过本次运行")
+        logging.info(f"📅 签到时间: {today_stats.get('checkin_time', '-')}")
+        logging.info(f"💬 今日回复: {today_stats.get('reply_count', 0)} 次")
+        logging.info("=" * 60)
         return
     
     max_retries = 3  # 最大重试次数
