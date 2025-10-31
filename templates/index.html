@@ -181,9 +181,26 @@
 
         /* 亮色主题适配 - 侧边栏 */
         [data-theme="light"] .sidebar {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.90), rgba(255, 245, 250, 0.90));
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 245, 250, 0.95));
             backdrop-filter: blur(20px);
             border-right: 1px solid rgba(236, 72, 153, 0.2);
+        }
+        
+        /* 亮色主题 - Logo区域文字 */
+        [data-theme="light"] .logo-text p {
+            color: #64748b !important;
+            opacity: 1 !important;
+        }
+        
+        /* 亮色主题 - 侧边栏头部分隔线 */
+        [data-theme="light"] .sidebar-header {
+            border-bottom: 1px solid rgba(236, 72, 153, 0.15) !important;
+        }
+        
+        /* 亮色主题 - 版本信息区域 */
+        [data-theme="light"] .version-section {
+            background: rgba(139, 92, 246, 0.08) !important;
+            border: 1px solid rgba(139, 92, 246, 0.15) !important;
         }
 
         [data-theme="light"] .menu-item {
@@ -595,6 +612,21 @@
 
         [data-theme="light"] .mini-reply-content {
             color: #334155 !important;
+        }
+        
+        /* 亮色主题 - 最近回复卡片 */
+        [data-theme="light"] .mini-reply-card {
+            background: rgba(139, 92, 246, 0.05) !important;
+            border: 1px solid rgba(139, 92, 246, 0.1) !important;
+        }
+        
+        [data-theme="light"] .mini-reply-card:hover {
+            background: rgba(139, 92, 246, 0.1) !important;
+            border-color: rgba(139, 92, 246, 0.2) !important;
+        }
+        
+        [data-theme="light"] .mini-reply-time {
+            color: #64748b !important;
         }
 
         /* 亮色主题 - 签到状态符号 */
@@ -1617,6 +1649,20 @@
                 top: 70px;
                 right: 10px;
                 left: 10px;
+            }
+            
+            /* 移动端 - 最近回复标题溢出处理 */
+            .mini-reply-card {
+                max-width: 100%;
+            }
+            
+            .mini-reply-title,
+            .mini-reply-content {
+                max-width: 100%;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                word-break: break-all;
             }
         }
 
