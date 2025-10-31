@@ -62,8 +62,8 @@
             --bg-gradient-end: #e0f2fe;
             --text-primary: #1e293b;
             --text-secondary: #64748b;
-            --card-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.75), rgba(250, 245, 255, 0.75));
-            --card-border: rgba(139, 92, 246, 0.15);
+            --card-bg: rgba(255, 255, 255, 0.90);
+            --card-border: rgba(139, 92, 246, 0.25);
             --dark: #fef3f8;
             --dark-2: #e0f2fe;
             --dark-3: #334155;
@@ -73,15 +73,17 @@
         /* 亮色主题 - 卡片渐变效果 */
         [data-theme="light"] .stat-card,
         [data-theme="light"] .config-card {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.75), rgba(250, 245, 255, 0.75));
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.90), rgba(250, 245, 255, 0.90));
             backdrop-filter: blur(15px);
-            border-color: rgba(139, 92, 246, 0.15);
+            border: 1px solid rgba(139, 92, 246, 0.25);
+            box-shadow: 0 2px 10px rgba(139, 92, 246, 0.08);
         }
 
         [data-theme="light"] .stat-card:hover,
         [data-theme="light"] .config-card:hover {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.85), rgba(245, 240, 255, 0.85));
-            border-color: rgba(139, 92, 246, 0.25);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(245, 240, 255, 0.95));
+            border-color: rgba(139, 92, 246, 0.35);
+            box-shadow: 0 4px 16px rgba(139, 92, 246, 0.15);
         }
 
         /* 亮色主题背景装饰 */
@@ -179,9 +181,9 @@
 
         /* 亮色主题适配 - 侧边栏 */
         [data-theme="light"] .sidebar {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.85), rgba(255, 240, 250, 0.85));
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.90), rgba(255, 245, 250, 0.90));
             backdrop-filter: blur(20px);
-            border-right: 1px solid rgba(236, 72, 153, 0.15);
+            border-right: 1px solid rgba(236, 72, 153, 0.2);
         }
 
         [data-theme="light"] .menu-item {
@@ -196,6 +198,27 @@
         [data-theme="light"] .menu-item.active {
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             color: white;
+        }
+
+        /* 亮色主题 - 版本信息卡片 */
+        [data-theme="light"] .version-section {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.85), rgba(250, 245, 255, 0.85)) !important;
+            border: 1px solid rgba(139, 92, 246, 0.25) !important;
+            box-shadow: 0 2px 8px rgba(139, 92, 246, 0.08);
+        }
+
+        [data-theme="light"] .version-section span {
+            color: #475569 !important;
+        }
+
+        [data-theme="light"] #sidebar-current-version,
+        [data-theme="light"] #sidebar-latest-version {
+            color: #1e293b !important;
+            font-weight: 700 !important;
+        }
+
+        [data-theme="light"] #sidebar-update-status {
+            color: #64748b !important;
         }
 
         /* 亮色主题 - 输入框和表单元素 */
@@ -216,27 +239,34 @@
 
         /* 亮色主题 - 日志面板 */
         [data-theme="light"] .log-panel {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.7), rgba(240, 250, 255, 0.7));
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.88), rgba(240, 250, 255, 0.88));
             backdrop-filter: blur(15px);
-            border-color: rgba(59, 130, 246, 0.15);
+            border: 1px solid rgba(59, 130, 246, 0.25);
+            box-shadow: 0 2px 10px rgba(59, 130, 246, 0.08);
         }
 
         [data-theme="light"] .log-container {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.6), rgba(245, 250, 255, 0.6));
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(245, 250, 255, 0.92));
             color: #1e293b;
+        }
+
+        [data-theme="light"] #dashboardLogs {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.85), rgba(245, 250, 255, 0.85)) !important;
         }
 
         /* 亮色主题 - 顶部栏 */
         [data-theme="light"] .header-bar {
-            background: linear-gradient(90deg, rgba(255, 255, 255, 0.85), rgba(240, 245, 255, 0.85));
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.92), rgba(245, 248, 255, 0.92));
             backdrop-filter: blur(20px);
-            border-bottom-color: rgba(139, 92, 246, 0.15);
+            border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+            box-shadow: 0 2px 8px rgba(139, 92, 246, 0.05);
         }
 
         [data-theme="light"] .mobile-header {
-            background: linear-gradient(90deg, rgba(255, 255, 255, 0.9), rgba(255, 240, 250, 0.9));
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.95), rgba(255, 245, 250, 0.95));
             backdrop-filter: blur(20px);
-            border-bottom-color: rgba(236, 72, 153, 0.15);
+            border-bottom: 1px solid rgba(236, 72, 153, 0.2);
+            box-shadow: 0 2px 8px rgba(236, 72, 153, 0.05);
         }
 
         /* 亮色主题 - 按钮优化 */
@@ -304,8 +334,15 @@
 
         /* 亮色主题 - 回复卡片 */
         [data-theme="light"] .reply-card {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.7), rgba(255, 245, 255, 0.7));
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.88), rgba(255, 245, 255, 0.88));
             backdrop-filter: blur(10px);
+            border: 1px solid rgba(236, 72, 153, 0.2);
+            box-shadow: 0 2px 8px rgba(236, 72, 153, 0.06);
+        }
+
+        [data-theme="light"] .reply-card:hover {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 245, 255, 0.95));
+            border-color: rgba(236, 72, 153, 0.3);
         }
 
         [data-theme="light"] .reply-title,
@@ -318,18 +355,34 @@
             color: #64748b;
         }
 
-        /* 亮色主题 - 日志文本 */
-        [data-theme="light"] .log-line {
-            color: #1e293b;
+        /* 亮色主题 - 日志文本全面优化 */
+        [data-theme="light"] .log-line,
+        [data-theme="light"] .log-entry,
+        [data-theme="light"] #dashboardLogs,
+        [data-theme="light"] #logContainer,
+        [data-theme="light"] #historyLogContainer {
+            color: #1e293b !important;
         }
 
-        [data-theme="light"] .log-time {
-            color: #64748b;
+        [data-theme="light"] .log-time,
+        [data-theme="light"] .log-entry span[style*="color: #64748b"],
+        [data-theme="light"] span[style*="color: #64748b"] {
+            color: #475569 !important;
+        }
+
+        [data-theme="light"] .log-entry span,
+        [data-theme="light"] #dashboardLogs .log-entry,
+        [data-theme="light"] #dashboardLogs span {
+            color: #334155 !important;
         }
 
         /* 亮色主题 - 更新日志 */
         [data-theme="light"] #update-logs-container {
-            color: #1e293b;
+            color: #1e293b !important;
+        }
+
+        [data-theme="light"] #update-logs-container * {
+            color: inherit;
         }
 
         /* 亮色主题 - 用户信息 */
@@ -338,10 +391,10 @@
         }
 
         [data-theme="light"] .dropdown-menu {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(250, 245, 255, 0.95));
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(250, 245, 255, 0.98));
             backdrop-filter: blur(20px);
-            border-color: rgba(139, 92, 246, 0.2);
-            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.15);
+            border: 1px solid rgba(139, 92, 246, 0.25);
+            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.2);
         }
 
         [data-theme="light"] .dropdown-item {
@@ -380,6 +433,57 @@
         /* 亮色主题 - Toast通知 */
         [data-theme="light"] .toast {
             color: white;
+        }
+
+        /* 亮色主题 - 所有灰色文字优化 */
+        [data-theme="light"] [style*="color: #94a3b8"],
+        [data-theme="light"] [style*="color: #cbd5e1"],
+        [data-theme="light"] .page-subtitle,
+        [data-theme="light"] .stat-info h3,
+        [data-theme="light"] .form-group-title,
+        [data-theme="light"] .mini-reply-content,
+        [data-theme="light"] .stat-row-date,
+        [data-theme="light"] .empty-state,
+        [data-theme="light"] .tab-btn {
+            color: #475569 !important;
+        }
+
+        /* 亮色主题 - 用户信息卡片标签 */
+        [data-theme="light"] [style*="color: #94a3b8; font-size: 0.9rem"] {
+            color: #64748b !important;
+        }
+
+        /* 亮色主题 - 配置信息 */
+        [data-theme="light"] [style*="color: #cbd5e1; line-height"] {
+            color: #334155 !important;
+        }
+
+        /* 亮色主题 - 日期时间文字 */
+        [data-theme="light"] [style*="font-size: 0.85rem; color: #64748b"],
+        [data-theme="light"] [style*="font-size: 0.8rem; color: #64748b"] {
+            color: #64748b !important;
+        }
+
+        /* 亮色主题 - 说明文字区域 */
+        [data-theme="light"] [style*="color: #cbd5e1; font-size: 0.95rem"] {
+            color: #475569 !important;
+        }
+
+        /* 亮色主题 - 菜单项和图标 */
+        [data-theme="light"] .menu-item-icon {
+            color: #64748b !important;
+        }
+
+        /* 亮色主题 - 加载中提示 */
+        [data-theme="light"] [style*="text-align: center; padding: 40px; color: #64748b"],
+        [data-theme="light"] [style*="padding: 40px; color: #64748b"] {
+            color: #475569 !important;
+        }
+
+        /* 亮色主题 - 版本信息文字 */
+        [data-theme="light"] .version-section [style*="color:#94a3b8"],
+        [data-theme="light"] .version-section [style*="color:#e2e8f0"] {
+            color: #334155 !important;
         }
 
         /* 侧边栏 */
@@ -1919,21 +2023,21 @@
 
             <!-- 实时日志面板 -->
             <div class="log-tab-content" id="log-tab-realtime">
-                <div class="log-panel">
-                    <div class="log-header">
-                        <div class="log-title">
-                            <span>📋</span>
+            <div class="log-panel">
+                <div class="log-header">
+                    <div class="log-title">
+                        <span>📋</span>
                             <span>实时日志（最新200条）</span>
-                        </div>
-                        <div class="log-actions">
-                            <button class="log-btn" onclick="scrollToTop()">⬆️ 顶部</button>
-                            <button class="log-btn" onclick="scrollToBottom()">⬇️ 底部</button>
-                        </div>
                     </div>
-                    <div class="log-container" id="logContainer">
-                        <div class="log-entry log-INFO">
-                            <span class="log-time">--:--:--</span>
-                            <span>等待连接...</span>
+                    <div class="log-actions">
+                        <button class="log-btn" onclick="scrollToTop()">⬆️ 顶部</button>
+                        <button class="log-btn" onclick="scrollToBottom()">⬇️ 底部</button>
+                    </div>
+                </div>
+                <div class="log-container" id="logContainer">
+                    <div class="log-entry log-INFO">
+                        <span class="log-time">--:--:--</span>
+                        <span>等待连接...</span>
                         </div>
                     </div>
                 </div>
