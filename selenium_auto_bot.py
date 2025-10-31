@@ -423,11 +423,7 @@ class SeleniumAutoBot:
                 # 保存登录状态
                 self.save_cookies()
                 
-                # 获取用户信息
-                try:
-                    self.get_user_info()
-                except:
-                    pass
+                # 注意：用户信息在签到/回复完成后获取，此时积分数据才是最新的
                 
                 return True
             else:
@@ -641,11 +637,7 @@ class SeleniumAutoBot:
             
             if any(quick_indicators):
                 logging.info(f"✅ 快速检测到已登录状态（用户: {self.username}）")
-                # 获取用户信息
-                try:
-                    self.get_user_info()
-                except:
-                    pass
+                # 注意：用户信息在签到/回复完成后获取
                 return True
             
             # 如果快速检查未通过，访问个人中心确认
@@ -676,11 +668,7 @@ class SeleniumAutoBot:
                 
                 if any(login_indicators):
                     logging.info(f"✅ 确认已登录状态（用户: {self.username}）")
-                    # 获取用户信息
-                    try:
-                        self.get_user_info()
-                    except:
-                        pass
+                    # 注意：用户信息在签到/回复完成后获取
                     return True
                 else:
                     logging.info("ℹ️ 未检测到登录状态")
@@ -842,6 +830,13 @@ class SeleniumAutoBot:
                                         # 记录签到统计
                                         self.stats.mark_checkin_success()
                                         time.sleep(2)
+                                        
+                                        # 签到成功后获取用户信息（此时积分已更新）
+                                        try:
+                                            logging.info("📊 签到完成，获取最新用户信息...")
+                                            self.get_user_info()
+                                        except Exception as e:
+                                            logging.warning(f"⚠️ 获取用户信息失败: {e}")
                                     break
                             
                             if button_found:
@@ -2665,10 +2660,18 @@ class SeleniumAutoBot:
                 if reply_count > 0:
                     logging.info("📋 已完成回复，现在开始签到...")
                     self.daily_checkin()
+                    # 注意：签到成功后会自动获取用户信息
                 else:
                     logging.warning("⚠️ 未成功回复任何帖子，跳过签到（论坛要求回复后才能签到）")
             else:
                 logging.info("ℹ️ 签到功能已禁用")
+                # 如果没有开启签到，在回复完成后获取用户信息
+                if reply_count > 0:
+                    try:
+                        logging.info("📊 回复完成，获取最新用户信息...")
+                        self.get_user_info()
+                    except Exception as e:
+                        logging.warning(f"⚠️ 获取用户信息失败: {e}")
             
             logging.info(f"🎉 所有自动化任务完成！")
             
