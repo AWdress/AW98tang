@@ -584,14 +584,30 @@ class SeleniumAutoBot:
                     logging.info(f"✅ 评分: {user_info['rating']}")
                     break
             
-            # 调试：如果某些字段未获取到，尝试查找HTML片段
-            if user_info["money"] == 0 or user_info["coins"] == 0:
-                logging.debug("🔍 尝试查找统计信息HTML片段...")
-                # 查找包含"统计信息"的HTML区域
-                stats_section = re.search(r'统计信息.*?</ul>', page_source, re.DOTALL)
-                if stats_section:
-                    section_html = stats_section.group(0)
-                    logging.debug(f"找到统计信息区域（前500字符）: {section_html[:500]}")
+            # 调试：如果某些字段未获取到，保存HTML用于分析
+            if user_info["money"] == 0:
+                logging.warning("⚠️ 金钱字段未获取到，保存HTML用于调试...")
+                try:
+                    os.makedirs('debug', exist_ok=True)
+                    debug_file = 'debug/user_info_page.html'
+                    with open(debug_file, 'w', encoding='utf-8') as f:
+                        f.write(page_source)
+                    logging.info(f"📝 已保存用户信息页面到: {debug_file}")
+                    
+                    # 查找包含"统计信息"的HTML区域并输出
+                    stats_section = re.search(r'统计信息.*?</ul>', page_source, re.DOTALL)
+                    if stats_section:
+                        section_html = stats_section.group(0)
+                        logging.info(f"📊 统计信息HTML片段（前800字符）:\n{section_html[:800]}")
+                    else:
+                        # 尝试查找"金钱"关键字周围的内容
+                        money_context = re.search(r'.{0,200}金钱.{0,200}', page_source, re.DOTALL)
+                        if money_context:
+                            logging.info(f"💰 找到'金钱'关键字周围的内容:\n{money_context.group(0)}")
+                        else:
+                            logging.warning("⚠️ 页面中未找到'金钱'关键字")
+                except Exception as debug_error:
+                    logging.error(f"保存调试信息失败: {debug_error}")
             
             # 保存到统计数据
             self.stats.update_user_info(
