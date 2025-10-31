@@ -262,30 +262,93 @@ class SeleniumAutoBot:
             # 处理年龄验证
             self.handle_age_verification()
             
-            # 等待页面加载完成（首次访问需要更多时间处理Cloudflare等）
-            time.sleep(5)
+            # 智能等待Cloudflare验证和页面加载
+            logging.info("⏰ 等待页面完全加载...")
+            max_wait_time = 60  # 最多等待60秒
+            wait_interval = 3   # 每3秒检查一次
+            elapsed_time = 0
+            
+            while elapsed_time < max_wait_time:
+                page_source = self.driver.page_source
+                current_url = self.driver.current_url
+                
+                # 检查是否在Cloudflare验证页面
+                if "Checking your browser" in page_source or "Just a moment" in page_source:
+                    logging.info(f"🔒 检测到Cloudflare验证中... (已等待 {elapsed_time}秒)")
+                    time.sleep(wait_interval)
+                    elapsed_time += wait_interval
+                    continue
+                
+                # 检查是否能找到登录表单
+                try:
+                    # 尝试快速查找登录输入框
+                    test_field = self.driver.find_element(By.NAME, "username")
+                    if test_field:
+                        logging.info(f"✅ 页面加载完成 (耗时 {elapsed_time}秒)")
+                        break
+                except:
+                    pass
+                
+                # 检查是否已经登录（可能之前Cookie还有效）
+                if "logging&action=logout" in page_source or "退出" in page_source:
+                    logging.info("✅ 检测到已登录状态")
+                    return True
+                
+                time.sleep(wait_interval)
+                elapsed_time += wait_interval
+            
+            if elapsed_time >= max_wait_time:
+                logging.warning(f"⚠️ 页面加载超时 (已等待 {max_wait_time}秒)")
             
             # 等待登录表单加载，增加重试机制
             username_field = None
             max_retries = 3
             for retry in range(max_retries):
                 try:
-                    username_field = self.wait.until(
+                    # 使用较短的超时，因为已经等待过了
+                    wait_short = WebDriverWait(self.driver, 10)
+                    username_field = wait_short.until(
                         EC.presence_of_element_located((By.NAME, "username"))
                     )
                     logging.info("✅ 登录表单加载完成")
                     break
                 except TimeoutException:
                     if retry < max_retries - 1:
-                        logging.warning(f"⚠️ 第 {retry + 1} 次未找到用户名输入框，等待5秒后重试...")
-                        time.sleep(5)
+                        logging.warning(f"⚠️ 第 {retry + 1} 次未找到用户名输入框，等待8秒后重试...")
+                        time.sleep(8)
                     else:
-                        # 最后一次尝试其他可能的字段名
+                        # 最后一次尝试其他可能的字段名和选择器
+                        logging.warning("🔍 尝试备用查找方案...")
                         try:
+                            # 方案1: 尝试name="user"
                             username_field = self.driver.find_element(By.NAME, "user")
-                            logging.info("✅ 找到备用用户名输入框")
+                            logging.info("✅ 找到备用用户名输入框 (name='user')")
+                            break
                         except:
-                            logging.error("❌ 找不到用户名输入框")
+                            pass
+                        
+                        try:
+                            # 方案2: 尝试CSS选择器
+                            username_field = self.driver.find_element(By.CSS_SELECTOR, "input[type='text'][name*='user']")
+                            logging.info("✅ 找到备用用户名输入框 (CSS选择器)")
+                            break
+                        except:
+                            pass
+                        
+                        try:
+                            # 方案3: 尝试查找所有文本输入框
+                            text_inputs = self.driver.find_elements(By.CSS_SELECTOR, "input[type='text']")
+                            if text_inputs:
+                                username_field = text_inputs[0]
+                                logging.info("✅ 找到文本输入框（可能是用户名）")
+                                break
+                        except:
+                            pass
+                        
+                        # 所有方案都失败，保存调试信息
+                        if not username_field:
+                            logging.error("❌ 所有查找方案均失败，无法找到用户名输入框")
+                            logging.error(f"当前URL: {self.driver.current_url}")
                             # 保存调试信息
                             try:
                                 os.makedirs('debug', exist_ok=True)
