@@ -1369,10 +1369,13 @@ class SeleniumAutoBot:
             logging.error(f"❌ 获取帖子失败: {e}")
             return []
     
-    def reply_to_post(self, post_url, reply_content=None, post_title=""):
+    def reply_to_post(self, post_url, reply_content=None, post_title="", test_mode=False):
         """回复帖子"""
         try:
-            logging.info(f"💬 回复帖子: {post_url}")
+            if test_mode:
+                logging.info(f"🧪 [测试] 回复帖子: {post_url}")
+            else:
+                logging.info(f"💬 回复帖子: {post_url}")
             
             # 访问帖子页面
             self.driver.get(post_url)
@@ -1518,9 +1521,12 @@ class SeleniumAutoBot:
                     ]
                     
                     if any(success_indicators):
-                        logging.info("✅ 回复成功")
-                        # 记录回复统计
-                        self.stats.add_reply(post_title, post_url, reply_content)
+                        if test_mode:
+                            logging.info("✅ [测试] 回复成功（测试模式不记录统计）")
+                        else:
+                            logging.info("✅ 回复成功")
+                            # 记录回复统计（仅正常模式）
+                            self.stats.add_reply(post_title, post_url, reply_content)
                         return True
                     else:
                         # 保存页面用于调试
@@ -1544,8 +1550,14 @@ class SeleniumAutoBot:
             logging.error(f"❌ 访问帖子失败: {e}")
             return False
     
-    def should_skip_post(self, title, post_url=""):
-        """判断是否应该跳过该帖子"""
+    def should_skip_post(self, title, post_url="", check_replied=True):
+        """判断是否应该跳过该帖子
+        
+        Args:
+            title: 帖子标题
+            post_url: 帖子URL
+            check_replied: 是否检查已回复（测试模式下可设为False）
+        """
         # 检查跳过关键词
         for keyword in self.skip_keywords:
             if keyword in title:
@@ -1559,12 +1571,12 @@ class SeleniumAutoBot:
                 return True
         
         # 检查是否已经回复过该帖子（根据URL）
-        if post_url:
+        if check_replied and post_url:
             all_replies = self.stats.get_all_replies(limit=1000)  # 获取最近1000条回复记录
             for reply in all_replies:
                 if reply.get('url') == post_url:
                     logging.info(f"⏭️ 跳过已回复过的帖子: {title}")
-                return True
+                    return True
         
         return False
     
@@ -2821,7 +2833,8 @@ class SeleniumAutoBot:
                 
                 for idx, post in enumerate(posts, 1):
                     logging.info(f"🧪 [{idx}/{len(posts)}] 检查帖子: {post['title'][:50]}...")
-                    if self.should_skip_post(post['title'], post['url']):
+                    # 测试模式不检查已回复（check_replied=False），只检查关键词和前缀
+                    if self.should_skip_post(post['title'], post['url'], check_replied=False):
                         continue  # 已经在 should_skip_post 中显示了跳过信息
                     will_process.append(post)
                     if len(will_process) >= self.daily_reply_limit:
