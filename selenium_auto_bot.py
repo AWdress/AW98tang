@@ -192,23 +192,92 @@ class SeleniumAutoBot:
     def handle_age_verification(self):
         """处理年龄验证"""
         try:
-            # 检查是否有年龄验证页面
-            if "满18岁" in self.driver.page_source or "If you are over 18" in self.driver.page_source:
-                logging.info("🔞 检测到年龄验证页面")
+            max_attempts = 3
+            for attempt in range(max_attempts):
+                page_source = self.driver.page_source
                 
-                # 查找进入按钮
-                enter_buttons = self.driver.find_elements(By.XPATH, "//*[contains(text(), '进入') or contains(text(), 'click here') or contains(text(), 'enter')]")
-                
-                if enter_buttons:
-                    logging.info("点击年龄验证按钮...")
-                    enter_buttons[0].click()
-                    time.sleep(3)
-                    logging.info("✅ 年龄验证完成")
+                # 检查是否有年龄验证页面
+                if "满18岁" in page_source or "If you are over 18" in page_source or "SEHUATANG.ORG" in page_source:
+                    if attempt > 0:
+                        logging.info(f"🔞 年龄验证页面仍存在，第 {attempt + 1} 次尝试...")
+                    else:
+                        logging.info("🔞 检测到年龄验证页面")
+                    
+                    try:
+                        # 尝试多种方式查找进入按钮
+                        enter_button = None
+                        
+                        # 方案1: 通过class查找
+                        try:
+                            enter_buttons = self.driver.find_elements(By.CLASS_NAME, "enter-btn")
+                            if enter_buttons:
+                                enter_button = enter_buttons[0]
+                                logging.info("✅ 找到年龄验证按钮 (通过class)")
+                        except:
+                            pass
+                        
+                        # 方案2: 通过XPath查找
+                        if not enter_button:
+                            try:
+                                enter_button = self.driver.find_element(By.XPATH, "//a[contains(text(), '满18岁')]")
+                                logging.info("✅ 找到年龄验证按钮 (通过XPath)")
+                            except:
+                                pass
+                        
+                        # 方案3: 通过链接文本查找
+                        if not enter_button:
+                            try:
+                                enter_button = self.driver.find_element(By.PARTIAL_LINK_TEXT, "click here")
+                                logging.info("✅ 找到年龄验证按钮 (通过链接文本)")
+                            except:
+                                pass
+                        
+                        # 方案4: 直接访问主页
+                        if not enter_button:
+                            logging.warning("⚠️ 未找到年龄验证按钮，尝试直接访问主页...")
+                            self.driver.get(self.base_url)
+                            time.sleep(3)
+                            continue
+                        
+                        # 点击按钮
+                        if enter_button:
+                            logging.info("🖱️ 点击年龄验证按钮...")
+                            try:
+                                enter_button.click()
+                            except:
+                                # 如果普通点击失败，尝试JS点击
+                                self.driver.execute_script("arguments[0].click();", enter_button)
+                                logging.info("🖱️ 使用JavaScript点击")
+                            
+                            # 等待页面跳转
+                            time.sleep(5)
+                            
+                            # 验证是否跳转成功
+                            new_page_source = self.driver.page_source
+                            if "满18岁" not in new_page_source and "If you are over 18" not in new_page_source:
+                                logging.info("✅ 年龄验证完成，页面已跳转")
+                                return True
+                            else:
+                                logging.warning("⚠️ 点击后页面未跳转，重试...")
+                                time.sleep(2)
+                    
+                    except Exception as e:
+                        logging.warning(f"⚠️ 年龄验证处理异常: {e}")
+                        time.sleep(2)
                 else:
-                    logging.warning("未找到年龄验证按钮")
+                    # 没有年龄验证页面
+                    logging.info("ℹ️ 无需年龄验证")
+                    return True
+            
+            # 多次尝试后仍失败
+            logging.error("❌ 年龄验证失败，尝试强制跳过...")
+            self.driver.get(self.base_url)
+            time.sleep(3)
+            return False
                     
         except Exception as e:
-            logging.warning(f"年龄验证处理异常: {e}")
+            logging.error(f"❌ 年龄验证处理失败: {e}")
+            return False
     
     def wait_for_cloudflare(self):
         """等待Cloudflare验证完成"""
