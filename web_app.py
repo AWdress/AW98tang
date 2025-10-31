@@ -338,6 +338,7 @@ def get_status():
     # 读取最新统计（避免与机器人线程各自内存不同步）
     fresh_stats_manager = StatsManager()
     today_stats = fresh_stats_manager.get_today_stats()
+    user_info = fresh_stats_manager.get_user_info()
     response = jsonify({
         'status': bot_status,
         'config': {
@@ -351,7 +352,8 @@ def get_status():
             'today_replies': today_stats['reply_count'],
             'checkin_success': today_stats['checkin_success'],
             'checkin_time': today_stats['checkin_time']
-        }
+        },
+        'user_info': user_info
     })
     # 禁用缓存，确保实时更新
     response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
