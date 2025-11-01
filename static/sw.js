@@ -1,13 +1,23 @@
 // Service Worker for 色花堂智能助手 Pro
-const CACHE_NAME = 'aw98tang-v1.1.0';
-const STATIC_CACHE = 'aw98tang-static-v1.1';
-const DYNAMIC_CACHE = 'aw98tang-dynamic-v1.1';
+const CACHE_NAME = 'aw98tang-v2.0.0';
+const STATIC_CACHE = 'aw98tang-static-v2.0';
+const DYNAMIC_CACHE = 'aw98tang-dynamic-v2.0';
 
-// 需要缓存的静态资源
+// 需要缓存的静态资源（完整预缓存）
 const urlsToCache = [
   '/',
   '/static/manifest.json',
   '/static/offline.html',
+  '/static/icons/icon-72x72.png',
+  '/static/icons/icon-96x96.png',
+  '/static/icons/icon-128x128.png',
+  '/static/icons/icon-144x144.png',
+  '/static/icons/icon-152x152.png',
+  '/static/icons/icon-192x192.png',
+  '/static/icons/icon-384x384.png',
+  '/static/icons/icon-512x512.png',
+  '/static/img/logo.png',
+  '/static/splash/splash-1170x2532.png', // iPhone 12/13/14 最常用
   'https://unpkg.com/lucide@latest',
   'https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css'
 ];
@@ -226,6 +236,59 @@ self.addEventListener('notificationclick', event => {
     );
   }
 });
+
+// 后台同步（Background Sync）
+self.addEventListener('sync', event => {
+  console.log('🔄 后台同步触发:', event.tag);
+  
+  if (event.tag === 'sync-bot-config') {
+    event.waitUntil(syncBotConfig());
+  }
+  
+  if (event.tag === 'sync-bot-status') {
+    event.waitUntil(syncBotStatus());
+  }
+});
+
+// 同步机器人配置
+async function syncBotConfig() {
+  try {
+    const config = await self.registration.sync.getTags();
+    console.log('✅ 配置同步成功:', config);
+    
+    // 通知所有客户端
+    const clients = await self.clients.matchAll();
+    clients.forEach(client => {
+      client.postMessage({
+        type: 'CONFIG_SYNCED',
+        success: true
+      });
+    });
+  } catch (error) {
+    console.error('❌ 配置同步失败:', error);
+  }
+}
+
+// 同步机器人状态
+async function syncBotStatus() {
+  try {
+    const response = await fetch('/api/bot/status');
+    const data = await response.json();
+    console.log('✅ 状态同步成功:', data);
+    
+    // 发送通知
+    if (data.status === 'running') {
+      self.registration.showNotification('机器人运行中', {
+        body: `今日已回复 ${data.today_replies} 条`,
+        icon: '/static/icons/icon-192x192.png',
+        badge: '/static/icons/icon-72x72.png',
+        tag: 'bot-status'
+      });
+    }
+  } catch (error) {
+    console.error('❌ 状态同步失败:', error);
+  }
+}
 
 // 消息通信
 self.addEventListener('message', event => {

@@ -4243,34 +4243,34 @@
     .mobile-bottom-nav {
         display: none;
         position: fixed;
-        bottom: 12px;
-        left: 16px;
-        right: 16px;
+        bottom: 24px;
+        left: 20px;
+        right: 20px;
         z-index: 999;
         pointer-events: none;
     }
 
     .mobile-bottom-nav-wrapper {
-        /* iOS 风格的半透明背景 */
-        background: rgba(255, 255, 255, 0.7);
+        /* iOS 风格的超透明背景 */
+        background: rgba(255, 255, 255, 0.5);
         /* 强化毛玻璃效果 - iOS 雨滴效果 */
-        backdrop-filter: saturate(180%) blur(20px);
-        -webkit-backdrop-filter: saturate(180%) blur(20px);
-        border-radius: 20px;
-        padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
+        backdrop-filter: saturate(180%) blur(30px);
+        -webkit-backdrop-filter: saturate(180%) blur(30px);
+        border-radius: 30px;
+        padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
         /* iOS 风格悬浮阴影 */
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12),
-                    0 0 0 0.5px rgba(0, 0, 0, 0.04);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15),
+                    0 0 0 0.5px rgba(0, 0, 0, 0.06);
         pointer-events: auto;
     }
 
     /* 暗色主题下的毛玻璃效果 */
     [data-theme="dark"] .mobile-bottom-nav-wrapper {
-        background: rgba(30, 41, 59, 0.7);
-        backdrop-filter: saturate(180%) blur(20px);
-        -webkit-backdrop-filter: saturate(180%) blur(20px);
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4),
-                    0 0 0 0.5px rgba(255, 255, 255, 0.08);
+        background: rgba(30, 41, 59, 0.5);
+        backdrop-filter: saturate(180%) blur(30px);
+        -webkit-backdrop-filter: saturate(180%) blur(30px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5),
+                    0 0 0 0.5px rgba(255, 255, 255, 0.1);
     }
 
     .mobile-bottom-nav-content {
@@ -4694,6 +4694,270 @@
                 window.location.reload();
             }
         };
+
+        // ============================================
+        // 1️⃣ 推送通知功能
+        // ============================================
+        let notificationPermission = Notification.permission;
+
+        // 请求通知权限
+        async function requestNotificationPermission() {
+            if ('Notification' in window && notificationPermission === 'default') {
+                notificationPermission = await Notification.requestPermission();
+                console.log('🔔 通知权限:', notificationPermission);
+                
+                if (notificationPermission === 'granted') {
+                    showToast(true, '通知权限已开启');
+                    sendNotification('通知已开启', '您将收到机器人运行状态通知');
+                }
+            }
+        }
+
+        // 发送通知
+        function sendNotification(title, body, options = {}) {
+            if ('Notification' in window && Notification.permission === 'granted') {
+                const notification = new Notification(title, {
+                    body: body,
+                    icon: '/static/icons/icon-192x192.png',
+                    badge: '/static/icons/icon-72x72.png',
+                    vibrate: [200, 100, 200],
+                    tag: options.tag || 'default',
+                    requireInteraction: options.requireInteraction || false,
+                    ...options
+                });
+
+                notification.onclick = () => {
+                    window.focus();
+                    notification.close();
+                    if (options.onclick) options.onclick();
+                };
+
+                return notification;
+            }
+        }
+
+        // 包装原有的启动/停止函数，添加通知
+        const originalStartBot = window.startBot;
+        window.startBot = function() {
+            if (originalStartBot) {
+                originalStartBot();
+                sendNotification('🚀 机器人已启动', '开始自动回复和签到...', {
+                    tag: 'bot-status'
+                });
+                updateAppBadge();
+            }
+        };
+
+        const originalStopBot = window.stopBot;
+        window.stopBot = function() {
+            if (originalStopBot) {
+                originalStopBot();
+                sendNotification('⏹️ 机器人已停止', '自动回复已停止运行', {
+                    tag: 'bot-status'
+                });
+                clearAppBadge();
+            }
+        };
+
+        // ============================================
+        // 2️⃣ 应用徽章功能
+        // ============================================
+        async function updateAppBadge(count) {
+            if ('setAppBadge' in navigator) {
+                try {
+                    if (count && count > 0) {
+                        await navigator.setAppBadge(count);
+                        console.log('🔢 徽章已更新:', count);
+                    } else {
+                        // 自动获取今日回复数
+                        const todayReplies = parseInt(document.getElementById('todayReplies')?.textContent || 0);
+                        if (todayReplies > 0) {
+                            await navigator.setAppBadge(todayReplies);
+                        }
+                    }
+                } catch (error) {
+                    console.warn('徽章更新失败:', error);
+                }
+            }
+        }
+
+        async function clearAppBadge() {
+            if ('clearAppBadge' in navigator) {
+                try {
+                    await navigator.clearAppBadge();
+                    console.log('🔢 徽章已清除');
+                } catch (error) {
+                    console.warn('徽章清除失败:', error);
+                }
+            }
+        }
+
+        // 定时更新徽章（每5分钟）
+        setInterval(() => {
+            if (document.getElementById('statusText')?.textContent === '运行中') {
+                updateAppBadge();
+            }
+        }, 300000);
+
+        // ============================================
+        // 3️⃣ iOS 安装引导
+        // ============================================
+        function showIOSInstallGuide() {
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+            const isInStandaloneMode = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
+            
+            // iOS且未安装PWA，且24小时内未拒绝过
+            if (isIOS && !isInStandaloneMode) {
+                const dismissed = localStorage.getItem('ios-install-dismissed');
+                if (dismissed && Date.now() - parseInt(dismissed) < 86400000) {
+                    return; // 24小时内拒绝过
+                }
+
+                setTimeout(() => {
+                    const guide = document.createElement('div');
+                    guide.id = 'ios-install-guide';
+                    guide.innerHTML = `
+                        <div style="
+                            position: fixed;
+                            bottom: 100px;
+                            left: 20px;
+                            right: 20px;
+                            background: linear-gradient(135deg, #ec4899, #8b5cf6);
+                            color: white;
+                            padding: 20px;
+                            border-radius: 20px;
+                            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+                            z-index: 10000;
+                            animation: slideUp 0.5s ease-out;
+                        ">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                                <div style="font-size: 1.3rem; font-weight: 600;">📱 安装到主屏幕</div>
+                                <button onclick="document.getElementById('ios-install-guide').remove(); localStorage.setItem('ios-install-dismissed', Date.now())" 
+                                    style="background: rgba(255,255,255,0.2); border: none; color: white; font-size: 1.5rem; width: 32px; height: 32px; border-radius: 50%; cursor: pointer;">
+                                    ×
+                                </button>
+                            </div>
+                            <div style="font-size: 0.95rem; line-height: 1.5; margin-bottom: 16px; opacity: 0.95;">
+                                获得更好的使用体验：<br>
+                                1️⃣ 点击底部 <span style="display: inline-block; padding: 4px 8px; background: rgba(255,255,255,0.3); border-radius: 6px; margin: 0 4px;">📤</span> 分享按钮<br>
+                                2️⃣ 选择"添加到主屏幕"<br>
+                                3️⃣ 点击"添加"完成安装
+                            </div>
+                            <div style="text-align: center; padding: 30px 0 10px; font-size: 2rem; animation: bounce 2s infinite;">
+                                ⬇️
+                            </div>
+                        </div>
+                        <style>
+                            @keyframes slideUp {
+                                from {
+                                    opacity: 0;
+                                    transform: translateY(50px);
+                                }
+                                to {
+                                    opacity: 1;
+                                    transform: translateY(0);
+                                }
+                            }
+                            @keyframes bounce {
+                                0%, 20%, 50%, 80%, 100% {
+                                    transform: translateY(0);
+                                }
+                                40% {
+                                    transform: translateY(-10px);
+                                }
+                                60% {
+                                    transform: translateY(-5px);
+                                }
+                            }
+                        </style>
+                    `;
+                    document.body.appendChild(guide);
+                }, 3000); // 3秒后显示
+            }
+        }
+
+        // 页面加载完成后检查iOS安装引导
+        window.addEventListener('load', showIOSInstallGuide);
+
+        // ============================================
+        // 4️⃣ 智能更新策略
+        // ============================================
+        let updateCheckInterval = 3600000; // 默认1小时
+
+        // 根据电池和网络状态调整更新频率
+        if ('getBattery' in navigator) {
+            navigator.getBattery().then(battery => {
+                battery.addEventListener('levelchange', () => {
+                    if (battery.level < 0.2) {
+                        // 低电量时4小时检查一次
+                        updateCheckInterval = 14400000;
+                        console.log('🔋 低电量模式：降低更新检查频率');
+                    } else {
+                        updateCheckInterval = 3600000;
+                    }
+                });
+            });
+        }
+
+        // 网络状态变化时的处理
+        if ('connection' in navigator) {
+            const connection = navigator.connection;
+            connection.addEventListener('change', () => {
+                if (connection.saveData || connection.effectiveType === 'slow-2g' || connection.effectiveType === '2g') {
+                    console.log('📶 弱网模式：延迟更新检查');
+                    updateCheckInterval = 7200000; // 2小时
+                }
+            });
+        }
+
+        // 初始化时请求通知权限（延迟5秒）
+        setTimeout(() => {
+            if (notificationPermission === 'default') {
+                // 显示友好的权限请求提示
+                const permissionPrompt = document.createElement('div');
+                permissionPrompt.innerHTML = `
+                    <div style="
+                        position: fixed;
+                        top: 20px;
+                        left: 50%;
+                        transform: translateX(-50%);
+                        background: white;
+                        color: #1e293b;
+                        padding: 16px 24px;
+                        border-radius: 16px;
+                        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+                        z-index: 9999;
+                        display: flex;
+                        align-items: center;
+                        gap: 12px;
+                        animation: slideDown 0.4s ease-out;
+                        max-width: 90%;
+                    ">
+                        <div style="font-size: 1.5rem;">🔔</div>
+                        <div style="flex: 1;">
+                            <div style="font-weight: 600; margin-bottom: 4px;">开启通知</div>
+                            <div style="font-size: 0.85rem; color: #64748b;">及时收到机器人运行状态</div>
+                        </div>
+                        <button onclick="requestNotificationPermission(); this.parentElement.parentElement.remove();" 
+                            style="background: linear-gradient(135deg, #ec4899, #8b5cf6); color: white; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 600; cursor: pointer;">
+                            开启
+                        </button>
+                        <button onclick="this.parentElement.parentElement.remove();" 
+                            style="background: #f1f5f9; color: #64748b; border: none; padding: 10px 16px; border-radius: 10px; cursor: pointer;">
+                            稍后
+                        </button>
+                    </div>
+                `;
+                document.body.appendChild(permissionPrompt);
+                
+                // 10秒后自动关闭
+                setTimeout(() => {
+                    if (permissionPrompt.parentElement) {
+                        permissionPrompt.remove();
+                    }
+                }, 10000);
+            }
+        }, 5000);
 
         console.log('🌸 PWA 功能已加载');
     </script>
