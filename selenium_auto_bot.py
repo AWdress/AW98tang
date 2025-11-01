@@ -91,6 +91,16 @@ class SeleniumAutoBot:
             '谢谢分享，收藏了'
         ])
         
+        # 浏览器请求头配置
+        self.browser_headers = self.config.get('browser_headers', {
+            'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+            'sec_ch_ua': '"Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"',
+            'sec_ch_ua_mobile': '?0',
+            'sec_ch_ua_platform': '"Windows"',
+            'accept_language': 'zh-CN,zh;q=0.9,en;q=0.8',
+            'accept_encoding': 'gzip, deflate, br, zstd'
+        })
+        
     def load_config(self, config_file):
         """加载配置文件"""
         try:
@@ -159,8 +169,10 @@ class SeleniumAutoBot:
         chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
         chrome_options.add_experimental_option('useAutomationExtension', False)
         
-        # 设置用户代理
-        chrome_options.add_argument('--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
+        # 从配置文件读取用户代理
+        user_agent = self.browser_headers.get('user_agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36')
+        chrome_options.add_argument(f'--user-agent={user_agent}')
+        logging.info(f"🌐 设置 User-Agent: {user_agent}")
         
         try:
             from selenium.webdriver.chrome.service import Service
@@ -178,8 +190,9 @@ class SeleniumAutoBot:
                 service = Service(ChromeDriverManager().install())
                 self.driver = webdriver.Chrome(service=service, options=chrome_options)
             
-            # 使用CDP命令移除webdriver标志（兼容Chrome 142+）
+            # 使用CDP命令移除webdriver标志和设置请求头（兼容Chrome 142+）
             try:
+                # 移除webdriver标志
                 self.driver.execute_cdp_cmd('Page.addScriptToEvaluateOnNewDocument', {
                     'source': '''
                         Object.defineProperty(navigator, 'webdriver', {
@@ -196,6 +209,35 @@ class SeleniumAutoBot:
                         });
                     '''
                 })
+                
+                # 设置自定义请求头
+                headers = {}
+                
+                # 添加 Sec-CH-UA 相关头
+                if 'sec_ch_ua' in self.browser_headers:
+                    headers['sec-ch-ua'] = self.browser_headers['sec_ch_ua']
+                    logging.info(f"🔒 设置 Sec-CH-UA: {self.browser_headers['sec_ch_ua']}")
+                
+                if 'sec_ch_ua_mobile' in self.browser_headers:
+                    headers['sec-ch-ua-mobile'] = self.browser_headers['sec_ch_ua_mobile']
+                    logging.info(f"📱 设置 Sec-CH-UA-Mobile: {self.browser_headers['sec_ch_ua_mobile']}")
+                
+                if 'sec_ch_ua_platform' in self.browser_headers:
+                    headers['sec-ch-ua-platform'] = self.browser_headers['sec_ch_ua_platform']
+                    logging.info(f"💻 设置 Sec-CH-UA-Platform: {self.browser_headers['sec_ch_ua_platform']}")
+                
+                # 添加其他请求头
+                if 'accept_language' in self.browser_headers:
+                    headers['accept-language'] = self.browser_headers['accept_language']
+                
+                if 'accept_encoding' in self.browser_headers:
+                    headers['accept-encoding'] = self.browser_headers['accept_encoding']
+                
+                # 使用 CDP 设置额外的请求头
+                if headers:
+                    self.driver.execute_cdp_cmd('Network.setExtraHTTPHeaders', {'headers': headers})
+                    logging.info("✅ 自定义请求头设置成功")
+                
             except Exception as e:
                 logging.warning(f"⚠️ CDP命令执行失败（可忽略）: {e}")
             

@@ -165,6 +165,15 @@
             }
         }
 
+        @keyframes warningPulse {
+            0%, 100% { 
+                box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); 
+            }
+            50% { 
+                box-shadow: 0 0 0 10px rgba(245, 158, 11, 0); 
+            }
+        }
+
         @keyframes slideInLeft {
             from {
                 opacity: 0;
@@ -2755,6 +2764,89 @@
                         </ul>
                     </div>
                 </div>
+
+                <!-- 浏览器请求头配置 -->
+                <div class="config-card" style="grid-column: 1 / 4; margin-top: 20px;">
+                    <h3>
+                        <span style="font-size: 1.5rem;" class="emoji">🌐</span>
+                        <span>浏览器请求头配置</span>
+                    </h3>
+
+                    <!-- 警告提示框 -->
+                    <div style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(239, 68, 68, 0.1)); border: 2px solid rgba(245, 158, 11, 0.3); border-radius: 12px; padding: 16px; margin-bottom: 20px; animation: warningPulse 2s ease-in-out infinite;">
+                        <div style="display: flex; gap: 12px; align-items: flex-start;">
+                            <div style="font-size: 24px;">⚠️</div>
+                            <div style="flex: 1;">
+                                <div style="color: #f59e0b; font-weight: 600; font-size: 16px; margin-bottom: 8px;">
+                                    <span class="emoji">⚡</span> 高级配置 - 请谨慎操作
+                                </div>
+                                <div style="color: #cbd5e1; font-size: 14px; line-height: 1.6; margin-bottom: 8px;">
+                                    <strong>重要提示：</strong>如果你不了解HTTP请求头的作用，<strong style="color: #ef4444;">请勿修改此配置</strong>！
+                                </div>
+                                <ul style="list-style: none; padding-left: 20px; margin: 8px 0; color: #cbd5e1; font-size: 13px; line-height: 1.8;">
+                                    <li style="position: relative;"><span style="position: absolute; left: -20px;">⚠️</span>错误的配置可能导致无法访问目标网站</li>
+                                    <li style="position: relative;"><span style="position: absolute; left: -20px;">⚠️</span>版本号必须与浏览器保持一致</li>
+                                    <li style="position: relative;"><span style="position: absolute; left: -20px;">⚠️</span>不确定时请使用默认值</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group" style="grid-column: span 2;">
+                            <label><span class="emoji">👤</span> User-Agent（用户代理）</label>
+                            <input type="text" id="config_user_agent" placeholder="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36..." style="font-family: 'Courier New', monospace; font-size: 12px;">
+                            <small style="color: #64748b; font-size: 12px; margin-top: 4px; display: block;">标识浏览器类型和版本，影响网站识别</small>
+                        </div>
+                        <div class="form-group">
+                            <label><span class="emoji">🛡️</span> Sec-CH-UA-Mobile</label>
+                            <select id="config_sec_ch_ua_mobile">
+                                <option value="?0">?0 - 桌面设备</option>
+                                <option value="?1">?1 - 移动设备</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group" style="grid-column: span 2;">
+                            <label><span class="emoji">🔒</span> Sec-CH-UA（客户端提示）</label>
+                            <input type="text" id="config_sec_ch_ua" placeholder='"Google Chrome";v="131", "Chromium";v="131"' style="font-family: 'Courier New', monospace; font-size: 12px;">
+                            <small style="color: #64748b; font-size: 12px; margin-top: 4px; display: block;">Chrome客户端信息，注意双引号转义</small>
+                        </div>
+                        <div class="form-group">
+                            <label><span class="emoji">💻</span> Sec-CH-UA-Platform</label>
+                            <select id="config_sec_ch_ua_platform">
+                                <option value='"Windows"'>"Windows"</option>
+                                <option value='"macOS"'>"macOS"</option>
+                                <option value='"Linux"'>"Linux"</option>
+                                <option value='"Android"'>"Android"</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label><span class="emoji">🗣️</span> Accept-Language</label>
+                            <input type="text" id="config_accept_language" placeholder="zh-CN,zh;q=0.9,en;q=0.8" style="font-family: 'Courier New', monospace; font-size: 12px;">
+                            <small style="color: #64748b; font-size: 12px; margin-top: 4px; display: block;">接受的语言优先级</small>
+                        </div>
+                        <div class="form-group">
+                            <label><span class="emoji">📦</span> Accept-Encoding</label>
+                            <input type="text" id="config_accept_encoding" placeholder="gzip, deflate, br, zstd" style="font-family: 'Courier New', monospace; font-size: 12px;">
+                            <small style="color: #64748b; font-size: 12px; margin-top: 4px; display: block;">支持的压缩算法</small>
+                        </div>
+                    </div>
+
+                    <div class="action-buttons" style="margin-top: 15px;">
+                        <button type="button" class="btn btn-info" onclick="testHeadersConfig()"><span class="emoji">🧪</span> 测试配置</button>
+                        <button type="button" class="btn" onclick="resetHeadersToDefault()"><span class="emoji">🔄</span> 恢复默认值</button>
+                    </div>
+
+                    <div style="margin-top: 12px; padding: 10px; background: rgba(59, 130, 246, 0.1); border-left: 3px solid #3b82f6; border-radius: 4px; font-size: 0.85rem; color: #cbd5e1;">
+                        <strong><span class="emoji">💡</span> 提示：</strong>不配置时自动使用默认值（Chrome 131 on Windows）。只有当你需要模拟特定浏览器时才需要修改。
+                    </div>
+                </div>
+
                 </div> <!-- 关闭 config-grid -->
 
                 <div class="action-buttons" style="margin-top: 30px;">
@@ -3397,6 +3489,15 @@
                     document.getElementById('config_ai_max_tokens').value = config.ai_max_tokens || 200;
                     document.getElementById('config_ai_timeout').value = config.ai_timeout || 10;
                     document.getElementById('config_ai_system_prompt').value = config.ai_system_prompt || '你是一个论坛用户，需要根据帖子标题和内容生成简短的回复。回复要自然、友好、简洁，不超过50字。不要使用敏感词汇，保持礼貌和正能量。';
+                    
+                    // 加载浏览器请求头配置
+                    const headers = config.browser_headers || {};
+                    document.getElementById('config_user_agent').value = headers.user_agent || 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
+                    document.getElementById('config_sec_ch_ua').value = headers.sec_ch_ua || '"Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"';
+                    document.getElementById('config_sec_ch_ua_mobile').value = headers.sec_ch_ua_mobile || '?0';
+                    document.getElementById('config_sec_ch_ua_platform').value = headers.sec_ch_ua_platform || '"Windows"';
+                    document.getElementById('config_accept_language').value = headers.accept_language || 'zh-CN,zh;q=0.9,en;q=0.8';
+                    document.getElementById('config_accept_encoding').value = headers.accept_encoding || 'gzip, deflate, br, zstd';
                 })
                 .catch(err => console.error('加载配置失败:', err));
         }
@@ -3505,6 +3606,16 @@
                     currentConfig.ai_max_tokens = parseInt(document.getElementById('config_ai_max_tokens').value);
                     currentConfig.ai_timeout = parseInt(document.getElementById('config_ai_timeout').value);
                     currentConfig.ai_system_prompt = document.getElementById('config_ai_system_prompt').value;
+                    
+                    // 保存浏览器请求头配置
+                    currentConfig.browser_headers = {
+                        user_agent: document.getElementById('config_user_agent').value.trim(),
+                        sec_ch_ua: document.getElementById('config_sec_ch_ua').value.trim(),
+                        sec_ch_ua_mobile: document.getElementById('config_sec_ch_ua_mobile').value,
+                        sec_ch_ua_platform: document.getElementById('config_sec_ch_ua_platform').value,
+                        accept_language: document.getElementById('config_accept_language').value.trim(),
+                        accept_encoding: document.getElementById('config_accept_encoding').value.trim()
+                    };
 
                     return fetch('/api/config', {
                         method: 'POST',
@@ -3829,6 +3940,112 @@
                 const sus = document.getElementById('sidebar-update-status');
                 if (sus) sus.innerHTML = '<span>❌</span><span>检查异常</span>';
             }
+        }
+
+        // 测试浏览器请求头配置
+        function testHeadersConfig() {
+            const headers = {
+                user_agent: document.getElementById('config_user_agent').value.trim(),
+                sec_ch_ua: document.getElementById('config_sec_ch_ua').value.trim(),
+                sec_ch_ua_mobile: document.getElementById('config_sec_ch_ua_mobile').value,
+                sec_ch_ua_platform: document.getElementById('config_sec_ch_ua_platform').value,
+                accept_language: document.getElementById('config_accept_language').value.trim(),
+                accept_encoding: document.getElementById('config_accept_encoding').value.trim()
+            };
+            
+            // 验证配置
+            const errors = [];
+            
+            // 检查 User-Agent
+            if (!headers.user_agent) {
+                errors.push('User-Agent 不能为空');
+            } else if (!headers.user_agent.includes('Mozilla') && !headers.user_agent.includes('Chrome')) {
+                errors.push('User-Agent 格式可能不正确');
+            }
+            
+            // 检查版本一致性
+            if (headers.user_agent && headers.sec_ch_ua) {
+                try {
+                    const uaMatch = headers.user_agent.match(/Chrome\/(\d+)/);
+                    const chMatch = headers.sec_ch_ua.match(/v="(\d+)"/);
+                    
+                    if (uaMatch && chMatch) {
+                        const uaVersion = uaMatch[1];
+                        const chVersion = chMatch[1];
+                        
+                        if (uaVersion !== chVersion) {
+                            errors.push(`版本号不一致：User-Agent中为 ${uaVersion}，Sec-CH-UA中为 ${chVersion}`);
+                        }
+                    }
+                } catch (e) {
+                    // 忽略解析错误
+                }
+            }
+            
+            // 检查平台匹配
+            if (headers.user_agent && headers.sec_ch_ua_platform) {
+                const platformMap = {
+                    'Windows NT': 'Windows',
+                    'Macintosh': 'macOS',
+                    'X11; Linux': 'Linux',
+                    'Android': 'Android'
+                };
+                
+                let uaPlatform = null;
+                for (const [key, value] of Object.entries(platformMap)) {
+                    if (headers.user_agent.includes(key)) {
+                        uaPlatform = value;
+                        break;
+                    }
+                }
+                
+                const chPlatform = headers.sec_ch_ua_platform.replace(/"/g, '');
+                
+                if (uaPlatform && chPlatform && uaPlatform !== chPlatform) {
+                    errors.push(`平台不匹配：User-Agent中为 ${uaPlatform}，Sec-CH-UA-Platform中为 ${chPlatform}`);
+                }
+            }
+            
+            // 检查移动设备标识
+            if (headers.sec_ch_ua_mobile && !['?0', '?1'].includes(headers.sec_ch_ua_mobile)) {
+                errors.push('Sec-CH-UA-Mobile 值无效（应为 ?0 或 ?1）');
+            }
+            
+            // 显示结果
+            if (errors.length > 0) {
+                let errorMsg = '❌ 配置验证失败：\n\n';
+                errors.forEach((error, index) => {
+                    errorMsg += `${index + 1}. ${error}\n`;
+                });
+                errorMsg += '\n请修正后重试！';
+                alert(errorMsg);
+            } else {
+                let successMsg = '✅ 配置验证通过！\n\n';
+                successMsg += '📋 当前配置：\n';
+                successMsg += `User-Agent: ${headers.user_agent.substring(0, 50)}...\n`;
+                successMsg += `Sec-CH-UA: ${headers.sec_ch_ua}\n`;
+                successMsg += `Mobile: ${headers.sec_ch_ua_mobile}\n`;
+                successMsg += `Platform: ${headers.sec_ch_ua_platform}\n`;
+                successMsg += '\n💡 配置看起来正常，可以保存使用！';
+                alert(successMsg);
+            }
+        }
+        
+        // 恢复浏览器请求头默认值
+        function resetHeadersToDefault() {
+            if (!confirm('确定要将所有请求头配置恢复为默认值吗？\n\n⚠️ 此操作不可撤销！')) {
+                return;
+            }
+            
+            // 设置默认值
+            document.getElementById('config_user_agent').value = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
+            document.getElementById('config_sec_ch_ua').value = '"Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"';
+            document.getElementById('config_sec_ch_ua_mobile').value = '?0';
+            document.getElementById('config_sec_ch_ua_platform').value = '"Windows"';
+            document.getElementById('config_accept_language').value = 'zh-CN,zh;q=0.9,en;q=0.8';
+            document.getElementById('config_accept_encoding').value = 'gzip, deflate, br, zstd';
+            
+            showToast(true, '✅ 已恢复所有默认配置');
         }
 
         // 测试AI连接
