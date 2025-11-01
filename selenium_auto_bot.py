@@ -1375,7 +1375,7 @@ class SeleniumAutoBot:
             if test_mode:
                 logging.info(f"🧪 [测试] 回复帖子: {post_url}")
             else:
-            logging.info(f"💬 回复帖子: {post_url}")
+                logging.info(f"💬 回复帖子: {post_url}")
             
             # 访问帖子页面
             self.driver.get(post_url)
@@ -1524,9 +1524,9 @@ class SeleniumAutoBot:
                         if test_mode:
                             logging.info("✅ [测试] 回复成功（测试模式不记录统计）")
                         else:
-                        logging.info("✅ 回复成功")
+                            logging.info("✅ 回复成功")
                             # 记录回复统计（仅正常模式）
-                        self.stats.add_reply(post_title, post_url, reply_content)
+                            self.stats.add_reply(post_title, post_url, reply_content)
                         return True
                     else:
                         # 保存页面用于调试
