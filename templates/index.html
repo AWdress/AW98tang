@@ -4268,6 +4268,33 @@
             console.log('⏰ 用户拒绝安装，7天后再提示');
         });
 
+        // PWA 功能诊断
+        function checkPWASupport() {
+            const results = {
+                serviceWorker: 'serviceWorker' in navigator,
+                https: window.location.protocol === 'https:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1',
+                beforeinstallprompt: false,
+                notification: 'Notification' in window,
+                pushManager: 'PushManager' in window
+            };
+            
+            console.log('🔍 PWA支持检测结果：');
+            console.log('├─ Service Worker支持:', results.serviceWorker ? '✅' : '❌');
+            console.log('├─ HTTPS/Localhost:', results.https ? '✅' : '❌ 需要HTTPS');
+            console.log('├─ 通知支持:', results.notification ? '✅' : '❌');
+            console.log('└─ 推送支持:', results.pushManager ? '✅' : '❌');
+            
+            if (!results.https) {
+                console.warn('⚠️ 警告：当前使用HTTP访问，PWA功能将被禁用！');
+                console.warn('💡 解决方案：使用 localhost、127.0.0.1 或配置HTTPS');
+            }
+            
+            return results;
+        }
+        
+        // 执行检测
+        const pwaSupport = checkPWASupport();
+
         // 注册 Service Worker
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
