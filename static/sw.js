@@ -1,12 +1,13 @@
 // Service Worker for 色花堂智能助手 Pro
-const CACHE_NAME = 'aw98tang-v1.0.0';
-const STATIC_CACHE = 'aw98tang-static-v1';
-const DYNAMIC_CACHE = 'aw98tang-dynamic-v1';
+const CACHE_NAME = 'aw98tang-v1.1.0';
+const STATIC_CACHE = 'aw98tang-static-v1.1';
+const DYNAMIC_CACHE = 'aw98tang-dynamic-v1.1';
 
 // 需要缓存的静态资源
 const urlsToCache = [
   '/',
   '/static/manifest.json',
+  '/static/offline.html',
   'https://unpkg.com/lucide@latest',
   'https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css'
 ];

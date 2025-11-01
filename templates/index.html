@@ -28,13 +28,29 @@
     <link rel="apple-touch-icon" sizes="180x180" href="/static/icons/icon-180x180.png">
     <link rel="apple-touch-icon" sizes="167x167" href="/static/icons/icon-152x152.png">
     
-    <!-- iOS 启动画面（Splash Screens）-->
-    <link rel="apple-touch-startup-image" href="/static/icons/icon-512x512.png" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
-    <link rel="apple-touch-startup-image" href="/static/icons/icon-512x512.png" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
-    <link rel="apple-touch-startup-image" href="/static/icons/icon-512x512.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
-    <link rel="apple-touch-startup-image" href="/static/icons/icon-512x512.png" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
-    <link rel="apple-touch-startup-image" href="/static/icons/icon-512x512.png" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
-    <link rel="apple-touch-startup-image" href="/static/icons/icon-512x512.png" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+    <!-- iOS 启动画面（Splash Screens）- 专业定制版 -->
+    <!-- iPhone SE, 5s -->
+    <link rel="apple-touch-startup-image" href="/static/splash/splash-640x1136.png" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+    <!-- iPhone 8, 7, 6s, 6 -->
+    <link rel="apple-touch-startup-image" href="/static/splash/splash-750x1334.png" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+    <!-- iPhone 8 Plus, 7 Plus, 6s Plus, 6 Plus -->
+    <link rel="apple-touch-startup-image" href="/static/splash/splash-1242x2208.png" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+    <!-- iPhone 11, XR -->
+    <link rel="apple-touch-startup-image" href="/static/splash/splash-828x1792.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+    <!-- iPhone 11 Pro, X, XS -->
+    <link rel="apple-touch-startup-image" href="/static/splash/splash-1125x2436.png" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+    <!-- iPhone 11 Pro Max, XS Max -->
+    <link rel="apple-touch-startup-image" href="/static/splash/splash-1242x2688.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+    <!-- iPhone 12 mini, 13 mini -->
+    <link rel="apple-touch-startup-image" href="/static/splash/splash-1080x2340.png" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+    <!-- iPhone 12, 12 Pro, 13, 13 Pro, 14 -->
+    <link rel="apple-touch-startup-image" href="/static/splash/splash-1170x2532.png" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+    <!-- iPhone 12 Pro Max, 13 Pro Max, 14 Plus -->
+    <link rel="apple-touch-startup-image" href="/static/splash/splash-1284x2778.png" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+    <!-- iPhone 14 Pro -->
+    <link rel="apple-touch-startup-image" href="/static/splash/splash-1179x2556.png" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+    <!-- iPhone 14 Pro Max -->
+    <link rel="apple-touch-startup-image" href="/static/splash/splash-1290x2796.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
     
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -4205,19 +4221,34 @@
         padding-top: calc(20px + env(safe-area-inset-top));
     }
 
-    /* 移动端底部导航栏 */
+    /* 移动端底部导航栏 - iOS 26 毛玻璃效果 */
     .mobile-bottom-nav {
         display: none;
         position: fixed;
         bottom: 0;
         left: 0;
         right: 0;
-        background: var(--card-bg);
-        backdrop-filter: blur(20px);
-        border-top: 1px solid var(--card-border);
+        /* iOS 风格的半透明背景 */
+        background: rgba(255, 255, 255, 0.72);
+        /* 强化毛玻璃效果 - iOS 26 雨滴效果 */
+        backdrop-filter: saturate(180%) blur(20px);
+        -webkit-backdrop-filter: saturate(180%) blur(20px);
+        border-top: 0.5px solid rgba(0, 0, 0, 0.08);
         padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
         z-index: 999;
-        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+        /* iOS 风格的轻微阴影 */
+        box-shadow: 0 -0.5px 0 0 rgba(0, 0, 0, 0.04), 
+                    0 -2px 8px -2px rgba(0, 0, 0, 0.08);
+    }
+
+    /* 暗色主题下的毛玻璃效果 */
+    [data-theme="dark"] .mobile-bottom-nav {
+        background: rgba(30, 41, 59, 0.72);
+        backdrop-filter: saturate(180%) blur(20px);
+        -webkit-backdrop-filter: saturate(180%) blur(20px);
+        border-top: 0.5px solid rgba(255, 255, 255, 0.12);
+        box-shadow: 0 -0.5px 0 0 rgba(255, 255, 255, 0.04),
+                    0 -2px 8px -2px rgba(0, 0, 0, 0.3);
     }
 
     .mobile-bottom-nav-content {
@@ -4233,39 +4264,87 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 4px;
-        padding: 6px 12px;
+        gap: 2px;
+        padding: 4px 8px;
         cursor: pointer;
-        transition: all 0.3s;
-        border-radius: 12px;
-        color: var(--text-secondary);
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        border-radius: 10px;
+        color: #8e8e93;
         text-decoration: none;
         flex: 1;
-        max-width: 80px;
+        max-width: 75px;
+        position: relative;
     }
 
     .mobile-nav-item:active {
-        transform: scale(0.95);
+        transform: scale(0.92);
+        opacity: 0.6;
     }
 
     .mobile-nav-item.active {
         color: var(--primary);
-        background: rgba(236, 72, 153, 0.1);
+    }
+
+    /* iOS风格的活跃指示器 */
+    .mobile-nav-item.active::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 60px;
+        height: 32px;
+        background: rgba(236, 72, 153, 0.12);
+        border-radius: 16px;
+        z-index: -1;
+        animation: navPulse 0.3s ease-out;
+    }
+
+    @keyframes navPulse {
+        0% {
+            transform: translate(-50%, -50%) scale(0.8);
+            opacity: 0;
+        }
+        100% {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+        }
     }
 
     .mobile-nav-item .nav-icon {
-        font-size: 1.5rem;
-        transition: transform 0.3s;
+        font-size: 1.6rem;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
     }
 
     .mobile-nav-item.active .nav-icon {
-        transform: scale(1.15);
+        transform: translateY(-2px) scale(1.08);
+        filter: drop-shadow(0 2px 4px rgba(236, 72, 153, 0.3));
     }
 
     .mobile-nav-item .nav-label {
-        font-size: 0.75rem;
+        font-size: 0.65rem;
         font-weight: 500;
         white-space: nowrap;
+        letter-spacing: -0.2px;
+        transition: all 0.25s;
+    }
+
+    .mobile-nav-item.active .nav-label {
+        font-weight: 600;
+    }
+
+    /* 暗色主题下的导航项 */
+    [data-theme="dark"] .mobile-nav-item {
+        color: #98989d;
+    }
+
+    [data-theme="dark"] .mobile-nav-item.active {
+        color: var(--primary);
+    }
+
+    [data-theme="dark"] .mobile-nav-item.active::before {
+        background: rgba(236, 72, 153, 0.18);
     }
 
     @media (max-width: 768px) {
@@ -4518,6 +4597,112 @@
                         [channel.port2]
                     );
                 });
+            }
+        };
+
+        // PWA 版本更新检测
+        let updateRegistration = null;
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/static/sw.js').then(registration => {
+                console.log('✅ Service Worker 注册成功:', registration.scope);
+                
+                // 检查更新
+                registration.addEventListener('updatefound', () => {
+                    const newWorker = registration.installing;
+                    console.log('🔄 发现新版本...');
+                    
+                    newWorker.addEventListener('statechange', () => {
+                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                            // 有新版本可用
+                            updateRegistration = registration;
+                            showUpdatePrompt();
+                        }
+                    });
+                });
+                
+                // 定期检查更新（每小时）
+                setInterval(() => {
+                    registration.update();
+                }, 3600000);
+            }).catch(err => {
+                console.warn('⚠️ Service Worker 注册失败:', err);
+            });
+        }
+
+        // 显示更新提示
+        function showUpdatePrompt() {
+            const updateBanner = document.createElement('div');
+            updateBanner.id = 'pwa-update-banner';
+            updateBanner.innerHTML = `
+                <div style="
+                    position: fixed;
+                    top: 20px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    background: linear-gradient(135deg, var(--primary), var(--secondary));
+                    color: white;
+                    padding: 16px 24px;
+                    border-radius: 16px;
+                    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+                    z-index: 10000;
+                    display: flex;
+                    align-items: center;
+                    gap: 16px;
+                    animation: slideDown 0.4s ease-out;
+                    max-width: 90%;
+                ">
+                    <div style="font-size: 1.5rem;">🎉</div>
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600; font-size: 1rem; margin-bottom: 4px;">发现新版本</div>
+                        <div style="font-size: 0.85rem; opacity: 0.95;">刷新页面以获取最新功能</div>
+                    </div>
+                    <button onclick="applyPWAUpdate()" style="
+                        background: white;
+                        color: var(--primary);
+                        border: none;
+                        padding: 10px 20px;
+                        border-radius: 10px;
+                        font-weight: 600;
+                        cursor: pointer;
+                        font-size: 0.9rem;
+                        transition: transform 0.2s;
+                    " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                        立即更新
+                    </button>
+                    <button onclick="this.parentElement.parentElement.remove()" style="
+                        background: rgba(255, 255, 255, 0.2);
+                        color: white;
+                        border: none;
+                        padding: 10px 16px;
+                        border-radius: 10px;
+                        cursor: pointer;
+                        font-size: 0.9rem;
+                    ">
+                        ✕
+                    </button>
+                </div>
+                <style>
+                    @keyframes slideDown {
+                        from {
+                            opacity: 0;
+                            transform: translateX(-50%) translateY(-20px);
+                        }
+                        to {
+                            opacity: 1;
+                            transform: translateX(-50%) translateY(0);
+                        }
+                    }
+                </style>
+            `;
+            document.body.appendChild(updateBanner);
+        }
+
+        // 应用PWA更新
+        window.applyPWAUpdate = function() {
+            if (updateRegistration && updateRegistration.waiting) {
+                updateRegistration.waiting.postMessage({ type: 'SKIP_WAITING' });
+                window.location.reload();
             }
         };
 
