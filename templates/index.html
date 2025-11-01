@@ -28,6 +28,14 @@
     <link rel="apple-touch-icon" sizes="180x180" href="/static/icons/icon-180x180.png">
     <link rel="apple-touch-icon" sizes="167x167" href="/static/icons/icon-152x152.png">
     
+    <!-- iOS 启动画面（Splash Screens）-->
+    <link rel="apple-touch-startup-image" href="/static/icons/icon-512x512.png" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="/static/icons/icon-512x512.png" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="/static/icons/icon-512x512.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="/static/icons/icon-512x512.png" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="/static/icons/icon-512x512.png" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="/static/icons/icon-512x512.png" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+    
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Animate.css -->
@@ -4196,6 +4204,110 @@
     body.pwa-mode .sidebar {
         padding-top: calc(20px + env(safe-area-inset-top));
     }
+
+    /* 移动端底部导航栏 */
+    .mobile-bottom-nav {
+        display: none;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: var(--card-bg);
+        backdrop-filter: blur(20px);
+        border-top: 1px solid var(--card-border);
+        padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
+        z-index: 999;
+        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .mobile-bottom-nav-content {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 0 12px;
+    }
+
+    .mobile-nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        padding: 6px 12px;
+        cursor: pointer;
+        transition: all 0.3s;
+        border-radius: 12px;
+        color: var(--text-secondary);
+        text-decoration: none;
+        flex: 1;
+        max-width: 80px;
+    }
+
+    .mobile-nav-item:active {
+        transform: scale(0.95);
+    }
+
+    .mobile-nav-item.active {
+        color: var(--primary);
+        background: rgba(236, 72, 153, 0.1);
+    }
+
+    .mobile-nav-item .nav-icon {
+        font-size: 1.5rem;
+        transition: transform 0.3s;
+    }
+
+    .mobile-nav-item.active .nav-icon {
+        transform: scale(1.15);
+    }
+
+    .mobile-nav-item .nav-label {
+        font-size: 0.75rem;
+        font-weight: 500;
+        white-space: nowrap;
+    }
+
+    @media (max-width: 768px) {
+        .mobile-bottom-nav {
+            display: block;
+        }
+
+        .main-content {
+            padding-bottom: calc(70px + env(safe-area-inset-bottom)) !important;
+        }
+
+        /* 移动端卡片优化 */
+        .stat-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s;
+        }
+
+        .stat-card:active {
+            transform: scale(0.98);
+        }
+
+        .stats-grid {
+            gap: 16px;
+        }
+
+        /* 页面头部优化 */
+        .page-header {
+            padding: 16px 0;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+        }
+
+        .page-subtitle {
+            font-size: 0.9rem;
+            margin-top: 4px;
+        }
+    }
     </style>
 
     <!-- PWA 功能脚本 -->
@@ -4410,6 +4522,51 @@
         };
 
         console.log('🌸 PWA 功能已加载');
+    </script>
+
+    <!-- 移动端底部导航栏 -->
+    <nav class="mobile-bottom-nav">
+        <div class="mobile-bottom-nav-content">
+            <a class="mobile-nav-item active" onclick="showPage('dashboard'); setActiveNav(this);">
+                <div class="nav-icon">📊</div>
+                <div class="nav-label">仪表盘</div>
+            </a>
+            <a class="mobile-nav-item" onclick="showPage('replies'); setActiveNav(this);">
+                <div class="nav-icon">💬</div>
+                <div class="nav-label">回复</div>
+            </a>
+            <a class="mobile-nav-item" onclick="showPage('logs'); setActiveNav(this);">
+                <div class="nav-icon">📋</div>
+                <div class="nav-label">日志</div>
+            </a>
+            <a class="mobile-nav-item" onclick="showPage('config'); setActiveNav(this);">
+                <div class="nav-icon">⚙️</div>
+                <div class="nav-label">设置</div>
+            </a>
+            <a class="mobile-nav-item" onclick="showPage('update'); setActiveNav(this);">
+                <div class="nav-icon">🔄</div>
+                <div class="nav-label">更新</div>
+            </a>
+        </div>
+    </nav>
+
+    <script>
+        // 底部导航栏切换
+        function setActiveNav(element) {
+            // 移除所有active类
+            document.querySelectorAll('.mobile-nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            // 添加active类到当前点击的项
+            element.classList.add('active');
+        }
+
+        // 初始化：检测是否是PWA模式
+        if (window.matchMedia('(display-mode: standalone)').matches || 
+            window.navigator.standalone === true) {
+            document.body.classList.add('pwa-mode');
+            console.log('🎨 PWA 独立模式已激活');
+        }
     </script>
 </body>
 </html>

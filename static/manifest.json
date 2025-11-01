@@ -4,7 +4,7 @@
   "description": "色花堂论坛专用智能自动化系统 - 智能回复·自动签到·定时任务",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0f172a",
+  "background_color": "#ffeef8",
   "theme_color": "#ec4899",
   "orientation": "portrait-primary",
   "scope": "/",
