@@ -3088,19 +3088,19 @@ class SeleniumAutoBot:
                         logging.info("🛑 检测到停止信号，停止自动回帖")
                         return
                     
-                        if reply_count >= remaining_replies:
-                            logging.info(f"✅ 已完成本次回复任务 ({reply_count}/{remaining_replies})")
+                    if reply_count >= remaining_replies:
+                        logging.info(f"✅ 已完成本次回复任务 ({reply_count}/{remaining_replies})")
                         break
                     
-                        # 检查是否应该跳过该帖子（包括已回复检查）
-                        if self.should_skip_post(post['title'], post['url']):
+                    # 检查是否应该跳过该帖子（包括已回复检查）
+                    if self.should_skip_post(post['title'], post['url']):
                         continue
                     
                     # 回复帖子（传递标题用于智能回复）
                     if self.reply_to_post(post['url'], post_title=post['title']):
                         reply_count += 1
-                            current_total = today_reply_count + reply_count
-                            logging.info(f"✅ 本次已回复 {reply_count} 个，今日总计 {current_total}/{self.daily_reply_limit} 个帖子")
+                        current_total = today_reply_count + reply_count
+                        logging.info(f"✅ 本次已回复 {reply_count} 个，今日总计 {current_total}/{self.daily_reply_limit} 个帖子")
                         
                         # 等待间隔（期间也检查停止标志）
                         wait_time = random.randint(self.reply_interval_min, self.reply_interval_max)
@@ -3122,7 +3122,7 @@ class SeleniumAutoBot:
                 # 检查今日是否有回复（本次回复或之前已回复）
                 final_reply_count = today_reply_count + reply_count
                 if final_reply_count > 0:
-                if reply_count > 0:
+                    if reply_count > 0:
                         logging.info("📋 已完成本次回复，现在开始签到...")
                     else:
                         logging.info("📋 今日已有回复记录，现在开始签到...")
@@ -3204,8 +3204,8 @@ class SeleniumAutoBot:
         finally:
             if self.driver:
                 try:
-                self.driver.quit()
-                logging.info("🔚 浏览器已关闭")
+                    self.driver.quit()
+                    logging.info("🔚 浏览器已关闭")
                 except Exception as e:
                     # 忽略关闭浏览器时的错误（可能已经关闭）
                     logging.debug(f"关闭浏览器时出错: {e}")
