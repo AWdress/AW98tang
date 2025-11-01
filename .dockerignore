@@ -19,6 +19,7 @@ debug/
 .idea/
 *.swp
 *.swo
+.editorconfig
 
 # Chrome Driver（容器会自己下载）
 chromedriver-win32/
