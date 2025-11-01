@@ -10,7 +10,7 @@ import threading
 import time
 import schedule
 from datetime import datetime, timedelta
-from flask import Flask, render_template, jsonify, request, redirect, url_for, session, flash
+from flask import Flask, render_template, jsonify, request, redirect, url_for, session, flash, send_file, make_response
 from stats_manager import StatsManager
 from selenium_auto_bot import SeleniumAutoBot
 from update_manager import UpdateManager
@@ -656,6 +656,45 @@ def get_update_logs():
             'success': False,
             'message': str(e)
         }), 500
+
+# ============ PWA 相关路由 ============
+
+@app.route('/static/manifest.json')
+def manifest():
+    """PWA Manifest"""
+    try:
+        response = send_file('static/manifest.json', mimetype='application/manifest+json')
+        response.headers['Cache-Control'] = 'public, max-age=3600'  # 缓存1小时
+        return response
+    except Exception as e:
+        logging.error(f"加载 manifest.json 失败: {e}")
+        return jsonify({'error': 'Manifest not found'}), 404
+
+@app.route('/static/sw.js')
+def service_worker():
+    """Service Worker"""
+    try:
+        response = make_response(send_file('static/sw.js'))
+        response.headers['Content-Type'] = 'application/javascript'
+        response.headers['Service-Worker-Allowed'] = '/'
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'  # Service Worker 不缓存
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
+        return response
+    except Exception as e:
+        logging.error(f"加载 sw.js 失败: {e}")
+        return jsonify({'error': 'Service Worker not found'}), 404
+
+@app.route('/offline.html')
+def offline():
+    """离线页面"""
+    try:
+        return render_template('offline.html')
+    except Exception as e:
+        logging.error(f"加载离线页面失败: {e}")
+        return '<h1>离线模式</h1><p>网络未连接</p>', 200
+
+# =====================================
 
 def calculate_uptime():
     """计算运行时间"""

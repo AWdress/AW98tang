@@ -1526,8 +1526,8 @@ class SeleniumAutoBot:
                         else:
                         logging.info("✅ 回复成功")
                             # 记录回复统计（仅正常模式）
+                            # 记录回复统计（仅正常模式）
                         self.stats.add_reply(post_title, post_url, reply_content)
-                        return True
                     else:
                         # 保存页面用于调试
                         try:

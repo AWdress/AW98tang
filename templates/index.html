@@ -6,8 +6,28 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
+    
+    <!-- PWA 相关 Meta -->
+    <meta name="application-name" content="色花堂智能助手 Pro">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="色花堂助手">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#ec4899">
+    <meta name="description" content="色花堂论坛专用智能自动化系统 - 智能回复·自动签到·定时任务">
+    
     <title>色花堂智能助手 Pro</title>
-    <link rel="icon" href="https://www.sehuatang.net/favicon.ico" type="image/x-icon">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/static/manifest.json">
+    
+    <!-- Favicon & App Icons -->
+    <link rel="icon" href="/static/icons/favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon" href="/static/icons/icon-180x180.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/static/icons/icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/icons/icon-180x180.png">
+    <link rel="apple-touch-icon" sizes="167x167" href="/static/icons/icon-152x152.png">
+    
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Animate.css -->
@@ -4043,6 +4063,326 @@
                 document.body.style.opacity = '1';
             }, 100);
         });
+    </script>
+
+    <!-- PWA 安装提示 -->
+    <div id="pwa-install-prompt" class="pwa-prompt" style="display: none;">
+        <div class="pwa-prompt-content animate__animated animate__fadeInUp">
+            <div class="pwa-prompt-icon">
+                <i data-lucide="smartphone" style="width: 48px; height: 48px;"></i>
+            </div>
+            <h3>📱 添加到主屏幕</h3>
+            <p>体验类似原生 App 的流畅操作<br>快速启动、离线访问、推送通知</p>
+            <div class="pwa-prompt-actions">
+                <button id="pwa-install-btn" class="pwa-btn-primary">
+                    <i data-lucide="download" style="width: 20px; height: 20px;"></i>
+                    立即安装
+                </button>
+                <button id="pwa-dismiss-btn" class="pwa-btn-secondary">
+                    稍后再说
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+    /* PWA 安装提示样式 */
+    .pwa-prompt {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(0, 0, 0, 0.9);
+        backdrop-filter: blur(10px);
+        z-index: 10000;
+        padding: 20px;
+        box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    .pwa-prompt-content {
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        border-radius: 20px;
+        padding: 30px 20px;
+        text-align: center;
+        color: white;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        max-width: 500px;
+        margin: 0 auto;
+    }
+
+    .pwa-prompt-icon {
+        margin-bottom: 15px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .pwa-prompt-content h3 {
+        font-size: 1.5rem;
+        margin-bottom: 10px;
+        font-weight: 600;
+    }
+
+    .pwa-prompt-content p {
+        opacity: 0.95;
+        margin-bottom: 20px;
+        line-height: 1.6;
+        font-size: 0.95rem;
+    }
+
+    .pwa-prompt-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .pwa-prompt-actions button {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 500;
+    }
+
+    .pwa-btn-primary {
+        background: white;
+        color: var(--primary);
+    }
+
+    .pwa-btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(255, 255, 255, 0.3);
+    }
+
+    .pwa-btn-secondary {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+    }
+
+    .pwa-btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
+
+    @media (max-width: 768px) {
+        .pwa-prompt {
+            padding: 15px;
+        }
+        
+        .pwa-prompt-content {
+            padding: 25px 15px;
+        }
+        
+        .pwa-prompt-actions {
+            flex-direction: column;
+        }
+        
+        .pwa-prompt-actions button {
+            width: 100%;
+        }
+    }
+
+    /* PWA 模式样式优化 */
+    body.pwa-mode {
+        padding-top: env(safe-area-inset-top);
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    body.pwa-mode .sidebar {
+        padding-top: calc(20px + env(safe-area-inset-top));
+    }
+    </style>
+
+    <!-- PWA 功能脚本 -->
+    <script>
+        // PWA 安装逻辑
+        let deferredPrompt;
+        const PWA_DISMISS_KEY = 'pwa-dismissed';
+        const PWA_DISMISS_DURATION = 7 * 24 * 60 * 60 * 1000; // 7天
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            console.log('🎯 PWA 安装提示触发');
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // 检查是否已经安装
+            if (window.matchMedia('(display-mode: standalone)').matches) {
+                console.log('✅ 已经安装为 PWA');
+                return;
+            }
+            
+            // 检查是否在7天内拒绝过
+            const dismissed = localStorage.getItem(PWA_DISMISS_KEY);
+            if (dismissed) {
+                const dismissedTime = parseInt(dismissed);
+                const now = Date.now();
+                if (now - dismissedTime < PWA_DISMISS_DURATION) {
+                    console.log('⏰ 用户已拒绝，7天后再提示');
+                    return;
+                }
+            }
+            
+            // 延迟 5 秒后显示安装提示
+            setTimeout(() => {
+                const prompt = document.getElementById('pwa-install-prompt');
+                if (prompt) {
+                    prompt.style.display = 'block';
+                    lucide.createIcons(); // 重新渲染图标
+                }
+            }, 5000);
+        });
+
+        // 安装按钮点击
+        document.getElementById('pwa-install-btn')?.addEventListener('click', async () => {
+            if (!deferredPrompt) {
+                showToast(false, '安装功能暂不可用');
+                return;
+            }
+            
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            
+            console.log(`👤 用户选择: ${outcome}`);
+            
+            if (outcome === 'accepted') {
+                showToast(true, '✅ 安装成功！您现在可以从主屏幕启动应用');
+                localStorage.removeItem(PWA_DISMISS_KEY);
+            } else {
+                showToast(false, '安装已取消');
+            }
+            
+            deferredPrompt = null;
+            document.getElementById('pwa-install-prompt').style.display = 'none';
+        });
+
+        // 关闭按钮
+        document.getElementById('pwa-dismiss-btn')?.addEventListener('click', () => {
+            document.getElementById('pwa-install-prompt').style.display = 'none';
+            // 记录拒绝时间
+            localStorage.setItem(PWA_DISMISS_KEY, Date.now().toString());
+            console.log('⏰ 用户拒绝安装，7天后再提示');
+        });
+
+        // 注册 Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/static/sw.js')
+                    .then(registration => {
+                        console.log('✅ Service Worker 注册成功:', registration.scope);
+                        
+                        // 检查更新
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            console.log('🔄 发现新的 Service Worker');
+                            
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    console.log('🆕 发现新版本，准备更新');
+                                    
+                                    // 显示更新提示
+                                    if (confirm('🆕 发现新版本，是否立即更新？')) {
+                                        newWorker.postMessage({ type: 'SKIP_WAITING' });
+                                        window.location.reload();
+                                    }
+                                }
+                            });
+                        });
+
+                        // 定期检查更新（每小时）
+                        setInterval(() => {
+                            registration.update();
+                        }, 60 * 60 * 1000);
+                    })
+                    .catch(error => {
+                        console.error('❌ Service Worker 注册失败:', error);
+                    });
+
+                // 监听 Service Worker 消息
+                navigator.serviceWorker.addEventListener('message', event => {
+                    console.log('📨 收到 Service Worker 消息:', event.data);
+                    
+                    if (event.data.type === 'STATS_SYNCED') {
+                        console.log('✅ 统计数据已同步');
+                        // 可以在这里更新UI
+                    }
+                });
+            });
+        } else {
+            console.warn('⚠️ 浏览器不支持 Service Worker');
+        }
+
+        // 检测是否以 PWA 模式运行
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            console.log('📱 以 PWA 模式运行');
+            document.body.classList.add('pwa-mode');
+            
+            // PWA 模式下的特殊处理
+            console.log('🎯 PWA 模式已启用');
+        }
+
+        // 监听离线/在线状态
+        window.addEventListener('online', () => {
+            showToast(true, '✅ 网络已恢复连接');
+            console.log('🌐 网络已连接');
+        });
+
+        window.addEventListener('offline', () => {
+            showToast(false, '⚠️ 网络已断开，部分功能可能不可用');
+            console.log('📡 网络已断开');
+        });
+
+        // 后台同步统计数据（如果支持）
+        if ('serviceWorker' in navigator && 'sync' in navigator.serviceWorker) {
+            navigator.serviceWorker.ready.then(registration => {
+                // 注册后台同步
+                return registration.sync.register('sync-stats');
+            }).then(() => {
+                console.log('🔄 后台同步已注册');
+            }).catch(error => {
+                console.log('⚠️ 后台同步不支持:', error);
+            });
+        }
+
+        // iOS Safari 特殊处理
+        if (/iPhone|iPad|iPod/.test(navigator.userAgent) && !window.MSStream) {
+            // 检测是否从主屏幕启动
+            if (!window.navigator.standalone) {
+                console.log('🍎 iOS 设备，显示添加到主屏幕提示');
+            } else {
+                console.log('🍎 从 iOS 主屏幕启动');
+                document.body.classList.add('pwa-mode', 'ios-pwa');
+            }
+        }
+
+        // 清理缓存功能（调试用）
+        window.clearPWACache = async function() {
+            if ('serviceWorker' in navigator) {
+                const registration = await navigator.serviceWorker.ready;
+                const channel = new MessageChannel();
+                
+                return new Promise((resolve) => {
+                    channel.port1.onmessage = (event) => {
+                        if (event.data.success) {
+                            console.log('✅ PWA 缓存已清理');
+                            showToast(true, 'PWA 缓存已清理');
+                            resolve(true);
+                        }
+                    };
+                    
+                    registration.active.postMessage(
+                        { type: 'CLEAR_CACHE' },
+                        [channel.port2]
+                    );
+                });
+            }
+        };
+
+        console.log('🌸 PWA 功能已加载');
     </script>
 </body>
 </html>
