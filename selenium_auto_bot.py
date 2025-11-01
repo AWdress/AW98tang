@@ -234,7 +234,7 @@ class SeleniumAutoBot:
                 logging.info("ℹ️ 无需年龄验证")
                 return True
             
-            logging.info("🔞 检测到年龄验证页面")
+                logging.info("🔞 检测到年龄验证页面")
                 
             # 等待页面元素完全可见（给页面动画和JS更多时间）
             logging.info("⏰ 等待页面元素完全可见...")
@@ -286,7 +286,7 @@ class SeleniumAutoBot:
                                     logging.info("✅ 点击成功，年龄验证已通过")
                                     click_success = True
                                     return True
-                                else:
+                else:
                                     logging.debug(f"点击方式 {i} 未能跳转，尝试下一种...")
                             except Exception as e:
                                 logging.debug(f"点击方式 {i} 失败: {e}")
@@ -297,7 +297,7 @@ class SeleniumAutoBot:
                             logging.warning("⚠️ 找到按钮但所有点击方式都失败")
                             break
                     
-                    except Exception as e:
+        except Exception as e:
                         logging.debug(f"选择器 {by}={value} 失败: {e}")
                         continue
                 
@@ -486,11 +486,11 @@ class SeleniumAutoBot:
                     # 使用较短的超时，因为已经等待过了
                     wait_short = WebDriverWait(self.driver, 10)
                     username_field = wait_short.until(
-                        EC.presence_of_element_located((By.NAME, "username"))
-                    )
-                    logging.info("✅ 登录表单加载完成")
+                    EC.presence_of_element_located((By.NAME, "username"))
+                )
+                logging.info("✅ 登录表单加载完成")
                     break
-                except TimeoutException:
+            except TimeoutException:
                     if retry < max_retries - 1:
                         logging.warning(f"⚠️ 第 {retry + 1} 次未找到用户名输入框，等待8秒后重试...")
                         time.sleep(8)
@@ -499,10 +499,10 @@ class SeleniumAutoBot:
                         logging.warning("🔍 尝试备用查找方案...")
                         try:
                             # 方案1: 尝试name="user"
-                            username_field = self.driver.find_element(By.NAME, "user")
+                    username_field = self.driver.find_element(By.NAME, "user")
                             logging.info("✅ 找到备用用户名输入框 (name='user')")
                             break
-                        except:
+                except:
                             pass
                         
                         try:
@@ -1375,7 +1375,7 @@ class SeleniumAutoBot:
             if test_mode:
                 logging.info(f"🧪 [测试] 回复帖子: {post_url}")
             else:
-                logging.info(f"💬 回复帖子: {post_url}")
+            logging.info(f"💬 回复帖子: {post_url}")
             
             # 访问帖子页面
             self.driver.get(post_url)
@@ -1524,9 +1524,9 @@ class SeleniumAutoBot:
                         if test_mode:
                             logging.info("✅ [测试] 回复成功（测试模式不记录统计）")
                         else:
-                            logging.info("✅ 回复成功")
+                        logging.info("✅ 回复成功")
                             # 记录回复统计（仅正常模式）
-                            self.stats.add_reply(post_title, post_url, reply_content)
+                        self.stats.add_reply(post_title, post_url, reply_content)
                         return True
                     else:
                         # 保存页面用于调试
@@ -3122,7 +3122,7 @@ class SeleniumAutoBot:
                 # 检查今日是否有回复（本次回复或之前已回复）
                 final_reply_count = today_reply_count + reply_count
                 if final_reply_count > 0:
-                    if reply_count > 0:
+                if reply_count > 0:
                         logging.info("📋 已完成本次回复，现在开始签到...")
                     else:
                         logging.info("📋 今日已有回复记录，现在开始签到...")
@@ -3204,8 +3204,8 @@ class SeleniumAutoBot:
         finally:
             if self.driver:
                 try:
-                    self.driver.quit()
-                    logging.info("🔚 浏览器已关闭")
+                self.driver.quit()
+                logging.info("🔚 浏览器已关闭")
                 except Exception as e:
                     # 忽略关闭浏览器时的错误（可能已经关闭）
                     logging.debug(f"关闭浏览器时出错: {e}")
